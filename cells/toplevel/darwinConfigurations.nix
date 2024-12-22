@@ -18,6 +18,9 @@
     home-manager.users.yoseio = {
       imports = [
         inputs.cells.core.homeProfiles.default
+
+        inputs.cells.dev.homeProfiles.git
+        inputs.cells.dev.homeProfiles.zsh
       ];
     };
 
