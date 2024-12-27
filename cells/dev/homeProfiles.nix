@@ -1,60 +1,79 @@
 {
   inputs,
   cell,
-}: {
+}:
+{
   git = {
     programs.git = {
       enable = true;
 
-      userName = "yoseio";
-      userEmail = "98276492+yoseio@users.noreply.github.com";
-
-      aliases = {
-        soft = "reset --soft";
-        hard = "reset --hard";
-        s1ft = "soft HEAD~1";
-        h1rd = "hard HEAD~1";
-
-        lg = "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit";
-        plog = "log --graph --pretty='format:%C(red)%d%C(reset) %C(yellow)%h%C(reset) %ar %C(green)%aN%C(reset) %s'";
-        tlog = "log --stat --since='1 Day Ago' --graph --pretty=oneline --abbrev-commit --date=relative";
-        rank = "shortlog -sn --no-merges";
-      };
+      userName = "shinbunbun";
+      userEmail = "34409044+shinbunbun@users.noreply.github.com";
 
       extraConfig = {
-        init.defaultBranch = "main";
         core.editor = "code --wait";
       };
     };
   };
 
-  zsh = {
-    programs.zsh = {
-      enable = true;
-      autosuggestion.enable = true;
-      enableCompletion = true;
-      syntaxHighlighting.enable = true;
-      enableVteIntegration = true;
-      dotDir = ".config/zsh";
-    };
+  zsh =
+    { pkgs, ... }:
+    {
+      # zsh config
+      programs.zsh = {
+        enable = true;
+        enableCompletion = true;
+        autosuggestion.enable = true;
+        plugins = [
+          {
+            name = "zsh-completions";
+            src = pkgs.zsh-completions.src;
+          }
+          {
+            name = "nix-zsh-completions";
+            src = pkgs.nix-zsh-completions.src;
+          }
+        ];
+        shellAliases = {
+          ls = "lsd";
+        };
+      };
 
-    programs.starship = {
-      enable = true;
-    };
-
-    programs.eza = {
-      enable = true;
-    };
-
-    programs.bat = {
-      enable = true;
-    };
-
-    programs.direnv = {
-      enable = true;
-      nix-direnv = {
+      # LSD config
+      programs.lsd = {
         enable = true;
       };
+
+      # starship config
+      programs.starship = {
+        enable = true;
+        settings = {
+          status = {
+            disabled = false;
+          };
+          time = {
+            disabled = false;
+            utc_time_offset = "+9";
+            time_format = "%Y-%m-%d %H:%M";
+          };
+        };
+      };
+
+      # direnv config
+      programs.direnv = {
+        enable = true;
+        nix-direnv.enable = true;
+        enableBashIntegration = true;
+      };
     };
-  };
+
+  vim =
+    { pkgs, ... }:
+    {
+      # vim config
+      programs.vim = {
+        enable = true;
+        plugins = with pkgs.vimPlugins; [ vim-airline ];
+      };
+    };
 }

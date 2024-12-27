@@ -15,19 +15,20 @@
       inputs.cells.core.darwinProfiles.optimize
     ];
 
-    home-manager.users.yoseio = {
+    home-manager.users.shinbunbun = {
       imports = [
         inputs.cells.core.homeProfiles.default
 
         inputs.cells.dev.homeProfiles.git
         inputs.cells.dev.homeProfiles.zsh
+        inputs.cells.shinbunbun.homeProfiles.default
       ];
     };
 
     users.users = {
-      yoseio = {
+      shinbunbun = {
         createHome = true;
-        home = "/Users/yoseio";
+        home = "/Users/shinbunbun";
         shell = inputs.nixpkgs.pkgs.zsh;
       };
     };

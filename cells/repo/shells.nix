@@ -8,7 +8,7 @@
 in
   l.mapAttrs (_: lib.dev.mkShell) {
     default = {
-      name = "nix-dotfiles-template";
+      name = "shinbunbun";
       imports = [ std.devshellProfiles.default ];
       commands = with nixpkgs; [
         { package = alejandra; }
