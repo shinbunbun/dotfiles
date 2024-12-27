@@ -21,6 +21,7 @@
 
         inputs.cells.dev.homeProfiles.git
         inputs.cells.dev.homeProfiles.zsh
+        inputs.cells.dev.homeProfiles.vim
         inputs.cells.shinbunbun.homeProfiles.default
       ];
     };
