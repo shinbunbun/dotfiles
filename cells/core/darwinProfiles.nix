@@ -21,6 +21,8 @@
       };
       brews = [
         "go"
+        "jq"
+        "yamllint"
       ];
     };
   };
