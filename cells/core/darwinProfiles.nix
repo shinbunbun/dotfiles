@@ -14,7 +14,15 @@
 
     nix.useDaemon = true;
     security.pam.enableSudoTouchIdAuth = true;
-    homebrew.enable = true;
+    homebrew = {
+      enable = true;
+      onActivation = {
+        autoUpdate = true;
+      };
+      brews = [
+        "go"
+      ];
+    };
   };
 
   optimize = {
