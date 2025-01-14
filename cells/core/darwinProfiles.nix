@@ -23,6 +23,8 @@
         "go"
         "jq"
         "yamllint"
+        "nvm"
+        "yq"
       ];
     };
   };
