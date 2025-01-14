@@ -86,4 +86,11 @@
         google-cloud-sdk-with-cloud-datastore-emulator
       ];
     };
+
+  graphql =
+    { pkgs, ... }: {
+      home.packages = with pkgs; [
+        get-graphql-schema
+      ];
+    };
 }

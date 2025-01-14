@@ -23,6 +23,7 @@
         inputs.cells.dev.homeProfiles.zsh
         inputs.cells.dev.homeProfiles.vim
         inputs.cells.dev.homeProfiles.google_cloud_sdk
+        inputs.cells.dev.homeProfiles.graphql
 
         inputs.cells.shinbunbun.homeProfiles.default
       ];
