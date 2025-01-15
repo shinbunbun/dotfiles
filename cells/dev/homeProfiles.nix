@@ -87,10 +87,10 @@
       ];
     };
 
-  graphql =
+  /* graphql =
     { pkgs, ... }: {
       home.packages = with pkgs; [
         get-graphql-schema
       ];
-    };
+    }; */
 }
