@@ -26,6 +26,9 @@
         "nvm"
         "yq"
       ];
+      casks = [
+        "graphql-playground"
+      ];
     };
   };
 
