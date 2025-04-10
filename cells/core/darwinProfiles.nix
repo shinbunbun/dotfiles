@@ -12,8 +12,7 @@
       experimental-features = nix-command flakes
     '';
 
-    nix.useDaemon = true;
-    security.pam.enableSudoTouchIdAuth = true;
+    security.pam.services.sudo_local.touchIdAuth = true;
     homebrew = {
       enable = true;
       onActivation = {
@@ -28,6 +27,7 @@
       ];
       casks = [
         "graphql-playground"
+        "altair-graphql-client"
       ];
     };
   };
