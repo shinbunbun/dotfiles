@@ -1,0 +1,56 @@
+name: Auto Update Flakes (PR Mode)
+
+on:
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  update-flakes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v17
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      - name: Update flake
+        run: |
+          nix flake update
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if ! git diff --exit-code; then
+            echo "::set-output name=changed::true"
+          else
+            echo "::set-output name=changed::false"
+          fi
+
+      - name: Commit flake.lock changes
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git config --global user.email "github-actions@users.noreply.github.com"
+          git config --global user.name "github-actions"
+          git add flake.lock
+          git commit -m "Auto-update flake.lock: $(date '+%Y-%m-%d %H:%M')"
+      
+      - name: Create Pull Request for flake.lock update
+        if: steps.changes.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "Auto-update flake.lock"
+          title: "Auto-update flake.lock [skip ci]"
+          body: |
+            This PR updates flake.lock with the latest input updates via `nix flake update`.
+            
+            Please review and merge if everything looks OK.
+          branch: auto/update-flake-lock
+          base: main
