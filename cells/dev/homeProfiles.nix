@@ -93,4 +93,11 @@
         get-graphql-schema
       ];
     }; */
+
+    /* biome =
+    { pkgs, ... }: {
+      home.packages = with pkgs; [
+        biome
+      ];
+    }; */
 }
