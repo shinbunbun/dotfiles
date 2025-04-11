@@ -51,7 +51,7 @@ jobs:
     steps:
       - name: Debug
         run: |
-          echo "discover outputs: $(echo '${{ fromJSON(needs.discover.outputs.hits) }}' | jq .)"
+          echo "discover outputs: $(echo '${{ fromJSON(needs.discover.outputs.hits) }}')"
 
   build:
     needs: discover
