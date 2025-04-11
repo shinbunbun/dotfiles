@@ -42,7 +42,7 @@ jobs:
     if: ${{ fromJSON(needs.discover.outputs.hits).packages.build != null && fromJSON(needs.discover.outputs.hits).packages.build.length > 0 }}
     strategy:
       matrix:
-        target: "${{ fromJSON(needs.discover.outputs.hits).packages.build != null ? fromJSON(needs.discover.outputs.hits).packages.build : [] }}"
+        target: ${{ fromJSON(needs.discover.outputs.hits).packages.build }}
     steps:
       - uses: actions/checkout@v3
       - uses: nixbuild/nix-quick-install-action@master
@@ -60,6 +60,7 @@ jobs:
           purge-created: 0
           purge-primary-key: never
       - uses: divnix/std-action/run@main
+
 
   images:
     needs: [discover, build]
@@ -69,7 +70,7 @@ jobs:
     if: ${{ fromJSON(needs.discover.outputs.hits).["oci-images"].publish != null && fromJSON(needs.discover.outputs.hits).["oci-images"].publish.length > 0 }}
     strategy:
       matrix:
-        target: "${{ fromJSON(needs.discover.outputs.hits).[\"oci-images\"].publish != null ? fromJSON(needs.discover.outputs.hits).[\"oci-images\"].publish : [] }}"
+        target: ${{ fromJSON(needs.discover.outputs.hits).["oci-images"].publish }}
     steps:
       - uses: actions/checkout@v3
       - uses: nixbuild/nix-quick-install-action@master
@@ -88,6 +89,7 @@ jobs:
           purge-primary-key: never
       - uses: divnix/std-action/run@main
 
+
   darwin-rollout:
     needs: discover
     name: ${{ matrix.target.jobName }}
@@ -96,7 +98,7 @@ jobs:
     if: ${{ fromJSON(needs.discover.outputs.hits).darwinConfigurations.switch != null && fromJSON(needs.discover.outputs.hits).darwinConfigurations.switch.length > 0 }}
     strategy:
       matrix:
-        target: "${{ fromJSON(needs.discover.outputs.hits).darwinConfigurations.switch != null ? fromJSON(needs.discover.outputs.hits).darwinConfigurations.switch : [] }}"
+        target: ${{ fromJSON(needs.discover.outputs.hits).darwinConfigurations.switch }}
     steps:
       - uses: actions/checkout@v3
       - uses: nixbuild/nix-quick-install-action@master
@@ -114,6 +116,7 @@ jobs:
           purge-created: 0
           purge-primary-key: never
       - uses: divnix/std-action/run@main
+
 
 
   # deploy:  # 必要に応じて調整してください
