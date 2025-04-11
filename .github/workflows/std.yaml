@@ -48,10 +48,11 @@ jobs:
     needs: discover
     name: ${{ matrix.target.jobName }}
     runs-on: ubuntu-latest
-    if: fromJSON(needs.discover.outputs.hits).packages.build != '{}'
-    # strategy:
-    #   matrix:
-    #     target: ${{ fromJSON(needs.discover.outputs.hits).packages.build }}
+    if: fromJSON(needs.discover.outputs.hits).packages.build != '{}' &&
+      fromJSON(needs.discover.outputs.hits).packages.build != ''
+    strategy:
+      matrix:
+        target: ${{ fromJSON(needs.discover.outputs.hits).packages.build }}
     steps:
       - uses: actions/checkout@v3
       - run: echo ${{ fromJSON(needs.discover.outputs.hits).packages.build }}
