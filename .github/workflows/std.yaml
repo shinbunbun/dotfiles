@@ -96,6 +96,7 @@ jobs:
           purge-prefixes: nix-${{ runner.os }}-
           purge-created: 0
           purge-primary-key: never
+          fail-on-cache-miss: false
       - uses: divnix/std-action/run@main
 
   # deploy:
