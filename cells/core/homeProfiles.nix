@@ -1,7 +1,8 @@
 {
   inputs,
   cell,
-}: {
+}:
+{
   default = {
     home.stateVersion = "24.11";
 

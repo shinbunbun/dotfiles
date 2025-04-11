@@ -76,28 +76,35 @@
         plugins = with pkgs.vimPlugins; [ vim-airline ];
       };
     };
-  
+
   google_cloud_sdk =
-    { pkgs, ... }: let
-      google-cloud-sdk-with-cloud-datastore-emulator = pkgs.google-cloud-sdk.withExtraComponents ([pkgs.google-cloud-sdk.components.cloud-datastore-emulator]);
-    in 
+    { pkgs, ... }:
+    let
+      google-cloud-sdk-with-cloud-datastore-emulator = pkgs.google-cloud-sdk.withExtraComponents ([
+        pkgs.google-cloud-sdk.components.cloud-datastore-emulator
+      ]);
+    in
     {
       home.packages = with pkgs; [
         google-cloud-sdk-with-cloud-datastore-emulator
       ];
     };
 
-  /* graphql =
+  /*
+    graphql =
     { pkgs, ... }: {
       home.packages = with pkgs; [
         get-graphql-schema
       ];
-    }; */
+    };
+  */
 
-    /* biome =
+  /*
+    biome =
     { pkgs, ... }: {
       home.packages = with pkgs; [
         biome
       ];
-    }; */
+    };
+  */
 }
