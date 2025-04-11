@@ -39,10 +39,10 @@ jobs:
     name: ${{ matrix.target.jobName }}
     runs-on: ubuntu-latest
     # packages.build が空配列ではない場合のみジョブを実行
-    if: ${{ (fromJSON(needs.discover.outputs.hits).packages.build || []).length > 0 }}
+    if: ${{ fromJSON(needs.discover.outputs.hits).packages.build != null && fromJSON(needs.discover.outputs.hits).packages.build.length > 0 }}
     strategy:
       matrix:
-        target: ${{ fromJSON(needs.discover.outputs.hits).packages.build || [] }}
+        target: ${{ fromJSON(needs.discover.outputs.hits).packages.build != null ? fromJSON(needs.discover.outputs.hits).packages.build : [] }}
     steps:
       - uses: actions/checkout@v3
       - uses: nixbuild/nix-quick-install-action@master
@@ -66,10 +66,10 @@ jobs:
     name: ${{ matrix.target.jobName }}
     runs-on: ubuntu-latest
     # oci-images.publish が空配列ではない場合のみジョブを実行
-    if: ${{ (fromJSON(needs.discover.outputs.hits).oci-images.publish || []).length > 0 }}
+    if: ${{ fromJSON(needs.discover.outputs.hits).["oci-images"].publish != null && fromJSON(needs.discover.outputs.hits).["oci-images"].publish.length > 0 }}
     strategy:
       matrix:
-        target: ${{ fromJSON(needs.discover.outputs.hits).oci-images.publish || [] }}
+        target: ${{ fromJSON(needs.discover.outputs.hits).["oci-images"].publish != null ? fromJSON(needs.discover.outputs.hits).["oci-images"].publish : [] }}
     steps:
       - uses: actions/checkout@v3
       - uses: nixbuild/nix-quick-install-action@master
@@ -114,10 +114,10 @@ jobs:
     name: ${{ matrix.target.jobName }}
     runs-on: macos-latest
     # darwinConfigurations.switch が空配列ではない場合のみジョブを実行
-    if: ${{ (fromJSON(needs.discover.outputs.hits).darwinConfigurations.switch || []).length > 0 }}
+    if: ${{ fromJSON(needs.discover.outputs.hits).darwinConfigurations.switch != null && fromJSON(needs.discover.outputs.hits).darwinConfigurations.switch.length > 0 }}
     strategy:
       matrix:
-        target: ${{ fromJSON(needs.discover.outputs.hits).darwinConfigurations.switch || [] }}
+        target: ${{ fromJSON(needs.discover.outputs.hits).darwinConfigurations.switch != null ? fromJSON(needs.discover.outputs.hits).darwinConfigurations.switch : [] }}
     steps:
       - uses: actions/checkout@v3
       - uses: nixbuild/nix-quick-install-action@master
