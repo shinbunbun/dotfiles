@@ -48,14 +48,15 @@ jobs:
     needs: discover
     name: ${{ matrix.target.jobName }}
     runs-on: ubuntu-latest
-    if: fromJSON(needs.discover.outputs.hits).packages.build != '{}' &&
-      fromJSON(needs.discover.outputs.hits).packages.build != ''
+    # devshells.shells が空オブジェクト '{}' や空文字列 '' でなければジョブを実行
+    if: fromJSON(needs.discover.outputs.hits).devshells.shells != '{}' &&
+        fromJSON(needs.discover.outputs.hits).devshells.shells != ''
     strategy:
       matrix:
-        target: ${{ fromJSON(needs.discover.outputs.hits).packages.build }}
+        target: ${{ fromJSON(needs.discover.outputs.hits).devshells.shells }}
     steps:
       - uses: actions/checkout@v3
-      - run: echo ${{ fromJSON(needs.discover.outputs.hits).packages.build }}
+      - run: echo ${{ fromJSON(needs.discover.outputs.hits).devshells.shells }}
       - uses: nixbuild/nix-quick-install-action@master
       - uses: nixbuild/nixbuild-action@v17
         with:
