@@ -75,11 +75,11 @@ jobs:
     needs: discover
     name: ${{ matrix.target.jobName }}
     runs-on: macos-latest
-    if: fromJSON(needs.discover.outputs.hits).darwinConfigurations.switch != '{}' &&
-      fromJSON(needs.discover.outputs.hits).darwinConfigurations.switch != ''
+    if: fromJSON(needs.discover.outputs.hits).darwinConfigurations.build != '{}' &&
+      fromJSON(needs.discover.outputs.hits).darwinConfigurations.build != ''
     strategy:
       matrix:
-        target: ${{ fromJSON(needs.discover.outputs.hits).darwinConfigurations.switch }}
+        target: ${{ fromJSON(needs.discover.outputs.hits).darwinConfigurations.build }}
     steps:
       - uses: actions/checkout@v3
       - uses: nixbuild/nix-quick-install-action@master
