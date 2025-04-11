@@ -24,12 +24,22 @@ jobs:
           generate_summary_for: job
       - uses: nix-community/cache-nix-action@v6
         with:
+          # restore and save a cache using this key
           primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
+          # if there's no cache hit, restore a cache by this prefix
           restore-prefixes-first-match: nix-${{ runner.os }}-
+          # collect garbage until Nix store size (in bytes) is at most this number
+          # before trying to save a new cache
+          # 1G = 1073741824
           gc-max-store-size-linux: 1G
+          # do purge caches
           purge: true
+          # purge all versions of the cache
           purge-prefixes: nix-${{ runner.os }}-
+          # created more than this number of seconds ago
+          # relative to the start of the `Post Restore and save Nix store` phase
           purge-created: 0
+          # except any version with the key that is the same as the `primary-key`
           purge-primary-key: never
       - uses: divnix/std-action/discover@main
         id: discovery
@@ -38,8 +48,7 @@ jobs:
     needs: discover
     name: ${{ matrix.target.jobName }}
     runs-on: ubuntu-latest
-    # packages.build が空配列ではない場合のみジョブを実行
-    if: ${{ fromJSON(needs.discover.outputs.hits).packages.build != null && fromJSON(needs.discover.outputs.hits).packages.build.length > 0 }}
+    if: fromJSON(needs.discover.outputs.hits).packages.build != '{}'
     strategy:
       matrix:
         target: ${{ fromJSON(needs.discover.outputs.hits).packages.build }}
@@ -50,27 +59,17 @@ jobs:
         with:
           nixbuild_ssh_key: ${{ secrets.SSH_PRIVATE_KEY }}
           generate_summary_for: job
-      - uses: nix-community/cache-nix-action@v6
-        with:
-          primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
-          restore-prefixes-first-match: nix-${{ runner.os }}-
-          gc-max-store-size-linux: 1G
-          purge: true
-          purge-prefixes: nix-${{ runner.os }}-
-          purge-created: 0
-          purge-primary-key: never
+      - uses: DeterminateSystems/magic-nix-cache-action@main
       - uses: divnix/std-action/run@main
-
 
   images:
     needs: [discover, build]
     name: ${{ matrix.target.jobName }}
     runs-on: ubuntu-latest
-    # oci-images.publish が空配列ではない場合のみジョブを実行
-    if: ${{ fromJSON(needs.discover.outputs.hits).["oci-images"].publish != null && fromJSON(needs.discover.outputs.hits).["oci-images"].publish.length > 0 }}
+    if: fromJSON(needs.discover.outputs.hits).oci-images.publish != '{}'
     strategy:
       matrix:
-        target: ${{ fromJSON(needs.discover.outputs.hits).["oci-images"].publish }}
+        target: ${{ fromJSON(needs.discover.outputs.hits).oci-images.publish }}
     steps:
       - uses: actions/checkout@v3
       - uses: nixbuild/nix-quick-install-action@master
@@ -78,24 +77,14 @@ jobs:
         with:
           nixbuild_ssh_key: ${{ secrets.SSH_PRIVATE_KEY }}
           generate_summary_for: job
-      - uses: nix-community/cache-nix-action@v6
-        with:
-          primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
-          restore-prefixes-first-match: nix-${{ runner.os }}-
-          gc-max-store-size-linux: 1G
-          purge: true
-          purge-prefixes: nix-${{ runner.os }}-
-          purge-created: 0
-          purge-primary-key: never
+      - uses: DeterminateSystems/magic-nix-cache-action@main
       - uses: divnix/std-action/run@main
-
 
   darwin-rollout:
     needs: discover
     name: ${{ matrix.target.jobName }}
     runs-on: macos-latest
-    # darwinConfigurations.switch が空配列ではない場合のみジョブを実行
-    if: ${{ fromJSON(needs.discover.outputs.hits).darwinConfigurations.switch != null && fromJSON(needs.discover.outputs.hits).darwinConfigurations.switch.length > 0 }}
+    if: fromJSON(needs.discover.outputs.hits).darwinConfigurations.switch != '{}'
     strategy:
       matrix:
         target: ${{ fromJSON(needs.discover.outputs.hits).darwinConfigurations.switch }}
@@ -106,30 +95,20 @@ jobs:
         with:
           nixbuild_ssh_key: ${{ secrets.SSH_PRIVATE_KEY }}
           generate_summary_for: job
-      - uses: nix-community/cache-nix-action@v6
-        with:
-          primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
-          restore-prefixes-first-match: nix-${{ runner.os }}-
-          gc-max-store-size-linux: 1G
-          purge: true
-          purge-prefixes: nix-${{ runner.os }}-
-          purge-created: 0
-          purge-primary-key: never
+      - uses: DeterminateSystems/magic-nix-cache-action@main
       - uses: divnix/std-action/run@main
 
-
-
-  # deploy:  # 必要に応じて調整してください
+  # deploy:
   #   needs: [discover, images]
   #   name: ${{ matrix.target.jobName }}
   #   runs-on: ubuntu-latest
   #   environment:
   #     name: development
   #     url: https://my.dev.example.com
-  #   if: ${{ (fromJSON(needs.discover.outputs.hits).deployments.apply || []).length > 0 }}
+  #   if: fromJSON(needs.discover.outputs.hits).deployments.apply != '{}'
   #   strategy:
   #     matrix:
-  #       target: ${{ fromJSON(needs.discover.outputs.hits).deployments.apply || [] }}
+  #       target: ${{ fromJSON(needs.discover.outputs.hits).deployments.apply }}
   #   steps:
   #     - uses: actions/checkout@v3
   #     - uses: nixbuild/nix-quick-install-action@master
