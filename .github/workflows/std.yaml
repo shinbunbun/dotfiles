@@ -86,7 +86,8 @@ jobs:
     needs: discover
     name: ${{ matrix.target.jobName }}
     runs-on: macos-latest
-    if: fromJSON(needs.discover.outputs.hits).darwinConfigurations.switch != '{}'
+    if: fromJSON(needs.discover.outputs.hits).darwinConfigurations.switch != '{}' &&
+      fromJSON(needs.discover.outputs.hits).darwinConfigurations.switch != ''
     strategy:
       matrix:
         target: ${{ fromJSON(needs.discover.outputs.hits).darwinConfigurations.switch }}
