@@ -38,48 +38,67 @@
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    flake-utils = {
+      url = "github:numtide/flake-utils";
+    };
   };
 
-  outputs = {
-    self,
-    nixpkgs,
-    std,
-    hive,
-    ...
-  } @ inputs:
-    std.growOn {
-      inherit inputs;
-
-      nixpkgsConfig = {
-        allowUnfree = true;
-      };
-
-      systems = [
-        "x86_64-linux"
-        "aarch64-linux"
-        "x86_64-darwin"
-        "aarch64-darwin"
-      ];
-
-      cellsFrom = ./cells;
-
-      cellBlocks = with std.blockTypes;
-      with hive.blockTypes; [
-        (functions "nixosProfiles")
-        (functions "darwinProfiles")
-        (functions "homeProfiles")
-
-        nixosConfigurations
-        darwinConfigurations
-
-        (devshells "shells")
-      ];
-    }
+  outputs =
     {
-      nixosConfigurations = hive.collect self "nixosConfigurations";
-      darwinConfigurations = hive.collect self "darwinConfigurations";
-    }
-    {
-      devShells = hive.harvest self ["repo" "shells"];
+      self,
+      nixpkgs,
+      std,
+      hive,
+      flake-utils,
+      ...
+    }@inputs:
+    # ① growOn で各種セルを展開
+    let
+      base =
+        std.growOn
+          {
+            inherit inputs;
+            nixpkgsConfig = {
+              allowUnfree = true;
+            };
+            systems = [
+              "x86_64-linux"
+              "aarch64-linux"
+              "x86_64-darwin"
+              "aarch64-darwin"
+            ];
+            cellsFrom = ./cells;
+            cellBlocks =
+              with std.blockTypes;
+              with hive.blockTypes;
+              [
+                (functions "nixosProfiles")
+                (functions "darwinProfiles")
+                (functions "homeProfiles")
+                nixosConfigurations
+                darwinConfigurations
+                (devshells "shells")
+              ];
+          }
+          {
+            nixosConfigurations = hive.collect self "nixosConfigurations";
+            darwinConfigurations = hive.collect self "darwinConfigurations";
+            devShells = hive.harvest self [
+              "repo"
+              "shells"
+            ];
+          };
+      # ② growOn の結果に formatter をマージ
+    in
+    base
+    // {
+      formatter = flake-utils.lib.eachDefaultSystemMap (
+        system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+        in
+        pkgs.nixfmt-tree
+      );
     };
 }

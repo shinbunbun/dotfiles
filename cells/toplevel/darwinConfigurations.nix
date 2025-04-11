@@ -1,7 +1,8 @@
 {
   inputs,
   cell,
-}: {
+}:
+{
   macOS = {
     bee = {
       system = "aarch64-darwin";
