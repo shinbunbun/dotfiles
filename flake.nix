@@ -74,7 +74,7 @@
               (std.blockTypes.functions "darwinProfiles")
               (std.blockTypes.functions "homeProfiles")
               (hive.blockTypes.nixosConfigurations)
-              (hive.blockTypes.darwinConfigurations)
+              (hive.blockTypes.darwinConfigurations // { ci.build = true; })
               (std.blockTypes.devshells "shells" { ci.build = true; })
             ];
           }
