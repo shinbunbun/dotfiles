@@ -58,11 +58,11 @@ jobs:
     name: ${{ matrix.target.jobName }}
     runs-on: ubuntu-latest
     # devshells.shells が空オブジェクト '{}' や空文字列 '' でなければジョブを実行
-    if: fromJSON(needs.discover.outputs.hits).devshells.shells != '{}' &&
-        fromJSON(needs.discover.outputs.hits).devshells.shells != ''
+    if: fromJSON(needs.discover.outputs.hits).shells != '{}' &&
+        fromJSON(needs.discover.outputs.hits).shells != ''
     strategy:
       matrix:
-        target: ${{ fromJSON(needs.discover.outputs.hits).devshells.shells }}
+        target: ${{ fromJSON(needs.discover.outputs.hits).shells }}
     steps:
       - uses: actions/checkout@v3
       - uses: nixbuild/nix-quick-install-action@master
