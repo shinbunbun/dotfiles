@@ -69,17 +69,14 @@
               "aarch64-darwin"
             ];
             cellsFrom = ./cells;
-            cellBlocks =
-              with std.blockTypes;
-              with hive.blockTypes;
-              [
-                (functions "nixosProfiles")
-                (functions "darwinProfiles")
-                (functions "homeProfiles")
-                nixosConfigurations
-                darwinConfigurations
-                (devshells "shells")
-              ];
+            cellBlocks = [
+              (std.blockTypes.functions "nixosProfiles")
+              (std.blockTypes.functions "darwinProfiles")
+              (std.blockTypes.functions "homeProfiles")
+              (hive.blockTypes.nixosConfigurations)
+              (hive.blockTypes.darwinConfigurations)
+              (std.blockTypes.devshells "shells" { ci.build = true; })
+            ];
           }
           {
             nixosConfigurations = hive.collect self "nixosConfigurations";
