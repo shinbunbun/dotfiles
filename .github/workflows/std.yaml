@@ -31,6 +31,7 @@ jobs:
           purge-prefixes: nix-${{ runner.os }}-
           purge-created: 0
           purge-primary-key: never
+        continue-on-error: true
       - uses: divnix/std-action/discover@main
         id: discovery
 
@@ -69,6 +70,7 @@ jobs:
           purge-prefixes: nix-${{ runner.os }}-
           purge-created: 0
           purge-primary-key: never
+        continue-on-error: true
       - uses: divnix/std-action/run@main
 
   darwin-rollout:
@@ -96,6 +98,7 @@ jobs:
           purge-prefixes: nix-${{ runner.os }}-
           purge-created: 0
           purge-primary-key: never
+        continue-on-error: true
       - uses: divnix/std-action/run@main
 
   # deploy:
