@@ -47,7 +47,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "Auto-update flake.lock"
-          title: "Auto-update flake.lock [skip ci]"
+          title: "Auto-update flake.lock"
           body: |
             This PR updates flake.lock with the latest input updates via `nix flake update`.
             
