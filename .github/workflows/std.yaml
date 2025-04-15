@@ -60,6 +60,10 @@ jobs:
       #     nixbuild_ssh_key: ${{ secrets.SSH_PRIVATE_KEY }}
       #     generate_summary_for: job
       - uses: divnix/std-action/run@main
+      - name: List build output files
+        run: ls -la
+      - name: List result directory
+        run: ls -la copylogs
 
   darwin-rollout:
     needs: discover
@@ -87,7 +91,7 @@ jobs:
       - name: List build output files
         run: ls -la
       - name: List result directory
-        run: ls -la result
+        run: ls -la copylogs
 
   # deploy:
   #   needs: [discover, images]
