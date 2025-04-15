@@ -86,6 +86,8 @@ jobs:
       - uses: divnix/std-action/run@main
       - name: List build output files
         run: ls -la
+      - name: List result directory
+        run: ls -la result
 
   # deploy:
   #   needs: [discover, images]
