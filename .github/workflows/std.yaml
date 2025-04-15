@@ -63,7 +63,7 @@ jobs:
       - name: List build output files
         run: ls -la
       - name: List result directory
-        run: ls -la copylogs
+        run: cat copylogs
 
   darwin-rollout:
     needs: discover
@@ -91,7 +91,7 @@ jobs:
       - name: List build output files
         run: ls -la
       - name: List result directory
-        run: ls -la copylogs
+        run: cat copylogs
 
   # deploy:
   #   needs: [discover, images]
