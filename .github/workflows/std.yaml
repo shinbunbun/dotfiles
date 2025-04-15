@@ -14,7 +14,7 @@ jobs:
   discover:
     outputs:
       hits: ${{ steps.discovery.outputs.hits }}
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
       - uses: nixbuild/nix-quick-install-action@master
@@ -37,7 +37,7 @@ jobs:
   build:
     needs: discover
     name: ${{ matrix.target.jobName }}
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     # devshells.shells が空オブジェクト '{}' や空文字列 '' でなければジョブを実行
     if: fromJSON(needs.discover.outputs.hits).shells.build != '[]' &&
         fromJSON(needs.discover.outputs.hits).shells.build != ''
@@ -56,7 +56,7 @@ jobs:
   darwin-rollout:
     needs: discover
     name: ${{ matrix.target.jobName }}
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     if: fromJSON(needs.discover.outputs.hits).darwinConfigurations.build != '{}' &&
       fromJSON(needs.discover.outputs.hits).darwinConfigurations.build != ''
     strategy:
