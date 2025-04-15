@@ -83,7 +83,7 @@ jobs:
       #     generate_summary_for: job
       - uses: divnix/std-action/run@main
       - name: List build output files
-        run: ls -la result/
+        run: ls -la
 
   # deploy:
   #   needs: [discover, images]
