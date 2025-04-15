@@ -34,42 +34,42 @@ jobs:
         run: |
           echo "discover outputs: $(echo '${{ toJSON(fromJSON(needs.discover.outputs.hits)) }}')"
 
-  # build:
-  #   needs: discover
-  #   name: ${{ matrix.target.jobName }}
-  #   runs-on: macos-latest
-  #   # devshells.shells が空オブジェクト '{}' や空文字列 '' でなければジョブを実行
-  #   if: fromJSON(needs.discover.outputs.hits).shells.build != '[]' &&
-  #       fromJSON(needs.discover.outputs.hits).shells.build != ''
-  #   strategy:
-  #     matrix:
-  #       target: ${{ fromJSON(needs.discover.outputs.hits).shells.build }}
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - uses: nixbuild/nix-quick-install-action@master
-  #     - uses: nixbuild/nixbuild-action@v17
-  #       with:
-  #         nixbuild_ssh_key: ${{ secrets.SSH_PRIVATE_KEY }}
-  #         generate_summary_for: job
-  #     - uses: divnix/std-action/run@main
+  build:
+    needs: discover
+    name: ${{ matrix.target.jobName }}
+    runs-on: macos-latest
+    # devshells.shells が空オブジェクト '{}' や空文字列 '' でなければジョブを実行
+    if: fromJSON(needs.discover.outputs.hits).shells.build != '[]' &&
+        fromJSON(needs.discover.outputs.hits).shells.build != ''
+    strategy:
+      matrix:
+        target: ${{ fromJSON(needs.discover.outputs.hits).shells.build }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: nixbuild/nix-quick-install-action@master
+      # - uses: nixbuild/nixbuild-action@v17
+      #   with:
+      #     nixbuild_ssh_key: ${{ secrets.SSH_PRIVATE_KEY }}
+      #     generate_summary_for: job
+      - uses: divnix/std-action/run@main
 
-  # darwin-rollout:
-  #   needs: discover
-  #   name: ${{ matrix.target.jobName }}
-  #   runs-on: macos-latest
-  #   if: fromJSON(needs.discover.outputs.hits).darwinConfigurations.build != '{}' &&
-  #     fromJSON(needs.discover.outputs.hits).darwinConfigurations.build != ''
-  #   strategy:
-  #     matrix:
-  #       target: ${{ fromJSON(needs.discover.outputs.hits).darwinConfigurations.build }}
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - uses: nixbuild/nix-quick-install-action@master
-  #     - uses: nixbuild/nixbuild-action@v17
-  #       with:
-  #         nixbuild_ssh_key: ${{ secrets.SSH_PRIVATE_KEY }}
-  #         generate_summary_for: job
-  #     - uses: divnix/std-action/run@main
+  darwin-rollout:
+    needs: discover
+    name: ${{ matrix.target.jobName }}
+    runs-on: macos-latest
+    if: fromJSON(needs.discover.outputs.hits).darwinConfigurations.build != '{}' &&
+      fromJSON(needs.discover.outputs.hits).darwinConfigurations.build != ''
+    strategy:
+      matrix:
+        target: ${{ fromJSON(needs.discover.outputs.hits).darwinConfigurations.build }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: nixbuild/nix-quick-install-action@master
+      # - uses: nixbuild/nixbuild-action@v17
+      #   with:
+      #     nixbuild_ssh_key: ${{ secrets.SSH_PRIVATE_KEY }}
+      #     generate_summary_for: job
+      - uses: divnix/std-action/run@main
 
   # deploy:
   #   needs: [discover, images]
