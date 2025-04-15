@@ -77,6 +77,8 @@ jobs:
           brew install gnu-sed
           echo "$(brew --prefix gnu-sed)/libexec/gnubin" >> $GITHUB_PATH
       - uses: nixbuild/nix-quick-install-action@master
+        with:
+          buildFlags: '--out-link result'
       # - uses: nixbuild/nixbuild-action@v17
       #   with:
       #     nixbuild_ssh_key: ${{ secrets.SSH_PRIVATE_KEY }}
