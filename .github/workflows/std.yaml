@@ -90,6 +90,8 @@ jobs:
           nixbuild_ssh_key: ${{ secrets.SSH_PRIVATE_KEY }}
           generate_summary_for: job
       - uses: divnix/std-action/run@main
+        with:
+          fail-on-cache-miss: "false"
 
   # deploy:
   #   needs: [discover, images]
