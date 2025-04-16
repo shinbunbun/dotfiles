@@ -34,12 +34,17 @@ in
       ];
     };
 
-    users.users = if builtins.getEnv "CI" != "" then {} else{
+    users.users = {
       ${username} = {
-        createHome = true;
+        name = username;
         home = "/Users/${username}";
         shell = inputs.nixpkgs.pkgs.zsh;
-      };
+      } // (if builtins.getEnv "CI" != "" then {
+        # CI環境では最小限の設定のみを適用
+        createHome = false;
+      } else {
+        createHome = true;
+      });
     };
   };
 }
