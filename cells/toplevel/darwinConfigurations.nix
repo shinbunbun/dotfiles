@@ -34,17 +34,12 @@ in
       ];
     };
 
-    users.users =
-      if builtins.getEnv "CI" == "" then
-        {
-          # 本番環境では "shinbunbun" ユーザーを作成
-          shinbunbun = {
-            createHome = true;
-            home = "/Users/shinbunbun";
-            shell = inputs.nixpkgs.pkgs.zsh;
-          };
-        }
-      else
-        { };
+    users.users = {
+      ${username} = {
+        createHome = true;
+        home = "/Users/${username}";
+        shell = inputs.nixpkgs.pkgs.zsh;
+      };
+    };
   };
 }
