@@ -4,7 +4,6 @@
 }:
 let
   username = "shinbunbun";
-  isCI = builtins.getEnv "CI" != "";
 in
 {
   macOS = {
@@ -15,14 +14,10 @@ in
       darwin = inputs.nix-darwin;
     };
 
-    imports =
-      if isCI then
-        [ ]
-      else
-        [
-          inputs.cells.core.darwinProfiles.default
-          inputs.cells.core.darwinProfiles.optimize
-        ];
+    imports = [
+      inputs.cells.core.darwinProfiles.default
+      inputs.cells.core.darwinProfiles.optimize
+    ];
 
     home-manager.users.${username} = {
       imports = [
@@ -40,28 +35,12 @@ in
     };
 
     users.users = {
-      ${username} =
-        {
-          name = username;
-          home = "/Users/${username}";
-          shell = inputs.nixpkgs.pkgs.zsh;
-        }
-        // (
-          if isCI then
-            {
-              # CI環境では最小限の設定のみを適用
-              createHome = false;
-              uid = 1000;
-              gid = 1000;
-            }
-          else
-            {
-              createHome = true;
-            }
-        );
+      ${username} = {
+        name = username;
+        home = "/Users/${username}";
+        shell = inputs.nixpkgs.pkgs.zsh;
+        createHome = true;
+      };
     };
-
-    # nixの設定
-    nix.enable = !isCI;
   };
 }
