@@ -2,6 +2,9 @@
   inputs,
   cell,
 }:
+let
+  username = if builtins.getEnv "CI" != "" then "runner" else "shinbunbun";
+in
 {
   macOS = {
     bee = {
@@ -16,7 +19,7 @@
       inputs.cells.core.darwinProfiles.optimize
     ];
 
-    home-manager.users.shinbunbun = {
+    home-manager.users.${username} = {
       imports = [
         inputs.cells.core.homeProfiles.default
 
@@ -32,9 +35,9 @@
     };
 
     users.users = {
-      shinbunbun = {
+      ${username} = {
         createHome = true;
-        home = "/Users/shinbunbun";
+        home = "/Users/" + username;
         shell = inputs.nixpkgs.pkgs.zsh;
       };
     };
