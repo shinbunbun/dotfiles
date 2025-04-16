@@ -85,6 +85,10 @@ jobs:
       #   with:
       #     nixbuild_ssh_key: ${{ secrets.SSH_PRIVATE_KEY }}
       #     generate_summary_for: job
+      - name: echo CI env
+        run: echo $CI
+      - name: who
+        run: who
       - uses: divnix/std-action/run@main
       - name: List build output files
         run: ls -la
