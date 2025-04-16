@@ -81,8 +81,6 @@ jobs:
           brew install gnu-sed
           echo "$(brew --prefix gnu-sed)/libexec/gnubin" >> $GITHUB_PATH
       - uses: nixbuild/nix-quick-install-action@master
-        with:
-          buildFlags: '--out-link result'
       # - uses: nixbuild/nixbuild-action@v17
       #   with:
       #     nixbuild_ssh_key: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -90,8 +88,11 @@ jobs:
       - uses: divnix/std-action/run@main
       - name: List build output files
         run: ls -la
-      - name: List result directory
-        run: cat copylogs
+      - name: Query build output path
+        run: |
+          out=$(nix derivation show "$actionDrv^out" | jq -r '.[].outputs.out.path')
+          echo "The build output is at: $out"
+
 
   # deploy:
   #   needs: [discover, images]
