@@ -92,8 +92,8 @@ jobs:
         run: |
           out=$(nix derivation show "$actionDrv^out" | jq -r '.[].outputs.out.path')
           echo "The build output is at: $out"
-      - name: List result directory
-        run: ls -la /nix/store/gppmkdk6mg92z73rh1ngzb2ggk7wipl5-build
+      - name: cat result file
+        run: cat /nix/store/gppmkdk6mg92z73rh1ngzb2ggk7wipl5-build
 
 
   # deploy:
