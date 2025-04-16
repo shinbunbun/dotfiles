@@ -4,6 +4,7 @@
 }:
 let
   username = "shinbunbun";
+  isCI = builtins.getEnv "CI" != "";
 in
 {
   macOS = {
@@ -15,7 +16,7 @@ in
     };
 
     imports =
-      if builtins.getEnv "CI" != "" then
+      if isCI then
         [ ]
       else
         [
@@ -46,10 +47,12 @@ in
           shell = inputs.nixpkgs.pkgs.zsh;
         }
         // (
-          if builtins.getEnv "CI" != "" then
+          if isCI then
             {
               # CI環境では最小限の設定のみを適用
               createHome = false;
+              uid = 1000;
+              gid = 1000;
             }
           else
             {
@@ -57,5 +60,11 @@ in
             }
         );
     };
+
+    # CI環境では不要な設定を無効化
+    services.nix-daemon.enable = !isCI;
+    services.activate-system.enable = !isCI;
+    services.nix-gc.enable = !isCI;
+    services.nix-optimise.enable = !isCI;
   };
 }
