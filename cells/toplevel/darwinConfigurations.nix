@@ -3,7 +3,7 @@
   cell,
 }:
 let
-  username = if builtins.getEnv "CI" != "" then "runner" else "shinbunbun";
+  username = "shinbunbun";
 in
 {
   macOS = {
@@ -14,7 +14,7 @@ in
       darwin = inputs.nix-darwin;
     };
 
-    imports = [
+    imports = if builtins.getEnv "CI" != "" then [] else [
       inputs.cells.core.darwinProfiles.default
       inputs.cells.core.darwinProfiles.optimize
     ];
@@ -33,9 +33,8 @@ in
         inputs.cells.shinbunbun.homeProfiles.default
       ];
     };
-    
-    users.mutableUsers = builtins.getEnv "CI" == "";
-    users.users = {
+
+    users.users = if builtins.getEnv "CI" != "" then {} else{
       ${username} = {
         createHome = true;
         home = "/Users/${username}";
