@@ -33,7 +33,8 @@ in
         inputs.cells.shinbunbun.homeProfiles.default
       ];
     };
-
+    
+    users.mutableUsers = builtins.getEnv "CI" == "";
     users.users = {
       ${username} = {
         createHome = true;
