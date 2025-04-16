@@ -29,6 +29,7 @@
       casks = [
         "graphql-playground"
         "altair-graphql-client"
+        "cursor"
       ];
     };
   };
