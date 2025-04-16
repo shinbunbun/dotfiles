@@ -61,10 +61,7 @@ in
         );
     };
 
-    # CI環境では不要な設定を無効化
-    services.nix-daemon.enable = !isCI;
-    services.activate-system.enable = !isCI;
-    nix.gc.enable = !isCI;
-    nix.optimise.enable = !isCI;
+    # nixの設定
+    nix.enable = !isCI;
   };
 }
