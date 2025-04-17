@@ -18,6 +18,7 @@
       enable = true;
       onActivation = {
         autoUpdate = true;
+        upgrade = true;
       };
       brews = [
         "go"
