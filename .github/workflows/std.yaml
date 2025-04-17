@@ -98,7 +98,8 @@ jobs:
           echo "The build output is at: $out"
       - name: Execute build output
         run: |
-          /bin/chmod +x "$out"
+          nix-store --add-root "$out" --indirect
+          nix-store --realise "$out"
           "$out"
 
 
