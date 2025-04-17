@@ -98,8 +98,8 @@ jobs:
           echo "The build output is at: $out"
       - name: Execute build output
         run: |
-          chmod +x $out
-          $out
+          /bin/chmod +x "$out"
+          "$out"
 
 
   # deploy:
