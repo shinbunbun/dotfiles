@@ -17,6 +17,11 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Install GNU sed
+        run: |
+          brew install gnu-sed
+          echo "$(brew --prefix gnu-sed)/libexec/gnubin" >> $GITHUB_PATH
+      - uses: nixbuild/nix-quick-install-action@master
       - uses: nix-community/cache-nix-action@v6
         with:
           primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
@@ -26,11 +31,6 @@ jobs:
           purge-prefixes: nix-${{ runner.os }}-
           purge-created: 0
           purge-primary-key: never
-      - name: Install GNU sed
-        run: |
-          brew install gnu-sed
-          echo "$(brew --prefix gnu-sed)/libexec/gnubin" >> $GITHUB_PATH
-      - uses: nixbuild/nix-quick-install-action@master
       # - uses: nixbuild/nixbuild-action@v17
       #   with:
       #     nixbuild_ssh_key: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -59,6 +59,11 @@ jobs:
         target: ${{ fromJSON(needs.discover.outputs.hits).shells.build }}
     steps:
       - uses: actions/checkout@v3
+      - name: Install GNU sed
+        run: |
+          brew install gnu-sed
+          echo "$(brew --prefix gnu-sed)/libexec/gnubin" >> $GITHUB_PATH
+      - uses: nixbuild/nix-quick-install-action@master
       - uses: nix-community/cache-nix-action@v6
         with:
           primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
@@ -68,11 +73,6 @@ jobs:
           purge-prefixes: nix-${{ runner.os }}-
           purge-created: 0
           purge-primary-key: never
-      - name: Install GNU sed
-        run: |
-          brew install gnu-sed
-          echo "$(brew --prefix gnu-sed)/libexec/gnubin" >> $GITHUB_PATH
-      - uses: nixbuild/nix-quick-install-action@master
       # - uses: nixbuild/nixbuild-action@v17
       #   with:
       #     nixbuild_ssh_key: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -94,6 +94,11 @@ jobs:
         target: ${{ fromJSON(needs.discover.outputs.hits).darwinConfigurations.build }}
     steps:
       - uses: actions/checkout@v3
+      - name: Install GNU sed
+        run: |
+          brew install gnu-sed
+          echo "$(brew --prefix gnu-sed)/libexec/gnubin" >> $GITHUB_PATH
+      - uses: nixbuild/nix-quick-install-action@master
       - uses: nix-community/cache-nix-action@v6
         with:
           primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
@@ -103,11 +108,6 @@ jobs:
           purge-prefixes: nix-${{ runner.os }}-
           purge-created: 0
           purge-primary-key: never
-      - name: Install GNU sed
-        run: |
-          brew install gnu-sed
-          echo "$(brew --prefix gnu-sed)/libexec/gnubin" >> $GITHUB_PATH
-      - uses: nixbuild/nix-quick-install-action@master
       # - uses: nixbuild/nixbuild-action@v17
       #   with:
       #     nixbuild_ssh_key: ${{ secrets.SSH_PRIVATE_KEY }}
