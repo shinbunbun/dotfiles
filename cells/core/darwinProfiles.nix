@@ -26,12 +26,33 @@
         "yamllint"
         "nvm"
         "yq"
+        "mas"
       ];
       casks = [
         "graphql-playground"
         "altair-graphql-client"
         "cursor"
       ];
+      masApps = {
+        "Brother iPrint&Scan" = 1193539993;
+        "CommentScreen" = 1450950860;
+        "GarageBand" = 682658836;
+        "Goodnotes" = 1444383602;
+        "iMovie" = 408981434;
+        "Keynote" = 409183694;
+        "LINE" = 539883307;
+        "Microsoft Excel" = 462058435;
+        "Microsoft OneNote" = 784801555;
+        "Microsoft Outlook" = 985367838;
+        "Microsoft PowerPoint" = 462062816;
+        "Microsoft Word" = 462054704;
+        "Numbers" = 409203825;
+        "OneDrive" = 823766827;
+        "Pages" = 409201541;
+        "RunCat" = 1429033973;
+        "Spark" = 1176895641;
+        "Xcode" = 497799835;
+      };
     };
   };
 
