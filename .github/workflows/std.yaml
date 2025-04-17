@@ -98,9 +98,15 @@ jobs:
           echo "The build output is at: $out"
       - name: Execute build output
         run: |
-          nix-store --add-root "$out" --indirect
-          nix-store --realise "$out"
-          "$out"
+          echo "Checking file existence and permissions..."
+          ls -l "$out"
+          if [ -f "$out" ]; then
+            echo "File exists, attempting to execute..."
+            "$out"
+          else
+            echo "Error: File does not exist at $out"
+            exit 1
+          fi
 
 
   # deploy:
