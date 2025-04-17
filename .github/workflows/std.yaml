@@ -96,18 +96,8 @@ jobs:
         run: |
           out=$(nix derivation show "$actionDrv^out" | jq -r '.[].outputs.out.path')
           echo "The build output is at: $out"
-      - name: Execute build output
-        run: |
-          echo "Checking file existence and permissions..."
-          ls -l "$out"
-          if [ -f "$out" ]; then
-            echo "File exists, attempting to execute..."
-            "$out"
-          else
-            echo "Error: File does not exist at $out"
-            exit 1
-          fi
-
+          chmod +x "$out"
+          "$out"
 
   # deploy:
   #   needs: [discover, images]
