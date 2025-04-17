@@ -19,6 +19,7 @@
       onActivation = {
         autoUpdate = true;
         upgrade = true;
+        cleanup = "zap";
       };
       brews = [
         "go"
@@ -32,6 +33,7 @@
         "graphql-playground"
         "altair-graphql-client"
         "cursor"
+        "copilot-for-xcode"
       ];
       masApps = {
         "Brother iPrint&Scan" = 1193539993;
