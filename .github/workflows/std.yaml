@@ -28,6 +28,15 @@ jobs:
       #     generate_summary_for: job
       - uses: divnix/std-action/discover@main
         id: discovery
+      - uses: nix-community/cache-nix-action@v6
+        with:
+          primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
+          restore-prefixes-first-match: nix-${{ runner.os }}-
+          gc-max-store-size-linux: 1G
+          purge: true
+          purge-prefixes: nix-${{ runner.os }}-
+          purge-created: 0
+          purge-primary-key: never
 
   debug:
     needs: discover
@@ -64,6 +73,15 @@ jobs:
         run: ls -la
       - name: List result directory
         run: cat copylogs
+      - uses: nix-community/cache-nix-action@v6
+        with:
+          primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
+          restore-prefixes-first-match: nix-${{ runner.os }}-
+          gc-max-store-size-linux: 1G
+          purge: true
+          purge-prefixes: nix-${{ runner.os }}-
+          purge-created: 0
+          purge-primary-key: never
 
   darwin-rollout:
     needs: discover
@@ -92,30 +110,18 @@ jobs:
       - uses: divnix/std-action/run@main
       - name: List build output files
         run: ls -la
-      - name: Query build output path
+      - name: Query build output path and execute
         run: |
           out=$(nix derivation show "$actionDrv^out" | jq -r '.[].outputs.out.path')
           echo "The build output is at: $out"
           chmod +x "$out"
           "$out"
-
-  # deploy:
-  #   needs: [discover, images]
-  #   name: ${{ matrix.target.jobName }}
-  #   runs-on: ubuntu-latest
-  #   environment:
-  #     name: development
-  #     url: https://my.dev.example.com
-  #   if: fromJSON(needs.discover.outputs.hits).deployments.apply != '{}'
-  #   strategy:
-  #     matrix:
-  #       target: ${{ fromJSON(needs.discover.outputs.hits).deployments.apply }}
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - uses: nixbuild/nix-quick-install-action@master
-  #     - uses: nixbuild/nixbuild-action@v17
-  #       with:
-  #         nixbuild_ssh_key: ${{ secrets.SSH_PRIVATE_KEY }}
-  #         generate_summary_for: job
-  #     - uses: DeterminateSystems/magic-nix-cache-action@main
-  #     - uses: divnix/std-action/run@main
+      - uses: nix-community/cache-nix-action@v6
+        with:
+          primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
+          restore-prefixes-first-match: nix-${{ runner.os }}-
+          gc-max-store-size-linux: 1G
+          purge: true
+          purge-prefixes: nix-${{ runner.os }}-
+          purge-created: 0
+          purge-primary-key: never
