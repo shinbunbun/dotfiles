@@ -54,8 +54,8 @@
       ...
     }@inputs:
     # ① growOn で各種セルを展開
-    # let
-    #   base =
+    let
+      base =
         std.growOn
           {
             inherit inputs;
@@ -73,7 +73,7 @@
               (std.blockTypes.functions "nixosProfiles")
               (std.blockTypes.functions "darwinProfiles")
               (std.blockTypes.functions "homeProfiles")
-              hive.blockTypes.nixosConfigurations
+              (hive.blockTypes.nixosConfigurations // { ci.build = true; })
               (hive.blockTypes.darwinConfigurations // { ci.build = true; })
               (std.blockTypes.devshells "shells" { ci.build = true; })
             ];
@@ -87,15 +87,15 @@
             ];
           };
       # ② growOn の結果に formatter をマージ
-    # in
-    # base
-    # // {
-    #   formatter = flake-utils.lib.eachDefaultSystemMap (
-    #     system:
-    #     let
-    #       pkgs = nixpkgs.legacyPackages.${system};
-    #     in
-    #     pkgs.nixfmt-tree
-    #   );
-    # };
+    in
+    base
+    // {
+      formatter = flake-utils.lib.eachDefaultSystemMap (
+        system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+        in
+        pkgs.nixfmt-tree
+      );
+    };
 }
