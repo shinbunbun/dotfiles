@@ -47,11 +47,4 @@
     /export/k8s  192.168.1.4(rw,nohide,insecure,no_subtree_check,no_root_squash)
     /export/k8s  192.168.1.3(rw,nohide,insecure,no_subtree_check,no_root_squash)
   '';
-
-  # Auto upgrade
-  system.autoUpgrade.enable = true;
-  system.autoUpgrade.allowReboot = false;
-
-  # This value determines the NixOS release
-  system.stateVersion = "21.11";
 }

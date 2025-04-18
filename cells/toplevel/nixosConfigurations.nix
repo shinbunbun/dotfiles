@@ -10,8 +10,7 @@
     };
 
     imports = [
-      inputs.sops-nix.nixosModules.sops
-      inputs.cells.nixos.nixosProfiles.default
+      inputs.cells.core.nixosProfiles.default
     ];
   };
 }
