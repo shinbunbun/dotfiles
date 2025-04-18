@@ -34,6 +34,9 @@
         "altair-graphql-client"
         "cursor"
         "copilot-for-xcode"
+        "adobe-creative-cloud"
+        "xquartz"
+        "discord"
       ];
       masApps = {
         "Brother iPrint&Scan" = 1193539993;
@@ -54,6 +57,7 @@
         "RunCat" = 1429033973;
         "Spark" = 1176895641;
         "Xcode" = 497799835;
+        "Slack for Desktop" = 803453959;
       };
     };
   };
