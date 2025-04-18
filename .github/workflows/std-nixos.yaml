@@ -1,4 +1,4 @@
-name: std CI/CD
+name: std CI/CD(NixOS)
 
 # プッシュとPRのトリガーはそのまま残し、VMテスト用の手動トリガーを追加
 on:
