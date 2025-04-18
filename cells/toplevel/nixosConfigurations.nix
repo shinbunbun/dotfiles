@@ -11,7 +11,7 @@
 
     imports = [
       inputs.sops-nix.nixosModules.sops
-      cell.nixos.nixosProfiles.default
+      cell.nixosProfiles.default
     ];
   };
 }
