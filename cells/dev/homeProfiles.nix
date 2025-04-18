@@ -90,6 +90,15 @@
       ];
     };
 
+  manage_secrets =
+    { pkgs, ... }:
+    {
+      home.packages = with pkgs; [
+        age
+        sops
+      ];
+    };
+
   /*
     graphql =
     { pkgs, ... }: {
