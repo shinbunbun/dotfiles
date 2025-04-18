@@ -117,7 +117,7 @@ jobs:
       # Install required packages
       - name: Install required packages
         run: |
-          nix-env -iA nixos.nixos-rebuild
+          nix-env -iA nixpkgs.nixos-rebuild
 
       # 基本的なビルドチェック
       - uses: divnix/std-action/run@main
