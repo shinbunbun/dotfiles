@@ -54,4 +54,4 @@
 
   # This value determines the NixOS release
   system.stateVersion = "21.11";
-} 
+}

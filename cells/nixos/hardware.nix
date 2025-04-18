@@ -7,4 +7,4 @@
 
   # Include the results of the hardware scan.
   imports = [ ./hardware-configuration-nixos.nix ];
-} 
+}

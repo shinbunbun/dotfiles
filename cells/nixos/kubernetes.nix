@@ -8,7 +8,10 @@ in
 
 {
   services.kubernetes = {
-    roles = ["master" "node"];
+    roles = [
+      "master"
+      "node"
+    ];
     masterAddress = kubeMasterHostname;
     apiserverAddress = "https://${kubeMasterHostname}:${toString kubeMasterAPIServerPort}";
     easyCerts = true;
@@ -23,4 +26,4 @@ in
     # needed if you use swap
     kubelet.extraOpts = "--fail-swap-on=false";
   };
-} 
+}

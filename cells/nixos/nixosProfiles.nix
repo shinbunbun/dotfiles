@@ -1,11 +1,13 @@
 {
-  default = { ... }: {
-    imports = [
-      ./hardware.nix
-      ./networking.nix
-      ./users.nix
-      ./services.nix
-      ./kubernetes.nix
-    ];
-  };
+  default =
+    { ... }:
+    {
+      imports = [
+        ./hardware.nix
+        ./networking.nix
+        ./users.nix
+        ./services.nix
+        ./kubernetes.nix
+      ];
+    };
 }
