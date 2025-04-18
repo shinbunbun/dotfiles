@@ -79,7 +79,11 @@
             ];
           }
           {
-            nixosConfigurations = hive.collect self "nixosConfigurations";
+            nixosConfigurations = (hive.collect self "nixosConfigurations") // {
+              "toplevel-nixos" = {
+                system = "x86_64-linux";
+              };
+            };
             darwinConfigurations = hive.collect self "darwinConfigurations";
             devShells = hive.harvest self [
               "repo"
