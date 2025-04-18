@@ -11,6 +11,7 @@
 
     imports = [
       inputs.cells.core.nixosProfiles.default
+      inputs.cells.core.nixosProfiles.optimise
     ];
   };
 }
