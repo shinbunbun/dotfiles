@@ -54,3 +54,4 @@ jobs:
             Please review and merge if everything looks OK.
           branch: auto/update-flake-lock
           base: main
+          pull-request: true
