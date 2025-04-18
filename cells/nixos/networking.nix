@@ -13,7 +13,11 @@ in
   networking.enableIPv6 = true;
 
   # Open ports in the firewall.
-  networking.firewall.allowedTCPPorts = [ 6443 8888 2049 ];
+  networking.firewall.allowedTCPPorts = [
+    6443
+    8888
+    2049
+  ];
 
   networking.extraHosts = ''
     ${kubeMasterIP} ${kubeMasterHostname}
@@ -29,4 +33,4 @@ in
       workstation = true;
     };
   };
-} 
+}
