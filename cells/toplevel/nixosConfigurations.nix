@@ -4,7 +4,6 @@
 }:
 {
   nixos = {
-    system = "x86_64-linux";
     bee = {
       system = "x86_64-linux";
       pkgs = inputs.nixpkgs;
