@@ -27,6 +27,7 @@ in
         inputs.cells.dev.homeProfiles.zsh
         inputs.cells.dev.homeProfiles.vim
         inputs.cells.dev.homeProfiles.google_cloud_sdk
+        inputs.cells.dev.homeProfiles.manage_secrets
         # inputs.cells.dev.homeProfiles.biome
         # inputs.cells.dev.homeProfiles.graphql
 

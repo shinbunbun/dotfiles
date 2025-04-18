@@ -1,0 +1,7 @@
+keys:
+  - &admin_user age1p057v4es63p6fef8usy67tkza7dj4xg326w5gm3c7rdthcd3xqlqps38z9
+creation_rules:
+  - path_regex: secrets/.*
+    key_groups:
+    - age:
+      - age1p057v4es63p6fef8usy67tkza7dj4xg326w5gm3c7rdthcd3xqlqps38z9 # あなたのage公開鍵
