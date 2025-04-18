@@ -1,15 +1,8 @@
-{
-  inputs,
-  cell,
-}:
+{ inputs, cell }:
 {
   nixos = {
-    bee = {
-      system = "x86_64-linux";
-      pkgs = inputs.nixpkgs;
-    };
-
-    imports = [
+    system = "x86_64-linux";
+    modules = [
       inputs.sops-nix.nixosModules.sops
       inputs.cells.nixos.nixosProfiles.default
     ];
