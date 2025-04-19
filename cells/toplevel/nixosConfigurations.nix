@@ -13,7 +13,5 @@
       inputs.cells.core.nixosProfiles.default
       inputs.cells.core.nixosProfiles.optimise
     ];
-
-    __std.actions.build = config.system.build.toplevel;
   };
 }
