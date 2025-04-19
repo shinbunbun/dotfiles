@@ -14,4 +14,10 @@
       inputs.cells.core.nixosProfiles.optimise
     ];
   };
+
+  __std.actions = {
+    homeMachine = {
+      build = cell.nixosConfigurations.homeMachine.config.system.build.toplevel;
+    };
+  };
 }
