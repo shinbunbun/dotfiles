@@ -10,6 +10,7 @@
     };
 
     imports = [
+      ./hardwareConfigrations/homeMachine.nix
       inputs.cells.core.nixosProfiles.default
       inputs.cells.core.nixosProfiles.optimise
     ];
