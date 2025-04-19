@@ -3,7 +3,7 @@
   cell,
 }:
 {
-  homeMachine = {
+  homeMachine = inputs.nixpkgs.lib.nixosSystem {
     bee = {
       system = "x86_64-linux";
       pkgs = inputs.nixpkgs;
