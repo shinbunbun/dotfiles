@@ -3,7 +3,7 @@
   cell,
 }:
 {
-  homeMachine = inputs.nixpkgs.lib.nixosSystem {
+  homeMachine = {
     bee = {
       system = "x86_64-linux";
       pkgs = inputs.nixpkgs;
@@ -13,11 +13,5 @@
       inputs.cells.core.nixosProfiles.default
       inputs.cells.core.nixosProfiles.optimise
     ];
-  };
-
-  __std.actions = {
-    homeMachine = {
-      build = cell.nixosConfigurations.homeMachine.config.system.build.toplevel;
-    };
   };
 }
