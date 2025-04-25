@@ -3,13 +3,9 @@
   cell,
 }:
 {
-  homeMachine = { config, pkgs, lib, ... }: {
-    bee = {
-      system = "x86_64-linux";
-      pkgs = inputs.nixpkgs;
-    };
-
-    imports = [
+  homeMachine = inputs.nixpkgs.lib.nixosSystem {
+    system = "x86_64-linux";
+    modules = [
       ./hardwareConfigurations/homeMachine.nix
       inputs.cells.core.nixosProfiles.default
       inputs.cells.core.nixosProfiles.optimise
