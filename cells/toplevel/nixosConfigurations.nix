@@ -3,7 +3,7 @@
   cell,
 }:
 {
-  homeMachine = inputs.nixpkgs.lib.nixosSystem {
+  homeMachine = inputs.nixpkgs.legacyPackages."x86_64-linux".lib.nixosSystem {
     system = "x86_64-linux";
     modules = [
       ./hardwareConfigurations/homeMachine.nix
