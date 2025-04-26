@@ -28,9 +28,5 @@
         inputs.cells.core.nixosProfiles.default
         inputs.cells.core.nixosProfiles.optimise
       ];
-
-      actions = {
-        build = config.system.build.toplevel;
-      };
     };
 }

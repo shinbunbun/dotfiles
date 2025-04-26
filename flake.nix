@@ -76,7 +76,7 @@
                 (functions "nixosProfiles")
                 (functions "darwinProfiles")
                 (functions "homeProfiles")
-                (nixosConfigurations)
+                (hive.blockTypes.nixosConfigurations)
                 (darwinConfigurations // { ci.build = true; })
                 (devshells "shells" { ci.build = true; })
               ];
