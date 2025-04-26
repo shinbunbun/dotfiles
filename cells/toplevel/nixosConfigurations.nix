@@ -17,12 +17,12 @@
         # home = inputs.home-manager;
       };
 
-      meta = {
+      /* meta = {
         description = "Home machine NixOS configuration";
-      };
+      }; */
 
       imports = [
-        ./hardwareConfigurations/homeMachine.nix
+        # ./hardwareConfigurations/homeMachine.nix
         inputs.cells.core.nixosProfiles.default
         inputs.cells.core.nixosProfiles.optimise
       ];
