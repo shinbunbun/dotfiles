@@ -13,7 +13,7 @@
     {
       bee = {
         system = "x86_64-linux";
-        pkgs = pkgs;
+        pkgs = inputs.nixpkgs;
         # home = inputs.home-manager;
       };
 
