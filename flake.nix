@@ -55,6 +55,7 @@
     }@inputs:
     # ① growOn で各種セルを展開
     let
+      customSelf = self // { renamer = cell: target: target; };
       base =
         std.growOn
           {
@@ -82,7 +83,7 @@
               ];
           }
           {
-            nixosConfigurations = hive.collect self "nixosConfigurations";
+            nixosConfigurations = hive.collect.__functor customSelf customSelf "nixosConfigurations";
             darwinConfigurations = hive.collect self "darwinConfigurations";
             devShells = hive.harvest self [
               "repo"
