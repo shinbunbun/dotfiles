@@ -68,7 +68,7 @@
               "x86_64-darwin"
               "aarch64-darwin"
             ];
-            cellsFrom = ./cells;
+            cellsFrom = [ ./cells/toplevel ];
             cellBlocks =
               with std.blockTypes;
               with hive.blockTypes;
