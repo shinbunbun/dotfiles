@@ -14,7 +14,7 @@
       bee = {
         system = "x86_64-linux";
         pkgs = pkgs;
-        home = inputs.home-manager;
+        # home = inputs.home-manager;
       };
 
       meta = {
