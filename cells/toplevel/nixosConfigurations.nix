@@ -11,7 +11,7 @@
       ...
     }:
     {
-      bee = inputs.nixpkgs.lib.nixosSystem {
+      bee = inputs.nixpkgs.legacyPackages."x86_64-linux".lib.nixosSystem {
         system = "x86_64-linux";
         pkgs = inputs.nixpkgs;
       };
