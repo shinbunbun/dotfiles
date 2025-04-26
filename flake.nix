@@ -77,7 +77,7 @@
                 (functions "darwinProfiles")
                 (functions "homeProfiles")
                 (nixosConfigurations // { ci.build = true; })
-                (darwinConfigurations // { ci.build = true; })
+                (functions "darwinConfigurations")
                 (devshells "shells" { ci.build = true; })
               ];
           }
