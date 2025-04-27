@@ -1,3 +1,7 @@
+# outputs.nixosConfigurations.homeMachine.config.system.build.toplevelにbuildが存在している
+# nix build .#nixosConfigurations.homeMachine.config.system.build.toplevelでは成功する
+
+
 {
   inputs,
   cell,

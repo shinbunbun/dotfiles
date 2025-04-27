@@ -54,43 +54,48 @@
       ...
     }@inputs:
     # ① growOn で各種セルを展開
-    let
-      customSelf = self // { renamer = cell: target: target; };
-      base =
-        std.growOn
-          {
-            inherit inputs;
-            nixpkgsConfig = {
-              allowUnfree = true;
-            };
-            systems = [
-              "x86_64-linux"
-              "aarch64-linux"
-              "x86_64-darwin"
-              "aarch64-darwin"
-            ];
-            cellsFrom = ./cells;
-            cellBlocks =
-              with std.blockTypes;
-              with hive.blockTypes;
-              [
-                (functions "nixosProfiles")
-                (functions "darwinProfiles")
-                (functions "homeProfiles")
-                (hive.blockTypes.nixosConfigurations)
-                (darwinConfigurations // { ci.build = true; })
-                (devshells "shells" { ci.build = true; })
-              ];
-          }
-          {
-            nixosConfigurations = hive.collect.__functor customSelf customSelf "nixosConfigurations";
-            darwinConfigurations = hive.collect self "darwinConfigurations";
-            devShells = hive.harvest self [
-              "repo"
-              "shells"
-            ];
-          };
-      # ② growOn の結果に formatter をマージ
+    # let
+    # customSelf = self // { renamer = cell: target: target; };
+    # base =
+    std.growOn
+      {
+        inherit inputs;
+        nixpkgsConfig = {
+          allowUnfree = true;
+        };
+        systems = [
+          "x86_64-linux"
+          "aarch64-linux"
+          "x86_64-darwin"
+          "aarch64-darwin"
+        ];
+        cellsFrom = ./cells;
+        cellBlocks =
+          with std.blockTypes;
+          with hive.blockTypes;
+          [
+            (functions "nixosProfiles")
+            (functions "darwinProfiles")
+            (functions "homeProfiles")
+            # (hive.blockTypes.nixosConfigurations)
+            # (darwinConfigurations // { ci.build = true; })
+            # (devshells "shells" { ci.build = true; })
+            nixosConfigurations
+            darwinConfigurations
+            (devshells "shells")
+          ];
+      }
+      {
+        # nixosConfigurations = hive.collect.__functor customSelf customSelf "nixosConfigurations";
+        nixosConfigurations = hive.collect self "nixosConfigurations";
+        darwinConfigurations = hive.collect self "darwinConfigurations";
+        devShells = hive.harvest self [
+          "repo"
+          "shells"
+        ];
+      };
+  # ② growOn の結果に formatter をマージ
+  /*
     in
     base
     // {
@@ -102,4 +107,5 @@
         pkgs.nixfmt-tree
       );
     };
+  */
 }
