@@ -14,17 +14,6 @@
     (modulesPath + "/installer/scan/not-detected.nix")
   ];
 
-  # sops-nixの設定
-  sops.defaultSopsFile = ../secrets/hardware-configuration.yaml;
-  sops.age.keyFile = "/var/lib/sops-nix/key.txt";
-
-  sops.secrets = {
-    "disk_uuids/root".owner = "root";
-    "disk_uuids/boot".owner = "root";
-    "disk_uuids/k8s".owner = "root";
-    "disk_uuids/swap".owner = "root";
-  };
-
   boot.initrd.availableKernelModules = [
     "xhci_pci"
     "ahci"
@@ -39,17 +28,17 @@
   boot.extraModulePackages = [ ];
 
   fileSystems."/" = {
-    device = "/dev/disk/by-uuid/${builtins.readFile config.sops.secrets."disk_uuids/root".path}";
+    device = "/dev/disk/by-uuid/4f041679-dbeb-4c7d-a371-39f44857d619";
     fsType = "ext4";
   };
 
   fileSystems."/boot" = {
-    device = "/dev/disk/by-uuid/${builtins.readFile config.sops.secrets."disk_uuids/boot".path}";
+    device = "/dev/disk/by-uuid/3734-ECC0";
     fsType = "vfat";
   };
 
   fileSystems."/mnt/k8s" = {
-    device = "/dev/disk/by-uuid/${builtins.readFile config.sops.secrets."disk_uuids/k8s".path}";
+    device = "/dev/disk/by-uuid/dc37e1f6-c488-4491-b524-96fc14e27a92";
     fsType = "ext4";
     options = [ "nofail" ];
   };
@@ -63,7 +52,7 @@
   };
 
   swapDevices = [
-    { device = "/dev/disk/by-uuid/${builtins.readFile config.sops.secrets."disk_uuids/swap".path}"; }
+    { device = "/dev/disk/by-uuid/42a8faf1-0f52-476e-a6d9-1fd777514493"; }
   ];
 
   powerManagement.cpuFreqGovernor = lib.mkDefault "powersave";
