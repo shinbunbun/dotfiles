@@ -1,6 +1,6 @@
 # outputs.nixosConfigurations.homeMachine.config.system.build.toplevelにbuildが存在している
 # nix build .#nixosConfigurations.homeMachine.config.system.build.toplevelでは成功する
-
+# ファイルを変更したので nix build .#nixosConfigurations.toplevel-homeMachine.config.system.build.toplevel
 
 {
   inputs,
