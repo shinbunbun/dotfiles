@@ -30,7 +30,8 @@
     };
 
     hive = {
-      url = "github:divnix/hive";
+      # url = "github:divnix/hive";
+      url = "/Users/shinbunbun/hive";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
