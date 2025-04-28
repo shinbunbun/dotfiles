@@ -31,6 +31,7 @@
         ./hardwareConfigurations/homeMachine.nix
         inputs.cells.core.nixosProfiles.default
         inputs.cells.core.nixosProfiles.optimise
+        inputs.sops-nix.nixosModules.sops
       ];
     };
 }
