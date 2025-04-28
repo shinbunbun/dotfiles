@@ -37,6 +37,7 @@
         "adobe-creative-cloud"
         "xquartz"
         "discord"
+        "vnc-viewer"
       ];
       masApps = {
         "Brother iPrint&Scan" = 1193539993;
