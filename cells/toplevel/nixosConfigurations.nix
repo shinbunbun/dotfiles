@@ -28,7 +28,7 @@
       */
 
       imports = [
-        # ./hardwareConfigurations/homeMachine.nix
+        ./hardwareConfigurations/homeMachine.nix
         inputs.cells.core.nixosProfiles.default
         inputs.cells.core.nixosProfiles.optimise
       ];
