@@ -274,11 +274,11 @@
         "std": "std"
       },
       "locked": {
-        "lastModified": 1745821794,
-        "narHash": "sha256-n7CS7TzS+XVrOUKLhjt3mAM8l+MOOU/jQA5hbFc0XUY=",
+        "lastModified": 1746032054,
+        "narHash": "sha256-yYNjDG2JogX08d6V/2wWUtLD2dNn7/SgfjD1ss4NLUo=",
         "owner": "shinbunbun",
         "repo": "hive",
-        "rev": "53b9e741c16e4d3579f4b0f9ba5d37182de021da",
+        "rev": "2710e6901d67e224ac700470fa050f45efd7df52",
         "type": "github"
       },
       "original": {
