@@ -3,53 +3,132 @@
   cell,
 }:
 {
-  default = let
-    kubeMasterIP = "192.168.1.3";
-    kubeMasterHostname = "api.kube";
-  in  {
-    # This value determines the NixOS release
-    system.stateVersion = "21.11";
+  default =
+    {
+      config,
+      pkgs,
+      lib,
+      ...
+    }:
+    let
+      kubeMasterIP = "192.168.1.3";
+      kubeMasterHostname = "api.kube";
+    in
+    {
+      # This value determines the NixOS release
+      system.stateVersion = "21.11";
 
-    # Auto upgrade
-    system.autoUpgrade.enable = true;
-    system.autoUpgrade.allowReboot = false;
+      # Auto upgrade
+      system.autoUpgrade.enable = true;
+      system.autoUpgrade.allowReboot = false;
 
-    nix.extraOptions = ''
-      experimental-features = nix-command flakes
-    '';
+      nix.extraOptions = ''
+        experimental-features = nix-command flakes
+      '';
 
-    # Use the systemd-boot EFI boot loader.
-    boot.loader.systemd-boot.enable = true;
-    boot.loader.efi.canTouchEfiVariables = true;
+      # Use the systemd-boot EFI boot loader.
+      boot.loader.systemd-boot.enable = true;
+      boot.loader.efi.canTouchEfiVariables = true;
 
-    networking.hostName = "nixos";
-    networking.useDHCP = false;
-    networking.interfaces.eno1.useDHCP = true;
-    networking.interfaces.wlp1s0.useDHCP = false;
-    networking.enableIPv6 = true;
+      networking.hostName = "nixos";
+      networking.useDHCP = false;
+      networking.interfaces.eno1.useDHCP = true;
+      networking.interfaces.wlp1s0.useDHCP = false;
+      networking.enableIPv6 = true;
 
-    # Open ports in the firewall.
-    networking.firewall.allowedTCPPorts = [
-      6443
-      8888
-      2049
-    ];
+      # Open ports in the firewall.
+      networking.firewall.allowedTCPPorts = [
+        6443
+        8888
+        2049
+      ];
 
-    networking.extraHosts = ''
-      ${kubeMasterIP} ${kubeMasterHostname}
-      192.168.1.4 nixos-desktop
-    '';
+      networking.extraHosts = ''
+        ${kubeMasterIP} ${kubeMasterHostname}
+        192.168.1.4 nixos-desktop
+      '';
 
-    # Avahi config
-    services.avahi = {
-      enable = true;
-      publish = {
+      # Avahi config
+      services.avahi = {
         enable = true;
-        addresses = true;
-        workstation = true;
+        publish = {
+          enable = true;
+          addresses = true;
+          workstation = true;
+        };
       };
+
+      # Set your time zone
+      time.timeZone = "Asia/Tokyo";
+
+      # Enable the OpenSSH daemon.
+      services.openssh = {
+        enable = true;
+        ports = [ 31415 ];
+        settings = {
+          X11Forwarding = true;
+          PermitRootLogin = "no";
+          PasswordAuthentication = false;
+        };
+      };
+
+      # fail2ban config
+      services.fail2ban = {
+        enable = true;
+        ignoreIP = [
+          "192.168.11.0/24"
+          "163.143.0.0/16"
+        ];
+      };
+
+      # PAM
+      security.pam.services = {
+        sudo.sshAgentAuth = true;
+      };
+
+      # add docker config
+      virtualisation.docker.enable = true;
+
+      # NFS server
+      services.nfs.server.enable = true;
+      services.nfs.server.exports = ''
+        /export/k8s  192.168.1.4(rw,nohide,insecure,no_subtree_check,no_root_squash)
+        /export/k8s  192.168.1.3(rw,nohide,insecure,no_subtree_check,no_root_squash)
+      '';
+
+      # sops-nixの有効化
+      sops.defaultSopsFile = ../secrets/ssh-keys.yaml;
+      sops.age.keyFile = "/var/lib/sops-nix/key.txt";
+
+      # 秘密情報の定義
+      sops.secrets."ssh_keys/bunbun" = {
+        owner = "bunbun";
+      };
+
+      # Define a user account. Don't forget to set a password with 'passwd'.
+      users.users.bunbun = {
+        isNormalUser = true;
+        extraGroups = [
+          "wheel"
+          "docker"
+        ]; # Enable 'sudo' for the user.
+        openssh.authorizedKeys.keyFiles = [
+          config.sops.secrets."ssh_keys/bunbun".path
+        ];
+        shell = pkgs.zsh;
+      };
+
+      programs.zsh.enable = true;
+
+      # List packages installed in system profile.
+      environment.systemPackages = with pkgs; [
+        vim
+        wget
+        kompose
+        kubectl
+        kubernetes
+      ];
     };
-  };
 
   optimise = {
     # https://wiki.nixos.org/wiki/Storage_optimization

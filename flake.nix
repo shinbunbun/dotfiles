@@ -82,8 +82,8 @@
             # (hive.blockTypes.nixosConfigurations)
             # (darwinConfigurations // { ci.build = true; })
             # (devshells "shells" { ci.build = true; })
-            nixosConfigurations
-            darwinConfigurations
+            (nixosConfigurations // { ci.build = true; })
+            (darwinConfigurations // { ci.build = true; })
             (devshells "shells")
           ];
       }
