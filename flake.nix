@@ -31,8 +31,8 @@
 
     hive = {
       # url = "github:divnix/hive";
-      # url = "/Users/shinbunbun/hive";
-      url = "github:shinbunbun/hive?ref=shinbunbun";
+      url = "/Users/shinbunbun/hive";
+      # url = "github:shinbunbun/hive?ref=shinbunbun";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -89,7 +89,19 @@
       }
       {
         # nixosConfigurations = hive.collect.__functor customSelf customSelf "nixosConfigurations";
-        nixosConfigurations = hive.collect self "nixosConfigurations";
+        nixosConfigurations =
+          let
+            collected = hive.collect self "nixosConfigurations";
+          in
+          builtins.mapAttrs (
+            name: config:
+            config
+            // {
+              # targetDrv = builtins.trace "nixosConfigurations: ${builtins.typeOf (config.config.system.build.toplevel)}" config.config.system.build.toplevel;
+              targetDrv = config.config.system.build.toplevel;
+            }
+          ) collected;
+        # nixosConfigurations = hive.collect self "nixosConfigurations";
         darwinConfigurations = hive.collect self "darwinConfigurations";
         devShells = hive.harvest self [
           "repo"
