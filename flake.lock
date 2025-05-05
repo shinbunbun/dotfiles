@@ -274,14 +274,18 @@
         "std": "std"
       },
       "locked": {
-        "lastModified": 1746237037,
-        "narHash": "sha256-QzebxPDKWYKJpRGNcSbtmt32iw9Tvc0DJs9VwN2A10o=",
-        "path": "/Users/shinbunbun/hive",
-        "type": "path"
+        "lastModified": 1746235802,
+        "narHash": "sha256-kc8JDmZoekrpdzvOCx1KegmFrHjaGXTWlSrqSGdjiUo=",
+        "owner": "shinbunbun",
+        "repo": "hive",
+        "rev": "90854d8f9ec75b2de8c3379829085afeacf746b3",
+        "type": "github"
       },
       "original": {
-        "path": "/Users/shinbunbun/hive",
-        "type": "path"
+        "owner": "shinbunbun",
+        "ref": "shinbunbun",
+        "repo": "hive",
+        "type": "github"
       }
     },
     "home-manager": {
