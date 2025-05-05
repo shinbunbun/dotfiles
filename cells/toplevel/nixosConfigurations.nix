@@ -7,25 +7,41 @@
   cell,
 }:
 {
-  homeMachine =
-    {
-      bee = {
-        system = "x86_64-linux";
-        pkgs = inputs.nixpkgs;
-        # home = inputs.home-manager;
-      };
-
-      /*
-        meta = {
-          description = "Home machine NixOS configuration";
-        };
-      */
-
-      imports = [
-        ./hardwareConfigurations/homeMachine.nix
-        inputs.cells.core.nixosProfiles.default
-        inputs.cells.core.nixosProfiles.optimise
-        inputs.sops-nix.nixosModules.sops
-      ];
+  homeMachine = {
+    bee = {
+      system = "x86_64-linux";
+      pkgs = inputs.nixpkgs;
+      # home = inputs.home-manager;
     };
+
+    /*
+      meta = {
+        description = "Home machine NixOS configuration";
+      };
+    */
+
+    imports = [
+      ./hardwareConfigurations/homeMachine.nix
+      inputs.cells.core.nixosProfiles.default
+      inputs.cells.core.nixosProfiles.optimise
+      inputs.sops-nix.nixosModules.sops
+    ];
+
+    ci.build = false;
+  };
+
+  ciMachine = {
+    bee = {
+      system = "x86_64-linux";
+      pkgs = inputs.nixpkgs;
+      # home = inputs.home-manager;
+    };
+
+    imports = [
+      ./hardwareConfigurations/homeMachine.nix
+      inputs.cells.core.ciNixosProfiles.default
+      inputs.cells.core.ciNixosProfiles.optimise
+    ];
+
+  };
 }
