@@ -122,6 +122,7 @@ jobs:
         run: |
           out=$(nix derivation show "$actionDrv^out" | jq -r '.[].outputs.out.path')
           echo "The build output is at: $out"
+          cat $out
           chmod +x "$out"
           "$out"
 
