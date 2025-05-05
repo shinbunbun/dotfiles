@@ -13,6 +13,7 @@
     let
       kubeMasterIP = "192.168.1.3";
       kubeMasterHostname = "api.kube";
+      isCI = builtins.getEnv "CI" == "true";
     in
     {
       # This value determines the NixOS release
@@ -97,12 +98,12 @@
       '';
 
       # sops-nixの有効化
-      sops.defaultSopsFile = ../secrets/ssh-keys.yaml;
-      sops.age.keyFile = "/var/lib/sops-nix/key.txt";
-
-      # 秘密情報の定義
-      sops.secrets."ssh_keys/bunbun" = {
-        owner = "bunbun";
+      sops = if isCI then {} else {
+        defaultSopsFile = ../secrets/ssh-keys.yaml;
+        age.keyFile = "/var/lib/sops-nix/key.txt";
+        secrets."ssh_keys/bunbun" = {
+          owner = "bunbun";
+        };
       };
 
       # Define a user account. Don't forget to set a password with 'passwd'.
@@ -112,7 +113,7 @@
           "wheel"
           "docker"
         ]; # Enable 'sudo' for the user.
-        openssh.authorizedKeys.keyFiles = [
+        openssh.authorizedKeys.keyFiles = if isCI then [] else [
           config.sops.secrets."ssh_keys/bunbun".path
         ];
         shell = pkgs.zsh;
