@@ -98,13 +98,17 @@
       '';
 
       # sops-nixの有効化
-      sops = if isCI then {} else {
-        defaultSopsFile = ../secrets/ssh-keys.yaml;
-        age.keyFile = "/var/lib/sops-nix/key.txt";
-        secrets."ssh_keys/bunbun" = {
-          owner = "bunbun";
-        };
-      };
+      sops =
+        if isCI then
+          { }
+        else
+          {
+            defaultSopsFile = ../secrets/ssh-keys.yaml;
+            age.keyFile = "/var/lib/sops-nix/key.txt";
+            secrets."ssh_keys/bunbun" = {
+              owner = "bunbun";
+            };
+          };
 
       # Define a user account. Don't forget to set a password with 'passwd'.
       users.users.bunbun = {
@@ -113,9 +117,20 @@
           "wheel"
           "docker"
         ]; # Enable 'sudo' for the user.
-        openssh.authorizedKeys.keyFiles = if isCI then [] else [
-          config.sops.secrets."ssh_keys/bunbun".path
-        ];
+        openssh.authorizedKeys.keyFiles =
+          if isCI then
+            [ ]
+          else
+            (
+              if
+                config ? sops
+                && config.sops.secrets ? "ssh_keys/bunbun"
+                && config.sops.secrets."ssh_keys/bunbun" ? path
+              then
+                [ config.sops.secrets."ssh_keys/bunbun".path ]
+              else
+                [ ]
+            );
         shell = pkgs.zsh;
       };
 

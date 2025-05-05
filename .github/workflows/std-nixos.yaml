@@ -108,11 +108,11 @@ jobs:
           purge-primary-key: never
 
       # Setup SOPS key
-      - name: Setup SOPS
-        run: |
-          sudo mkdir -p /var/lib/sops-nix
-          echo "${{ secrets.SOPS_AGE_KEY }}" | sudo tee /var/lib/sops-nix/key.txt > /dev/null
-          sudo chmod 600 /var/lib/sops-nix/key.txt
+      # - name: Setup SOPS
+      #   run: |
+      #     sudo mkdir -p /var/lib/sops-nix
+      #     echo "${{ secrets.SOPS_AGE_KEY }}" | sudo tee /var/lib/sops-nix/key.txt > /dev/null
+      #     sudo chmod 600 /var/lib/sops-nix/key.txt
 
       # 基本的なビルドチェック
       - uses: divnix/std-action/run@main
