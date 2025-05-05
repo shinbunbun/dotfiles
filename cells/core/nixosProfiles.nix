@@ -98,7 +98,10 @@
 
       # sops-nixの有効化
       sops.defaultSopsFile = ../secrets/ssh-keys.yaml;
-      sops.age.keyFile = "/var/lib/sops-nix/key.txt";
+      sops.age = {
+        keyFile = if builtins.getEnv "CI" == "true" then null else "/var/lib/sops-nix/key.txt";
+        key = if builtins.getEnv "CI" == "true" then builtins.getEnv "SOPS_AGE_KEY" else null;
+      };
 
       # 秘密情報の定義
       sops.secrets."ssh_keys/bunbun" = {
