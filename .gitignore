@@ -9,3 +9,4 @@ hive
 std
 tui
 std-action
+sops-nix
