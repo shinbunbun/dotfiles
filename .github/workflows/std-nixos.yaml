@@ -90,7 +90,8 @@ jobs:
     name: ${{ matrix.target.jobName }}
     runs-on: ubuntu-latest
     if: fromJSON(needs.discover.outputs.hits).nixosConfigurations.build != '{}' &&
-      fromJSON(needs.discover.outputs.hits).nixosConfigurations.build != ''
+      fromJSON(needs.discover.outputs.hits).nixosConfigurations.build != '' &&
+      ${{ matrix.target.name  == 'ciMachine' }}
     strategy:
       matrix:
         target: ${{ fromJSON(needs.discover.outputs.hits).nixosConfigurations.build }}
