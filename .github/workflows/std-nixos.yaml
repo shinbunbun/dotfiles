@@ -41,7 +41,7 @@ jobs:
       #   with:
       #     nixbuild_ssh_key: ${{ secrets.SSH_PRIVATE_KEY }}
       #     generate_summary_for: job
-      - uses: divnix/std-action/discover@main
+      - uses: shinbunbun/std-action/discover@main
         id: discovery
 
   debug:
@@ -79,7 +79,7 @@ jobs:
       #   with:
       #     nixbuild_ssh_key: ${{ secrets.SSH_PRIVATE_KEY }}
       #     generate_summary_for: job
-      - uses: divnix/std-action/run@main
+      - uses: shinbunbun/std-action/run@main
       - name: List build output files
         run: ls -la
       - name: List result directory
@@ -115,7 +115,7 @@ jobs:
       #     sudo chmod 600 /var/lib/sops-nix/key.txt
 
       # 基本的なビルドチェック
-      - uses: divnix/std-action/run@main
+      - uses: shinbunbun/std-action/run@main
       - name: List build output files
         run: ls -la
       # - name: Setup KVM
