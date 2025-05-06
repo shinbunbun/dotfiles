@@ -34,7 +34,6 @@
     bee = {
       system = "x86_64-linux";
       pkgs = inputs.nixpkgs;
-      # home = inputs.home-manager;
     };
 
     imports = [
@@ -42,5 +41,7 @@
       inputs.cells.core.ciNixosProfiles.ciMachine
     ];
 
+    # CI環境でのVMビルドを有効化
+    system.build.vmWithBootLoader = inputs.nixpkgs.lib.mkForce (self: self.config.system.build.vm);
   };
 }
