@@ -85,15 +85,15 @@ jobs:
       - name: List result directory
         run: cat copylogs
 
-  nixos-build:
+  nixos-build-vm:
     needs: discover
     name: ${{ matrix.target.jobName }}
     runs-on: ubuntu-latest
-    if: fromJSON(needs.discover.outputs.hits).nixosConfigurations.build != '{}' &&
-      fromJSON(needs.discover.outputs.hits).nixosConfigurations.build != ''
+    if: fromJSON(needs.discover.outputs.hits).nixosConfigurations.build-vm-with-bootloader != '{}' &&
+      fromJSON(needs.discover.outputs.hits).nixosConfigurations.build-vm-with-bootloader != ''
     strategy:
       matrix:
-        target: ${{ fromJSON(needs.discover.outputs.hits).nixosConfigurations.build }}
+        target: ${{ fromJSON(needs.discover.outputs.hits).nixosConfigurations.build-vm-with-bootloader }}
     steps:
       - uses: actions/checkout@v3
       - uses: nixbuild/nix-quick-install-action@master
@@ -118,6 +118,13 @@ jobs:
       - uses: divnix/std-action/run@main
       - name: List build output files
         run: ls -la
+      # - name: Setup KVM
+      #   run: |
+      #     sudo apt-get update
+      #     sudo apt-get install -y qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils
+      #     sudo modprobe kvm
+      #     sudo modprobe kvm_intel || sudo modprobe kvm_amd
+      #     sudo chown $USER /dev/kvm
       - name: Query build output path and execute
         run: |
           out=$(nix derivation show "$actionDrv^out" | jq -r '.[].outputs.out.path')
@@ -126,52 +133,52 @@ jobs:
           chmod +x "$out"
           "$out"
 
-  nixos-vm-test:
-    needs: [discover, nixos-build]
-    name: NixOS VM Test
-    runs-on: ubuntu-latest
-    if: >
-      github.event_name == 'workflow_dispatch' &&
-      github.event.inputs.run_vm_test == 'true' &&
-      fromJSON(needs.discover.outputs.hits).nixosConfigurations.build-vm-with-bootloader != '{}' &&
-      fromJSON(needs.discover.outputs.hits).nixosConfigurations.build-vm-with-bootloader != ''
-    strategy:
-      matrix:
-        target: ${{ fromJSON(needs.discover.outputs.hits).nixosConfigurations.build-vm-with-bootloader }}
-    steps:
-      - uses: actions/checkout@v3
-      - uses: nixbuild/nix-quick-install-action@master
-      - uses: nix-community/cache-nix-action@v6
-        with:
-          primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
-          restore-prefixes-first-match: nix-${{ runner.os }}-
-          gc-max-store-size-linux: 1G
-          purge: true
-          purge-prefixes: nix-${{ runner.os }}-
-          purge-created: 0
-          purge-primary-key: never
+  # nixos-vm-test:
+  #   needs: [discover, nixos-build]
+  #   name: NixOS VM Test
+  #   runs-on: ubuntu-latest
+  #   if: >
+  #     github.event_name == 'workflow_dispatch' &&
+  #     github.event.inputs.run_vm_test == 'true' &&
+  #     fromJSON(needs.discover.outputs.hits).nixosConfigurations.build-vm-with-bootloader != '{}' &&
+  #     fromJSON(needs.discover.outputs.hits).nixosConfigurations.build-vm-with-bootloader != ''
+  #   strategy:
+  #     matrix:
+  #       target: ${{ fromJSON(needs.discover.outputs.hits).nixosConfigurations.build-vm-with-bootloader }}
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: nixbuild/nix-quick-install-action@master
+  #     - uses: nix-community/cache-nix-action@v6
+  #       with:
+  #         primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
+  #         restore-prefixes-first-match: nix-${{ runner.os }}-
+  #         gc-max-store-size-linux: 1G
+  #         purge: true
+  #         purge-prefixes: nix-${{ runner.os }}-
+  #         purge-created: 0
+  #         purge-primary-key: never
 
-      # VMビルドとテスト
-      - name: Setup KVM
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils
-          sudo modprobe kvm
-          sudo modprobe kvm_intel || sudo modprobe kvm_amd
-          sudo chown $USER /dev/kvm
+  #     # VMビルドとテスト
+  #     - name: Setup KVM
+  #       run: |
+  #         sudo apt-get update
+  #         sudo apt-get install -y qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils
+  #         sudo modprobe kvm
+  #         sudo modprobe kvm_intel || sudo modprobe kvm_amd
+  #         sudo chown $USER /dev/kvm
 
-      - name: Build and test VM
-        run: |
-          nix build .#nixosConfigurations.nixos.config.system.build.vm
-          timeout 300 ./result/bin/run-nixos-vm -nographic || {
-            if [ $? -eq 124 ]; then
-              echo "VM test completed (timeout after 5 minutes)"
-              exit 0
-            else
-              echo "VM test failed"
-              exit 1
-            fi
-          }
+  #     - name: Build and test VM
+  #       run: |
+  #         nix build .#nixosConfigurations.nixos.config.system.build.vm
+  #         timeout 300 ./result/bin/run-nixos-vm -nographic || {
+  #           if [ $? -eq 124 ]; then
+  #             echo "VM test completed (timeout after 5 minutes)"
+  #             exit 0
+  #           else
+  #             echo "VM test failed"
+  #             exit 1
+  #           fi
+  #         }
 
-      - name: List build output files
-        run: ls -la
+  #     - name: List build output files
+  #       run: ls -la
