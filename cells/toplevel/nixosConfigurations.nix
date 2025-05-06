@@ -39,8 +39,7 @@
 
     imports = [
       ./hardwareConfigurations/homeMachine.nix
-      inputs.cells.core.ciNixosProfiles.default
-      inputs.cells.core.ciNixosProfiles.optimise
+      inputs.cells.core.ciNixosProfiles.ciMachine
     ];
 
   };
