@@ -40,6 +40,7 @@
     imports = [
       ./hardwareConfigurations/homeMachine.nix
       inputs.cells.core.ciNixosProfiles.ciMachine
+      inputs.nixpkgs.nixosModules.notDetected
     ];
 
   };
