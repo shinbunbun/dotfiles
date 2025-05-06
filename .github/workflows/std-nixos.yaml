@@ -41,7 +41,7 @@ jobs:
       #   with:
       #     nixbuild_ssh_key: ${{ secrets.SSH_PRIVATE_KEY }}
       #     generate_summary_for: job
-      - uses: shinbunbun/std-action/discover@main
+      - uses: shinbunbun/std-action/discover@shinbunbun
         id: discovery
 
   debug:
