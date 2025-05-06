@@ -41,8 +41,5 @@
       ./hardwareConfigurations/homeMachine.nix
       inputs.cells.core.ciNixosProfiles.ciMachine
     ];
-
-    # CI用の設定を追加
-    ci.build-vm-with-bootloader = true;
   };
 }

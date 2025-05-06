@@ -4,13 +4,13 @@ name: std CI/CD(NixOS)
 on:
   push:
   pull_request:
-  workflow_dispatch:
-    inputs:
-      run_vm_test:
-        description: 'Run VM test'
-        required: true
-        type: boolean
-        default: false
+  # workflow_dispatch:
+  #   inputs:
+  #     run_vm_test:
+  #       description: 'Run VM test'
+  #       required: true
+  #       type: boolean
+  #       default: false
 
 permissions:
   id-token: write
