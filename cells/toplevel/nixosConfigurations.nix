@@ -41,5 +41,14 @@
       ./hardwareConfigurations/homeMachine.nix
       inputs.cells.core.ciNixosProfiles.ciMachine
     ];
+
+    # VMビルドの設定
+    virtualisation.vmVariant = {
+      virtualisation = {
+        memorySize = 2048;
+        cores = 2;
+        graphics = false;
+      };
+    };
   };
 }
