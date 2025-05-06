@@ -2,8 +2,23 @@
 { inputs, cell }:
 {
   ciMachine = { config, pkgs, lib, ... }: {
-    imports = [ ./base.nix ];
-    
+    # 基本的なシステム設定
+    system.stateVersion = "24.05";
+    nix.settings.experimental-features = [ "nix-command" "flakes" ];
+
+    # ブートローダーの設定
+    boot.loader = {
+      systemd-boot.enable = true;
+      efi.canTouchEfiVariables = true;
+    };
+
+    # ネットワーク設定
+    networking = {
+      hostName = "ciMachine";
+      useDHCP = true;
+      firewall.enable = false;
+    };
+
     # ユーザー設定
     users.users.bunbun = {
       isNormalUser = true;
@@ -18,6 +33,22 @@
       automatic = true;
       dates = "weekly";
       options = "--delete-older-than 30d";
+    };
+
+    # VMビルドの設定
+    virtualisation.vmVariant = {
+      virtualisation = {
+        memorySize = 2048;
+        cores = 2;
+        graphics = false;
+      };
+    };
+
+    # VMビルドの設定
+    system.build = {
+      vmWithBootLoader = inputs.nixpkgs.lib.mkForce (inputs.nixpkgs.lib.mkVMOverride {
+        inherit (inputs.nixpkgs.lib) mkForce;
+      });
     };
   };
 }
