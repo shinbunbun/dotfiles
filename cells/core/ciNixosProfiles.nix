@@ -36,7 +36,7 @@
     };
 
     # VMビルドの設定
-    virtualisation.vmVariant = {
+    virtualisation.vmVariantWithBootLoader = {
       virtualisation = {
         memorySize = 2048;
         cores = 2;
