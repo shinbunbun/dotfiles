@@ -34,9 +34,6 @@
             src = pkgs.nix-zsh-completions.src;
           }
         ];
-        shellAliases = {
-          ls = "lsd";
-        };
       };
 
       # LSD config
