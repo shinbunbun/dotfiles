@@ -77,6 +77,7 @@
           with hive.blockTypes;
           [
             (functions "nixosProfiles")
+            (functions "ciNixosProfiles")
             (functions "darwinProfiles")
             (functions "homeProfiles")
             # (hive.blockTypes.nixosConfigurations)
