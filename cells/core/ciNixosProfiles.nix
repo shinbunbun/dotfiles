@@ -43,12 +43,5 @@
         graphics = false;
       };
     };
-
-    # VMビルドの設定
-    system.build = {
-      vmWithBootLoader = inputs.nixpkgs.lib.mkForce (inputs.nixpkgs.lib.mkVMOverride {
-        inherit (inputs.nixpkgs.lib) mkForce;
-      });
-    };
   };
 }
