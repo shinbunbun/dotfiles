@@ -90,13 +90,15 @@ jobs:
     name: ${{ matrix.target.jobName }}
     runs-on: ubuntu-latest
     if: fromJSON(needs.discover.outputs.hits).nixosConfigurations.build != '{}' &&
-      fromJSON(needs.discover.outputs.hits).nixosConfigurations.build != '' &&
-      ${{ matrix.target.name  == 'ciMachine' }}
+      fromJSON(needs.discover.outputs.hits).nixosConfigurations.build != ''
     strategy:
       matrix:
         target: ${{ fromJSON(needs.discover.outputs.hits).nixosConfigurations.build }}
     steps:
       - uses: actions/checkout@v3
+      - name: Skip if target is not ciMachine
+        if: matrix.target.name != 'ciMachine'
+        run: exit 0
       - uses: nixbuild/nix-quick-install-action@master
       - uses: nix-community/cache-nix-action@v6
         with:
