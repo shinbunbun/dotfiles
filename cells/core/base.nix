@@ -83,4 +83,23 @@ in
     kubectl
     kubernetes
   ];
+
+  virtualisation.vmVariantWithBootLoader = {
+    virtualisation = {
+      memorySize = 2048;
+      cores = 2;
+      graphics = false;
+    };
+  };
+
+  sops = {
+    defaultSopsFile = ../secrets/ssh-keys.yaml;
+    age.keyFile = "/var/lib/sops-nix/key.txt";
+    secrets."ssh_keys/bunbun" = {
+      owner = "bunbun";
+    };
+  };
+  users.users.bunbun.openssh.authorizedKeys.keyFiles = [
+    config.sops.secrets."ssh_keys/bunbun".path
+  ];
 }
