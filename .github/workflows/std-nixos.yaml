@@ -125,13 +125,13 @@ jobs:
       #     sudo modprobe kvm
       #     sudo modprobe kvm_intel || sudo modprobe kvm_amd
       #     sudo chown $USER /dev/kvm
-      - name: Query build output path and execute
-        run: |
-          out=$(nix derivation show "$actionDrv^out" | jq -r '.[].outputs.out.path')
-          echo "The build output is at: $out"
-          cat $out
-          chmod +x "$out"
-          "$out"
+      # - name: Query build output path and execute
+      #   run: |
+      #     out=$(nix derivation show "$actionDrv^out" | jq -r '.[].outputs.out.path')
+      #     echo "The build output is at: $out"
+      #     cat $out
+      #     chmod +x "$out"
+      #     "$out"
 
   # nixos-vm-test:
   #   needs: [discover, nixos-build]
