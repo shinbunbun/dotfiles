@@ -23,15 +23,22 @@ in
       };
     */
 
-    imports = [
-      inputs.cells.core.nixosProfiles.default
-      inputs.cells.core.nixosProfiles.optimise
-      inputs.sops-nix.nixosModules.sops
-    ] ++ (if isVM then [
-      inputs.cells.core.nixosProfiles.vm
-    ] else [
-      ./hardwareConfigurations/homeMachine.nix
-    ]);
+    imports =
+      [
+        inputs.cells.core.nixosProfiles.default
+        inputs.cells.core.nixosProfiles.optimise
+        inputs.sops-nix.nixosModules.sops
+      ]
+      ++ (
+        if isVM then
+          [
+            inputs.cells.core.nixosProfiles.vm
+          ]
+        else
+          [
+            ./hardwareConfigurations/homeMachine.nix
+          ]
+      );
   };
 
   # ciMachine = {
