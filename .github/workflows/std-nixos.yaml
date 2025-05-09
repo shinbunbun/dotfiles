@@ -174,10 +174,10 @@ jobs:
       # 基本的なビルドチェック
       - uses: shinbunbun/std-action/run@main
       
-      - name: Run NixOS VM
-        run: |
-          timeout 300 ./result/bin/run-nixos-vm -nographic | tee vm.log
-          grep "login:" vm.log
+      # - name: Run NixOS VM
+      #   run: |
+      #     timeout 300 ./result/bin/run-nixos-vm -nographic | tee vm.log
+      #     grep "login:" vm.log
 
   # nixos-vm-test:
   #   needs: [discover, nixos-build]

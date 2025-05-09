@@ -107,7 +107,7 @@
                   }
                 )
                 (darwinConfigurations // { ci.build = true; })
-                (devshells "shells")
+                (devshells "shells" { ci.build = true; })
               ];
           }
           {
