@@ -1,5 +1,8 @@
 # cells/core/nixosProfiles.nix
 { inputs, cell }:
+let
+  isVM = builtins.getEnv "NIXOS_BUILD_VM" == "1";
+in
 {
   default =
     {
@@ -51,4 +54,32 @@
       options = "--delete-older-than 30d";
     };
   };
+  vm =
+    {
+      lib,
+      ...
+    }:
+    {
+      boot.initrd.availableKernelModules = lib.mkDefault (
+        if isVM then
+          [
+            "virtio_pci"
+            "virtio_blk"
+          ]
+        else
+          [ ]
+      );
+
+      # ルートファイルシステムも VM なら /dev/vda1 を使う
+      fileSystems."/" = {
+        device = "/dev/vda1";
+        fsType = "ext4";
+      };
+
+      # /boot EFI パーティション
+      fileSystems."/boot" = {
+        device = "/dev/vda2";
+        fsType = "vfat";
+      };
+    };
 }
