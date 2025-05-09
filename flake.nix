@@ -59,73 +59,80 @@
     # let
     # customSelf = self // { renamer = cell: target: target; };
     # base =
-    std.growOn
-      {
-        inherit inputs;
-        nixpkgsConfig = {
-          allowUnfree = true;
-        };
-        systems = [
-          "x86_64-linux"
-          "aarch64-linux"
-          "x86_64-darwin"
-          "aarch64-darwin"
-        ];
-        cellsFrom = ./cells;
-        cellBlocks =
-          with std.blockTypes;
-          with hive.blockTypes;
-          [
-            (functions "nixosProfiles")
-            (functions "ciNixosProfiles")
-            (functions "darwinProfiles")
-            (functions "homeProfiles")
-            # (hive.blockTypes.nixosConfigurations)
-            # (darwinConfigurations // { ci.build = true; })
-            # (devshells "shells" { ci.build = true; })
-            /* (
-              nixosConfigurations
-              // {
-                ci.build = true;
-                transform =
-                  config:
-                  config
+    let
+      base =
+        std.growOn
+          {
+            inherit inputs;
+            nixpkgsConfig = {
+              allowUnfree = true;
+            };
+            systems = [
+              "x86_64-linux"
+              "aarch64-linux"
+              "x86_64-darwin"
+              "aarch64-darwin"
+            ];
+            cellsFrom = ./cells;
+            cellBlocks =
+              with std.blockTypes;
+              with hive.blockTypes;
+              [
+                (functions "nixosProfiles")
+                (functions "ciNixosProfiles")
+                (functions "darwinProfiles")
+                (functions "homeProfiles")
+                # (hive.blockTypes.nixosConfigurations)
+                # (darwinConfigurations // { ci.build = true; })
+                # (devshells "shells" { ci.build = true; })
+                /*
+                  (
+                    nixosConfigurations
+                    // {
+                      ci.build = true;
+                      transform =
+                        config:
+                        config
+                        // {
+                          targetDrv = config.config.system.build.toplevel;
+                        };
+                    }
+                  )
+                */
+                (
+                  nixosConfigurations
                   // {
-                    targetDrv = config.config.system.build.toplevel;
-                  };
-              }
-            ) */
-            (nixosConfigurations // { ci.build-vm-with-bootloader = true; ci.test = true; })
-            (darwinConfigurations // { ci.build = true; })
-            (devshells "shells")
-          ];
-      }
-      {
-        # nixosConfigurations = hive.collect.__functor customSelf customSelf "nixosConfigurations";
-        /* nixosConfigurations =
-          let
-            collected = hive.collect self "nixosConfigurations";
-          in
-          builtins.mapAttrs (
-            name: config:
-            config
-            // {
-              # targetDrv = builtins.trace "nixosConfigurations: ${builtins.typeOf (config.config.system.build.toplevel)}" config.config.system.build.toplevel;
-              targetDrv = config.config.system.build.toplevel;
-            }
-          ) collected; */
-        nixosConfigurations = hive.collect self "nixosConfigurations";
-        darwinConfigurations = hive.collect self "darwinConfigurations";
-        devShells = hive.harvest self [
-          "repo"
-          "shells"
-        ];
-      };
-  # ② growOn の結果に formatter をマージ
-  /*
-    in
-    base
-    // {
+                    ci.build-vm-with-bootloader = true;
+                    ci.test = true;
+                  }
+                )
+                (darwinConfigurations // { ci.build = true; })
+                (devshells "shells")
+              ];
+          }
+          {
+            # nixosConfigurations = hive.collect.__functor customSelf customSelf "nixosConfigurations";
+            /*
+              nixosConfigurations =
+              let
+                collected = hive.collect self "nixosConfigurations";
+              in
+              builtins.mapAttrs (
+                name: config:
+                config
+                // {
+                  # targetDrv = builtins.trace "nixosConfigurations: ${builtins.typeOf (config.config.system.build.toplevel)}" config.config.system.build.toplevel;
+                  targetDrv = config.config.system.build.toplevel;
+                }
+              ) collected;
+            */
+            nixosConfigurations = hive.collect self "nixosConfigurations";
+            darwinConfigurations = hive.collect self "darwinConfigurations";
+            devShells = hive.harvest self [
+              "repo"
+              "shells"
+            ];
+          };
       formatter = flake-utils.lib.eachDefaultSystemMap (
         system:
         let
@@ -133,6 +140,6 @@
         in
         pkgs.nixfmt-tree
       );
-    };
-  */
+    in
+    base // { inherit formatter; };
 }
