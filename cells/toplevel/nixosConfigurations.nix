@@ -6,6 +6,9 @@
   inputs,
   cell,
 }:
+let
+  isVM = builtins.getEnv "NIXOS_BUILD_VM" == "1";
+in
 {
   homeMachine = {
     bee = {
@@ -21,11 +24,14 @@
     */
 
     imports = [
-      ./hardwareConfigurations/homeMachine.nix
       inputs.cells.core.nixosProfiles.default
       inputs.cells.core.nixosProfiles.optimise
       inputs.sops-nix.nixosModules.sops
-    ];
+    ] ++ (if isVM then [
+      inputs.cells.core.nixosProfiles.vm
+    ] else [
+      ./hardwareConfigurations/homeMachine.nix
+    ]);
   };
 
   # ciMachine = {
