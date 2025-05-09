@@ -86,6 +86,7 @@ in
     kompose
     kubectl
     kubernetes
+    polkit
   ];
 
   virtualisation.vmVariantWithBootLoader = {
