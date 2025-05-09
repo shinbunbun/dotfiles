@@ -95,13 +95,13 @@ in
     };
   };
 
-  # sops = {
-  #   defaultSopsFile = ../secrets/ssh-keys.yaml;
-  #   age.keyFile = "/var/lib/sops-nix/key.txt";
-  #   secrets."ssh_keys/bunbun" = {
-  #     owner = "bunbun";
-  #   };
-  # };
+  sops = {
+    defaultSopsFile = ../secrets/ssh-keys.yaml;
+    age.keyFile = "/var/lib/sops-nix/key.txt";
+    secrets."ssh_keys/bunbun" = {
+      owner = "bunbun";
+    };
+  };
   # users.users.bunbun.openssh.authorizedKeys.keyFiles = [
   #   config.sops.secrets."ssh_keys/bunbun".path
   # ];
