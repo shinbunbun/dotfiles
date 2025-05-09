@@ -1,4 +1,4 @@
-name: std CI/CD(macOS)
+name: std CI(macOS)
 
 on: [push, pull_request]
 
