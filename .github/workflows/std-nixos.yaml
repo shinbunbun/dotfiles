@@ -113,6 +113,9 @@ jobs:
           mkdir -p ~/.config/sops/age
           echo "$SOPS_AGE_KEY" | base64 -d > ~/.config/sops/age/keys.txt
           export SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt
+          
+      # 基本的なビルドチェック
+      - uses: shinbunbun/std-action/run@main
 
   nixos-build-vm:
     needs: [discover, nixos-test]
