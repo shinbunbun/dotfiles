@@ -115,5 +115,5 @@ in
     '';
   };
 
-  services.polkit.enable = true;
+  security.polkit.enable = true;
 }
