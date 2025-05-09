@@ -97,7 +97,7 @@ in
   };
 
   sops = {
-    defaultSopsFile = "${inputs.secrets}/ssh-keys.yaml";
+    defaultSopsFile = "${inputs.self}/secrets/ssh-keys.yaml";
     age.keyFile = "/var/lib/sops-nix/key.txt";
     secrets."ssh_keys/bunbun" = {
       owner = "bunbun";
