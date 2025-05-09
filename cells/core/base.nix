@@ -3,6 +3,7 @@
   config,
   pkgs,
   lib,
+  inputs,
   ...
 }:
 let
@@ -96,7 +97,7 @@ in
   };
 
   sops = {
-    defaultSopsFile = ../../secrets/ssh-keys.yaml;
+    defaultSopsFile = "${inputs.secrets}/ssh-keys.yaml";
     age.keyFile = "/var/lib/sops-nix/key.txt";
     secrets."ssh_keys/bunbun" = {
       owner = "bunbun";
