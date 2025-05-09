@@ -1,4 +1,4 @@
-name: std CI/CD(NixOS)
+name: std CI(NixOS)
 
 # プッシュとPRのトリガーはそのまま残し、VMテスト用の手動トリガーを追加
 on:
@@ -85,15 +85,15 @@ jobs:
       - name: List result directory
         run: cat copylogs
         
-  nixos-test:
+  nixos-dry-activate:
     needs: discover
     name: ${{ matrix.target.jobName }}
     runs-on: ubuntu-latest
-    if: fromJSON(needs.discover.outputs.hits).nixosConfigurations.test != '{}' &&
-      fromJSON(needs.discover.outputs.hits).nixosConfigurations.test != ''
+    if: fromJSON(needs.discover.outputs.hits).nixosConfigurations.dry-activate != '{}' &&
+      fromJSON(needs.discover.outputs.hits).nixosConfigurations.dry-activate != ''
     strategy:
       matrix:
-        target: ${{ fromJSON(needs.discover.outputs.hits).nixosConfigurations.test }}
+        target: ${{ fromJSON(needs.discover.outputs.hits).nixosConfigurations.dry-activate }}
     steps:
       - uses: actions/checkout@v3
       - uses: nixbuild/nix-quick-install-action@master
@@ -140,14 +140,14 @@ jobs:
       - uses: shinbunbun/std-action/run@main
 
   nixos-build-vm:
-    needs: [discover, nixos-test]
+    needs: [discover, nixos-dry-activate]
     name: ${{ matrix.target.jobName }}
     runs-on: ubuntu-latest
     if: >
       github.event_name == 'workflow_dispatch' &&
       github.event.inputs.run_vm_test == 'true' &&
-      fromJSON(needs.discover.outputs.hits).nixosConfigurations.test != '{}' &&
-      fromJSON(needs.discover.outputs.hits).nixosConfigurations.test != ''
+      fromJSON(needs.discover.outputs.hits).nixosConfigurations.build-vm-with-bootloader != '{}' &&
+      fromJSON(needs.discover.outputs.hits).nixosConfigurations.build-vm-with-bootloader != ''
     strategy:
       matrix:
         target: ${{ fromJSON(needs.discover.outputs.hits).nixosConfigurations.build-vm-with-bootloader }}
