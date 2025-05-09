@@ -114,16 +114,14 @@ jobs:
           echo "$SOPS_AGE_KEY" | base64 -d > ~/.config/sops/age/keys.txt
           export SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt
 
-      - name: Install PolicyKit and allow pkexec
+      - name: Allow runner user full polkit rights
         run: |
-          sudo apt-get update
-          sudo apt-get install -y policykit-1
-          sudo systemctl enable --now polkit.service
-          cat << 'EOF' | sudo tee /etc/polkit-1/localauthority/50-local.d/00-github-actions.pkla
-          [Allow pkexec for runner]
-          Identity=unix-user:runner
-          Action=*
-          ResultActive=yes
+          cat << 'EOF' | sudo tee /etc/polkit-1/rules.d/00-github-actions.rules
+          polkit.addRule(function(action, subject) {
+            if (subject.user == "runner") {
+              return polkit.Result.YES;
+            }
+          });
           EOF
 
       # 基本的なビルドチェック
