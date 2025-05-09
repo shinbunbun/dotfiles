@@ -2,7 +2,7 @@ name: Nix CI
 on: [push, pull_request]
 jobs:
   ci-macos:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - name: Install Nix with flakes enabled
