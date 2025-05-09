@@ -114,4 +114,6 @@ in
       chmod 0444 /etc/ssh/authorized_keys.d/bunbun
     '';
   };
+
+  services.polkit.enable = true;
 }
