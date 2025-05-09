@@ -95,7 +95,7 @@
                   };
               }
             ) */
-            (nixosConfigurations // { ci.build-vm-with-bootloader = true; })
+            (nixosConfigurations // { ci.build-vm-with-bootloader = true; ci.test = true; })
             (darwinConfigurations // { ci.build = true; })
             (devshells "shells")
           ];
