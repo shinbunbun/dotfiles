@@ -60,25 +60,18 @@ in
       ...
     }:
     {
-      boot.initrd.availableKernelModules = lib.mkDefault (
-        if isVM then
-          [
-            "virtio_pci"
-            "virtio_blk"
-          ]
-        else
-          [ ]
-      );
+      boot.initrd.availableKernelModules = lib.mkDefault [
+        "virtio_pci"
+        "virtio_blk"
+      ];
 
-      # ルートファイルシステムも VM なら /dev/vda1 を使う
       fileSystems."/" = {
-        device = "/dev/vda1";
+        device = "/dev/disk/by-label/nixos-root";
         fsType = "ext4";
       };
 
-      # /boot EFI パーティション
       fileSystems."/boot" = {
-        device = "/dev/vda2";
+        device = "/dev/disk/by-label/nixos-boot";
         fsType = "vfat";
       };
     };
