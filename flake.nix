@@ -44,6 +44,8 @@
     flake-utils = {
       url = "github:numtide/flake-utils";
     };
+
+    secrets.url = "path:./secrets";
   };
 
   outputs =

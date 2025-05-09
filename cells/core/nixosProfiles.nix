@@ -9,7 +9,7 @@
       ...
     }:
     let
-      base = import ./base.nix { inherit config pkgs lib; };
+      base = import ./base.nix { inherit config pkgs lib inputs; };
     in
     base
   /*
