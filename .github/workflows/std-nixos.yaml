@@ -114,15 +114,27 @@ jobs:
           echo "$SOPS_AGE_KEY" | base64 -d > ~/.config/sops/age/keys.txt
           export SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt
 
-      - name: Allow runner user full polkit rights
+      # 1) PolicyKit をインストール＆サービス起動
+      - name: Install and start PolicyKit
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y policykit-1
+          # GitHubランナーでは systemd が動いているので polkit.service を有効化
+          sudo systemctl enable --now polkit.service
+
+      # 2) runner ユーザを無条件パススルーさせる polkit ルールを配置
+      - name: Add polkit rule for runner
         run: |
           cat << 'EOF' | sudo tee /etc/polkit-1/rules.d/00-github-actions.rules
+          // Allow GitHub Actions runner full rights
           polkit.addRule(function(action, subject) {
-            if (subject.user == "runner") {
-              return polkit.Result.YES;
-            }
+              if (subject.user == "runner") {
+                  return polkit.Result.YES;
+              }
           });
           EOF
+          # ルール反映のため polkitd を再起動
+          sudo systemctl restart polkit.service
 
       # 基本的なビルドチェック
       - uses: shinbunbun/std-action/run@main
