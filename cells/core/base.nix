@@ -90,12 +90,12 @@ in
   ];
 
   virtualisation = {
-    useEFIBoot = true;
     vmVariantWithBootLoader = {
       virtualisation = {
         memorySize = 2048;
         cores = 2;
         graphics = false;
+        useEFIBoot = true;
       };
     };
   };
