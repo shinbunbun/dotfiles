@@ -8,6 +8,7 @@
 }:
 let
   isVM = builtins.getEnv "NIXOS_BUILD_VM" == "1";
+  homeMachineUsername = "bunbun";
 in
 {
   homeMachine = {
@@ -28,9 +29,6 @@ in
         inputs.cells.core.nixosProfiles.default
         inputs.cells.core.nixosProfiles.optimise
 
-        inputs.cells.core.homeProfiles.default
-        inputs.cells.shinbunbun.homeProfiles.default
-
         inputs.sops-nix.nixosModules.sops
       ]
       ++ (
@@ -43,6 +41,13 @@ in
             ./hardwareConfigurations/homeMachine.nix
           ]
       );
+
+    home-manager.users.${homeMachineUsername} = {
+      imports = [
+        inputs.cells.core.homeProfiles.default
+        inputs.cells.shinbunbun.homeProfiles.default
+      ];
+    };
   };
 
   # ciMachine = {
