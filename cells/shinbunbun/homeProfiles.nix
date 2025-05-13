@@ -8,7 +8,6 @@
     {
       home.packages = with pkgs; [
         gh
-        cocoapods
         llvm
         nerd-fonts.fira-code
         nil

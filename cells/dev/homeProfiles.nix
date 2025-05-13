@@ -96,6 +96,14 @@
       ];
     };
 
+  cocoapods =
+    { pkgs, ... }:
+    {
+      home.packages = with pkgs; [
+        cocoapods
+      ];
+    };
+
   /*
     graphql =
     { pkgs, ... }: {
