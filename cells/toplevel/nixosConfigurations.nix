@@ -29,6 +29,7 @@ in
         inputs.cells.core.nixosProfiles.optimise
 
         inputs.cells.core.homeProfiles.default
+        inputs.cells.shinbunbun.homeProfiles.default
 
         inputs.sops-nix.nixosModules.sops
       ]
