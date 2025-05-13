@@ -27,6 +27,9 @@ in
       [
         inputs.cells.core.nixosProfiles.default
         inputs.cells.core.nixosProfiles.optimise
+
+        inputs.cells.core.homeProfiles.default
+
         inputs.sops-nix.nixosModules.sops
       ]
       ++ (
