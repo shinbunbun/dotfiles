@@ -3,6 +3,7 @@ name: std CI(NixOS)
 # プッシュとPRのトリガーはそのまま残し、VMテスト用の手動トリガーを追加
 on:
   push:
+  pull_request:
   # workflow_dispatch:
   #   inputs:
   #     run_vm_test:
