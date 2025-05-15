@@ -29,6 +29,7 @@ in
         inputs.cells.core.nixosProfiles.default
         inputs.cells.core.nixosProfiles.optimise
 
+        inputs.home-manager.nixosModules.home-manager
         inputs.sops-nix.nixosModules.sops
       ]
       ++ (
@@ -42,16 +43,20 @@ in
           ]
       );
 
-    home-manager.users.${homeMachineUsername} = {
-      imports = [
-        inputs.cells.core.homeProfiles.default
-        inputs.cells.shinbunbun.homeProfiles.default
+    home-manager = {
+      useGlobalPkgs = true;
+      useUserPackages = true;
+      users.${homeMachineUsername} = {
+        imports = [
+          inputs.cells.core.homeProfiles.default
+          inputs.cells.shinbunbun.homeProfiles.default
 
-        inputs.cells.dev.homeProfiles.git
-        inputs.cells.dev.homeProfiles.zsh
-        inputs.cells.dev.homeProfiles.vim
-        inputs.cells.dev.homeProfiles.manage_secrets
-      ];
+          inputs.cells.dev.homeProfiles.git
+          inputs.cells.dev.homeProfiles.zsh
+          inputs.cells.dev.homeProfiles.vim
+          inputs.cells.dev.homeProfiles.manage_secrets
+        ];
+      };
     };
   };
 
