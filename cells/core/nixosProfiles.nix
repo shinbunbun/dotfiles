@@ -3,6 +3,7 @@
 let
   kubeMasterIP = "192.168.1.3";
   kubeMasterHostname = "api.kube";
+  isVM = builtins.getEnv "NIXOS_BUILD_VM" == "1";
 in
 {
   default =
@@ -131,16 +132,17 @@ in
     };
   };
   sops =
-    { config, ... }:
+    { config, lib, ... }:
     {
       sops = {
         defaultSopsFile = "${inputs.self}/secrets/ssh-keys.yaml";
-        age.keyFile = "/var/lib/sops-nix/key.txt";
+        age.keyFile = lib.mkDefault "/var/lib/sops-nix/key.txt";
         secrets."ssh_keys/bunbun" = {
           owner = "bunbun";
+          mode = "0440";
         };
       };
-      users.users.bunbun.openssh.authorizedKeys.keyFiles = [
+      users.users.bunbun.openssh.authorizedKeys.keyFiles = lib.mkIf (!isVM) [
         config.sops.secrets."ssh_keys/bunbun".path
       ];
     };
