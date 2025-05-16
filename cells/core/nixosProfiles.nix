@@ -101,14 +101,6 @@ in
           };
         };
       };
-
-      sops = {
-        defaultSopsFile = "${inputs.self}/secrets/ssh-keys.yaml";
-        age.keyFile = "/var/lib/sops-nix/key.txt";
-        secrets."ssh_keys/bunbun" = {
-          owner = "bunbun";
-        };
-      };
       # users.users.bunbun.openssh.authorizedKeys.keyFiles = [
       #   config.sops.secrets."ssh_keys/bunbun".path
       # ];
@@ -128,11 +120,6 @@ in
       #   '';
       # };
 
-      # 代替方法として、直接authorized_keysを設定する
-      users.users.bunbun.openssh.authorizedKeys.keyFiles = [
-        config.sops.secrets."ssh_keys/bunbun".path
-      ];
-
       security.polkit.enable = true;
     };
   optimise = {
@@ -143,6 +130,20 @@ in
       options = "--delete-older-than 30d";
     };
   };
+  sops =
+    { config, ... }:
+    {
+      sops = {
+        defaultSopsFile = "${inputs.self}/secrets/ssh-keys.yaml";
+        age.keyFile = "/var/lib/sops-nix/key.txt";
+        secrets."ssh_keys/bunbun" = {
+          owner = "bunbun";
+        };
+      };
+      users.users.bunbun.openssh.authorizedKeys.keyFiles = [
+        config.sops.secrets."ssh_keys/bunbun".path
+      ];
+    };
   vm =
     {
       lib,

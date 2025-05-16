@@ -40,6 +40,7 @@ in
         else
           [
             ./hardwareConfigurations/homeMachine.nix
+            inputs.cells.core.nixosProfiles.sops
           ]
       );
 
