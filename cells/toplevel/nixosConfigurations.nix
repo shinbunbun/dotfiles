@@ -28,19 +28,20 @@ in
       [
         inputs.cells.core.nixosProfiles.default
         inputs.cells.core.nixosProfiles.optimise
-
         inputs.home-manager.nixosModules.home-manager
       ]
       ++ (
         if isVM then
+          # VMビルド時はSOPS関連のモジュールをスキップ
           [
             inputs.cells.core.nixosProfiles.vm
           ]
         else
           [
             ./hardwareConfigurations/homeMachine.nix
-            inputs.cells.core.nixosProfiles.sops
+            # 実環境のみSOPS関連のモジュールをインポート
             inputs.sops-nix.nixosModules.sops
+            inputs.cells.core.nixosProfiles.sops
           ]
       );
 

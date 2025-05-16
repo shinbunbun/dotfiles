@@ -53,9 +53,10 @@ in
           PermitRootLogin = "no";
           PasswordAuthentication = false;
         };
-        # extraConfig = ''
-        #   AuthorizedKeysFile /etc/ssh/authorized_keys.d/%u
-        # '';
+        # VMビルド時はauthorizedKeysFileを指定しない
+        extraConfig = lib.mkIf (!isVM) ''
+          AuthorizedKeysFile /etc/ssh/authorized_keys.d/%u
+        '';
       };
       services.fail2ban = {
         enable = true;
@@ -80,7 +81,8 @@ in
           "docker"
         ];
         shell = pkgs.zsh;
-        # authorizedKeys.keyFilesはprofileごとに上書き
+        # VMの場合はダミーの空のキーを設定
+        openssh.authorizedKeys.keys = lib.mkIf (isVM) [ "" ];
       };
       programs.zsh.enable = true;
       environment.systemPackages = with pkgs; [
@@ -134,17 +136,36 @@ in
   sops =
     { config, lib, ... }:
     {
-      sops = {
-        defaultSopsFile = "${inputs.self}/secrets/ssh-keys.yaml";
-        age.keyFile = lib.mkDefault "/var/lib/sops-nix/key.txt";
-        secrets."ssh_keys/bunbun" = {
-          owner = "bunbun";
-          mode = "0440";
+      # VMモード時はSOPS関連の設定をスキップ
+      config = lib.mkIf (!isVM) {
+        sops = {
+          defaultSopsFile = "${inputs.self}/secrets/ssh-keys.yaml";
+          age.keyFile = "/var/lib/sops-nix/key.txt";
+          secrets."ssh_keys/bunbun" = {
+            owner = "bunbun";
+            mode = "0440";
+          };
+        };
+        users.users.bunbun.openssh.authorizedKeys.keyFiles = [
+          config.sops.secrets."ssh_keys/bunbun".path
+        ];
+        # アクティベーションスクリプトでのコピー
+        system.activationScripts.copyBunbunAuthorizedKeys = {
+          text = ''
+            echo "認証鍵のコピーを開始します..."
+            mkdir -p /etc/ssh/authorized_keys.d
+            if [ -f "${config.sops.secrets."ssh_keys/bunbun".path}" ]; then
+              echo "ソースファイルが存在します: ${config.sops.secrets."ssh_keys/bunbun".path}"
+              cp "${config.sops.secrets."ssh_keys/bunbun".path}" /etc/ssh/authorized_keys.d/bunbun
+              chmod 0444 /etc/ssh/authorized_keys.d/bunbun
+              echo "認証鍵のコピーが完了しました"
+              ls -la /etc/ssh/authorized_keys.d/bunbun
+            else
+              echo "エラー: ソースファイルが見つかりません: ${config.sops.secrets."ssh_keys/bunbun".path}"
+            fi
+          '';
         };
       };
-      users.users.bunbun.openssh.authorizedKeys.keyFiles = lib.mkIf (!isVM) [
-        config.sops.secrets."ssh_keys/bunbun".path
-      ];
     };
   vm =
     {
