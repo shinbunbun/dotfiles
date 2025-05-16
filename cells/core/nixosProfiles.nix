@@ -129,8 +129,8 @@ in
       # };
 
       # 代替方法として、直接authorized_keysを設定する
-      users.users.bunbun.openssh.authorizedKeys.keyFiles = [ 
-        config.sops.secrets."ssh_keys/bunbun".path 
+      users.users.bunbun.openssh.authorizedKeys.keyFiles = [
+        config.sops.secrets."ssh_keys/bunbun".path
       ];
 
       security.polkit.enable = true;
