@@ -30,7 +30,6 @@ in
         inputs.cells.core.nixosProfiles.optimise
 
         inputs.home-manager.nixosModules.home-manager
-        inputs.sops-nix.nixosModules.sops
       ]
       ++ (
         if isVM then
@@ -41,6 +40,7 @@ in
           [
             ./hardwareConfigurations/homeMachine.nix
             inputs.cells.core.nixosProfiles.sops
+            inputs.sops-nix.nixosModules.sops
           ]
       );
 
