@@ -3,7 +3,6 @@
 let
   kubeMasterIP = "192.168.1.3";
   kubeMasterHostname = "api.kube";
-  isVM = builtins.getEnv "NIXOS_BUILD_VM" == "1";
 in
 {
   default =
@@ -45,9 +44,18 @@ in
         };
       };
       time.timeZone = "Asia/Tokyo";
-      
-      # SSHサービスはprofileごとに設定
-      
+      services.openssh = {
+        enable = true;
+        ports = [ 31415 ];
+        settings = {
+          X11Forwarding = true;
+          PermitRootLogin = "no";
+          PasswordAuthentication = false;
+        };
+        extraConfig = ''
+          AuthorizedKeysFile /etc/ssh/authorized_keys.d/%u
+        '';
+      };
       services.fail2ban = {
         enable = true;
         ignoreIP = [
@@ -71,6 +79,7 @@ in
           "docker"
         ];
         shell = pkgs.zsh;
+        # authorizedKeys.keyFilesはprofileごとに上書き
       };
       programs.zsh.enable = true;
       environment.systemPackages = with pkgs; [
@@ -92,69 +101,9 @@ in
           };
         };
       };
-
-      security.polkit.enable = true;
-    };
-  optimise = {
-    nix.settings.auto-optimise-store = true;
-    nix.gc = {
-      automatic = true;
-      dates = "weekly";
-      options = "--delete-older-than 30d";
-    };
-  };
-
-  # 実環境用のSSH設定
-  ssh-real = 
-    { config, ... }:
-    {
-      services.openssh = {
-        enable = true;
-        ports = [ 31415 ];
-        settings = {
-          X11Forwarding = true;
-          PermitRootLogin = "no";
-          PasswordAuthentication = false;
-        };
-        extraConfig = ''
-          AuthorizedKeysFile /etc/ssh/authorized_keys.d/%u
-        '';
-      };
-    };
-
-  # VMビルド用の簡易SSH設定
-  ssh-vm = 
-    { pkgs, ... }:
-    {
-      services.openssh.enable = false; # VMビルド時はSSHサービス自体を無効化
-      # 以下の設定は services.openssh.enable = false のため、実質的には評価されないか影響が限定的になります
-      services.openssh.ports = [ 31415 ];
-      services.openssh.settings = {
-        X11Forwarding = true;
-        PermitRootLogin = "no";
-        PasswordAuthentication = true; 
-        AuthorizedKeysFile = "/etc/ssh/dummy_authorized_keys_for_vm";
-      };
-      users.users.bunbun.password = "bunbun";
-      users.users.bunbun.openssh.authorizedKeys.keys = [];
-    };
-
-  sops =
-    { config, lib, ... }:
-    {
-      # 実環境用のSOPS設定
-      sops = {
-        defaultSopsFile = "${inputs.self}/secrets/ssh-keys.yaml";
-        age.keyFile = "/var/lib/sops-nix/key.txt";
-        secrets."ssh_keys/bunbun" = {
-          owner = "bunbun";
-          mode = "0440";
-        };
-      };
       users.users.bunbun.openssh.authorizedKeys.keyFiles = [
         config.sops.secrets."ssh_keys/bunbun".path
       ];
-      # アクティベーションスクリプトでのコピー
       system.activationScripts.copyBunbunAuthorizedKeys = {
         text = ''
           echo "認証鍵のコピーを開始します..."
@@ -170,6 +119,30 @@ in
           fi
         '';
       };
+
+      security.polkit.enable = true;
+    };
+  optimise = {
+    nix.settings.auto-optimise-store = true;
+    nix.gc = {
+      automatic = true;
+      dates = "weekly";
+      options = "--delete-older-than 30d";
+    };
+  };
+  sops =
+    { config, ... }:
+    {
+      sops = {
+        defaultSopsFile = "${inputs.self}/secrets/ssh-keys.yaml";
+        age.keyFile = "/var/lib/sops-nix/key.txt";
+        secrets."ssh_keys/bunbun" = {
+          owner = "bunbun";
+        };
+      };
+      users.users.bunbun.openssh.authorizedKeys.keyFiles = [
+        config.sops.secrets."ssh_keys/bunbun".path
+      ];
     };
   vm =
     {
