@@ -102,7 +102,7 @@
                   nixosConfigurations
                   // {
                     ci.build-vm-with-bootloader = true;
-                    ci.dry-activate = true;
+                    ci.build = true;
                   }
                 )
                 (darwinConfigurations // { ci.build = true; })
