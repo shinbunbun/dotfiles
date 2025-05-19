@@ -133,10 +133,14 @@ in
           X11Forwarding = true;
           PermitRootLogin = "no";
           PasswordAuthentication = true; # VMでは簡易化のためパスワード認証を許可
+          # AuthorizedKeysFile のデフォルト値を上書きし、VMビルド時の問題を回避
+          AuthorizedKeysFile = "/etc/ssh/dummy_authorized_keys_for_vm";
         };
       };
       # VMでは簡易的なパスワードを設定
       users.users.bunbun.password = "bunbun";
+      # VMではbunbunユーザーのauthorized keysを空に設定し、関連処理を無効化
+      users.users.bunbun.openssh.authorizedKeys.keys = [];
     };
 
   sops =
