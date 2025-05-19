@@ -109,8 +109,8 @@ in
           owner = "bunbun";
         };
       };
-      users.users.bunbun.openssh.authorizedKeys.keyFiles = [
-        config.sops.secrets."ssh_keys/bunbun".path
+      users.users.bunbun.openssh.authorizedKeys.keys = [
+        config.sops.placeholder."ssh_keys/bunbun"
       ];
       # system.activationScripts.copyBunbunAuthorizedKeys = {
       #   text = ''
