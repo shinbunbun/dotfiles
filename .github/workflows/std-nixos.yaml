@@ -84,6 +84,43 @@ jobs:
         run: ls -la
       - name: List result directory
         run: cat copylogs
+
+    
+  nixos-build:
+    needs: [discover]
+    name: ${{ matrix.target.jobName }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: ${{ fromJSON(needs.discover.outputs.hits).nixosConfigurations.build }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: nixbuild/nix-quick-install-action@master
+      - uses: nix-community/cache-nix-action@v6
+        with:
+          primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
+          restore-prefixes-first-match: nix-${{ runner.os }}-
+          gc-max-store-size-linux: 1G
+          purge: true
+          purge-prefixes: nix-${{ runner.os }}-
+          purge-created: 0
+          purge-primary-key: never
+
+       # Setup SOPS key
+      - name: Setup SOPS
+        run: |
+          mkdir -p ~/.config/sops/age
+          echo "$SOPS_AGE_KEY" | base64 -d > ~/.config/sops/age/keys.txt
+          export SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt
+
+      # 基本的なビルドチェック
+      - uses: shinbunbun/std-action/run@main
+      - name: Query build output path and execute
+        run: |
+          out=$(nix derivation show "$actionDrv^out" | jq -r '.[].outputs.out.path')
+          echo "The build output is at: $out"
+          chmod +x "$out"
+          "$out"
         
   # nixos-dry-activate:
   #   needs: discover
@@ -139,40 +176,40 @@ jobs:
   #     # 基本的なビルドチェック
   #     - uses: shinbunbun/std-action/run@main
 
-  nixos-build-vm:
-    needs: [discover]
-    name: ${{ matrix.target.jobName }}
-    runs-on: ubuntu-latest
-    # if: >
-    #   github.event_name == 'workflow_dispatch' &&
-    #   github.event.inputs.run_vm_test == 'true' &&
-    #   fromJSON(needs.discover.outputs.hits).nixosConfigurations.build-vm-with-bootloader != '{}' &&
-    #   fromJSON(needs.discover.outputs.hits).nixosConfigurations.build-vm-with-bootloader != ''
-    strategy:
-      matrix:
-        target: ${{ fromJSON(needs.discover.outputs.hits).nixosConfigurations.build-vm-with-bootloader }}
-    steps:
-      - uses: actions/checkout@v3
-      - uses: nixbuild/nix-quick-install-action@master
-      - uses: nix-community/cache-nix-action@v6
-        with:
-          primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
-          restore-prefixes-first-match: nix-${{ runner.os }}-
-          gc-max-store-size-linux: 1G
-          purge: true
-          purge-prefixes: nix-${{ runner.os }}-
-          purge-created: 0
-          purge-primary-key: never
+  # nixos-build-vm:
+  #   needs: [discover]
+  #   name: ${{ matrix.target.jobName }}
+  #   runs-on: ubuntu-latest
+  #   # if: >
+  #   #   github.event_name == 'workflow_dispatch' &&
+  #   #   github.event.inputs.run_vm_test == 'true' &&
+  #   #   fromJSON(needs.discover.outputs.hits).nixosConfigurations.build-vm-with-bootloader != '{}' &&
+  #   #   fromJSON(needs.discover.outputs.hits).nixosConfigurations.build-vm-with-bootloader != ''
+  #   strategy:
+  #     matrix:
+  #       target: ${{ fromJSON(needs.discover.outputs.hits).nixosConfigurations.build-vm-with-bootloader }}
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: nixbuild/nix-quick-install-action@master
+  #     - uses: nix-community/cache-nix-action@v6
+  #       with:
+  #         primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
+  #         restore-prefixes-first-match: nix-${{ runner.os }}-
+  #         gc-max-store-size-linux: 1G
+  #         purge: true
+  #         purge-prefixes: nix-${{ runner.os }}-
+  #         purge-created: 0
+  #         purge-primary-key: never
 
-       # Setup SOPS key
-      - name: Setup SOPS
-        run: |
-          mkdir -p ~/.config/sops/age
-          echo "$SOPS_AGE_KEY" | base64 -d > ~/.config/sops/age/keys.txt
-          export SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt
+  #      # Setup SOPS key
+  #     - name: Setup SOPS
+  #       run: |
+  #         mkdir -p ~/.config/sops/age
+  #         echo "$SOPS_AGE_KEY" | base64 -d > ~/.config/sops/age/keys.txt
+  #         export SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt
 
-      # 基本的なビルドチェック
-      - uses: shinbunbun/std-action/run@main
+  #     # 基本的なビルドチェック
+  #     - uses: shinbunbun/std-action/run@main
       
       # - name: Run NixOS VM
       #   run: |
