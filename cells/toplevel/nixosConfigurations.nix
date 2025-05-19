@@ -32,16 +32,18 @@ in
       ]
       ++ (
         if isVM then
-          # VMビルド時はSOPS関連のモジュールをスキップ
+          # VMビルド用の最小限の設定
           [
             inputs.cells.core.nixosProfiles.vm
+            inputs.cells.core.nixosProfiles.ssh-vm
           ]
         else
+          # 実環境用の完全な設定
           [
             ./hardwareConfigurations/homeMachine.nix
-            # 実環境のみSOPS関連のモジュールをインポート
             inputs.sops-nix.nixosModules.sops
             inputs.cells.core.nixosProfiles.sops
+            inputs.cells.core.nixosProfiles.ssh-real
           ]
       );
 
