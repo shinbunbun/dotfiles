@@ -110,7 +110,7 @@ in
         };
       };
       users.users.bunbun.openssh.authorizedKeys.keys = [
-        config.sops.placeholder."ssh_keys/bunbun"
+        config.sops.placeholder.ssh_keys.bunbun
       ];
       # system.activationScripts.copyBunbunAuthorizedKeys = {
       #   text = ''
