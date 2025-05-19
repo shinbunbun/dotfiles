@@ -28,22 +28,19 @@ in
       [
         inputs.cells.core.nixosProfiles.default
         inputs.cells.core.nixosProfiles.optimise
+
         inputs.home-manager.nixosModules.home-manager
+        inputs.sops-nix.nixosModules.sops
       ]
       ++ (
         if isVM then
-          # VMビルド用の最小限の設定
           [
             inputs.cells.core.nixosProfiles.vm
-            inputs.cells.core.nixosProfiles.ssh-vm
           ]
         else
-          # 実環境用の完全な設定
           [
             ./hardwareConfigurations/homeMachine.nix
-            inputs.sops-nix.nixosModules.sops
             inputs.cells.core.nixosProfiles.sops
-            inputs.cells.core.nixosProfiles.ssh-real
           ]
       );
 
