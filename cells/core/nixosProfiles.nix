@@ -126,20 +126,16 @@ in
   ssh-vm = 
     { pkgs, ... }:
     {
-      services.openssh = {
-        enable = true;
-        ports = [ 31415 ];
-        settings = {
-          X11Forwarding = true;
-          PermitRootLogin = "no";
-          PasswordAuthentication = true; # VMでは簡易化のためパスワード認証を許可
-          # AuthorizedKeysFile のデフォルト値を上書きし、VMビルド時の問題を回避
-          AuthorizedKeysFile = "/etc/ssh/dummy_authorized_keys_for_vm";
-        };
+      services.openssh.enable = false; # VMビルド時はSSHサービス自体を無効化
+      # 以下の設定は services.openssh.enable = false のため、実質的には評価されないか影響が限定的になります
+      services.openssh.ports = [ 31415 ];
+      services.openssh.settings = {
+        X11Forwarding = true;
+        PermitRootLogin = "no";
+        PasswordAuthentication = true; 
+        AuthorizedKeysFile = "/etc/ssh/dummy_authorized_keys_for_vm";
       };
-      # VMでは簡易的なパスワードを設定
       users.users.bunbun.password = "bunbun";
-      # VMではbunbunユーザーのauthorized keysを空に設定し、関連処理を無効化
       users.users.bunbun.openssh.authorizedKeys.keys = [];
     };
 
