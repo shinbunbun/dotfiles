@@ -105,12 +105,12 @@ in
       sops = {
         defaultSopsFile = "${inputs.self}/secrets/ssh-keys.yaml";
         age.keyFile = "/var/lib/sops-nix/key.txt";
-        secrets."ssh_keys/bunbun" = {
+        secrets."ssh_keys.bunbun" = {
           owner = "bunbun";
         };
       };
       users.users.bunbun.openssh.authorizedKeys.keys = [
-        config.sops.placeholder.ssh_keys.bunbun
+        config.sops.placeholder."ssh_keys.bunbun"
       ];
       # system.activationScripts.copyBunbunAuthorizedKeys = {
       #   text = ''
