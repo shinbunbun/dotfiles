@@ -52,9 +52,9 @@ in
           PermitRootLogin = "no";
           PasswordAuthentication = false;
         };
-        extraConfig = ''
-          AuthorizedKeysFile /etc/ssh/authorized_keys.d/%u
-        '';
+        # extraConfig = ''
+        #   AuthorizedKeysFile /etc/ssh/authorized_keys.d/%u
+        # '';
       };
       services.fail2ban = {
         enable = true;
@@ -101,24 +101,24 @@ in
           };
         };
       };
+
+      sops = {
+        defaultSopsFile = "${inputs.self}/secrets/ssh-keys.yaml";
+        age.keyFile = "/var/lib/sops-nix/key.txt";
+        secrets."ssh_keys/bunbun" = {
+          owner = "bunbun";
+        };
+      };
       users.users.bunbun.openssh.authorizedKeys.keyFiles = [
         config.sops.secrets."ssh_keys/bunbun".path
       ];
-      system.activationScripts.copyBunbunAuthorizedKeys = {
-        text = ''
-          echo "認証鍵のコピーを開始します..."
-          mkdir -p /etc/ssh/authorized_keys.d
-          if [ -f "${config.sops.secrets."ssh_keys/bunbun".path}" ]; then
-            echo "ソースファイルが存在します: ${config.sops.secrets."ssh_keys/bunbun".path}"
-            cp "${config.sops.secrets."ssh_keys/bunbun".path}" /etc/ssh/authorized_keys.d/bunbun
-            chmod 0444 /etc/ssh/authorized_keys.d/bunbun
-            echo "認証鍵のコピーが完了しました"
-            ls -la /etc/ssh/authorized_keys.d/bunbun
-          else
-            echo "エラー: ソースファイルが見つかりません: ${config.sops.secrets."ssh_keys/bunbun".path}"
-          fi
-        '';
-      };
+      # system.activationScripts.copyBunbunAuthorizedKeys = {
+      #   text = ''
+      #     mkdir -p /etc/ssh/authorized_keys.d
+      #     cp ${config.sops.secrets."ssh_keys/bunbun".path} /etc/ssh/authorized_keys.d/bunbun
+      #     chmod 0444 /etc/ssh/authorized_keys.d/bunbun
+      #   '';
+      # };
 
       security.polkit.enable = true;
     };
@@ -130,20 +130,6 @@ in
       options = "--delete-older-than 30d";
     };
   };
-  sops =
-    { config, ... }:
-    {
-      sops = {
-        defaultSopsFile = "${inputs.self}/secrets/ssh-keys.yaml";
-        age.keyFile = "/var/lib/sops-nix/key.txt";
-        secrets."ssh_keys/bunbun" = {
-          owner = "bunbun";
-        };
-      };
-      users.users.bunbun.openssh.authorizedKeys.keyFiles = [
-        config.sops.secrets."ssh_keys/bunbun".path
-      ];
-    };
   vm =
     {
       lib,
