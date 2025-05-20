@@ -108,9 +108,16 @@ in
         secrets."ssh_keys.bunbun" = {
           owner = "bunbun";
         };
+        templates."bunbun_authorized_keys" = {
+          owner = "bunbun";
+          mode = "0444";
+          content = ''
+            ${config.sops.placeholder."ssh_keys.bunbun"}
+          '';
+        };
       };
-      users.users.bunbun.openssh.authorizedKeys.keys = [
-        config.sops.placeholder."ssh_keys.bunbun"
+      users.users.bunbun.openssh.authorizedKeys.keyFiles = [
+        config.sops.templates."bunbun_authorized_keys".path
       ];
       # system.activationScripts.copyBunbunAuthorizedKeys = {
       #   text = ''
