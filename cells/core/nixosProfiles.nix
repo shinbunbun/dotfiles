@@ -52,9 +52,9 @@ in
           PermitRootLogin = "no";
           PasswordAuthentication = false;
         };
-        # extraConfig = ''
-        #   AuthorizedKeysFile /etc/ssh/authorized_keys.d/%u
-        # '';
+        extraConfig = ''
+          AuthorizedKeysFile /etc/ssh/authorized_keys.d/%u
+        '';
       };
       services.fail2ban = {
         enable = true;
@@ -109,16 +109,16 @@ in
           owner = "bunbun";
         };
       };
-      users.users.bunbun.openssh.authorizedKeys.keyFiles = [
-        config.sops.secrets."ssh_keys/bunbun".path
-      ];
-      # system.activationScripts.copyBunbunAuthorizedKeys = {
-      #   text = ''
-      #     mkdir -p /etc/ssh/authorized_keys.d
-      #     cp ${config.sops.secrets."ssh_keys/bunbun".path} /etc/ssh/authorized_keys.d/bunbun
-      #     chmod 0444 /etc/ssh/authorized_keys.d/bunbun
-      #   '';
-      # };
+      # users.users.bunbun.openssh.authorizedKeys.keyFiles = [
+      #   config.sops.secrets."ssh_keys/bunbun".path
+      # ];
+      system.activationScripts.copyBunbunAuthorizedKeys = {
+        text = ''
+          mkdir -p /etc/ssh/authorized_keys.d
+          cp ${config.sops.secrets."ssh_keys/bunbun".path} /etc/ssh/authorized_keys.d/bunbun
+          chmod 0444 /etc/ssh/authorized_keys.d/bunbun
+        '';
+      };
 
       security.polkit.enable = true;
     };
