@@ -6,7 +6,6 @@
   default = {
     system.stateVersion = 5;
 
-    # homebrewを使用するために必要
     system.primaryUser = "shinbunbun";
 
     nix.settings.sandbox = true;
