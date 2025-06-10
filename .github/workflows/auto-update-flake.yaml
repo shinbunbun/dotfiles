@@ -43,6 +43,7 @@ jobs:
       - name: Create Pull Request for flake.lock update
         if: steps.changes.outputs.changed == 'true'
         uses: peter-evans/create-pull-request@v6.0.1
+        id: create-pr
         with:
           token: ${{ secrets.PAT_TOKEN }}
           commit-message: "Auto-update flake.lock"
@@ -54,3 +55,10 @@ jobs:
           branch: auto/update-flake-lock
           base: main
           draft: false
+
+      - name: Enable auto-merge
+        if: steps.changes.outputs.changed == 'true' && steps.create-pr.outputs.pull-request-number != ''
+        run: |
+          gh pr merge ${{ steps.create-pr.outputs.pull-request-number }} --auto --squash
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
