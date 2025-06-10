@@ -43,7 +43,6 @@ jobs:
       - name: Install newer bash
         run: |
           nix profile install nixpkgs#bash
-          echo "$(nix profile list | grep bash | awk '{print $4}')/bin" >> $GITHUB_PATH
       - uses: divnix/std-action/discover@main
         id: discovery
 
@@ -145,10 +144,6 @@ jobs:
         run: echo $CI
       - name: who
         run: who
-      - name: Install newer bash
-        run: |
-          nix profile install nixpkgs#bash
-          echo "$(nix profile list | grep bash | awk '{print $4}')/bin" >> $GITHUB_PATH
       - uses: divnix/std-action/run@main
       - name: List build output files
         run: ls -la
