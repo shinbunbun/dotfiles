@@ -14,6 +14,7 @@
         nixd
         nixfmt-rfc-style
         warp-terminal
+        google-chrome
       ];
 
       # Let Home Manager install and manage itself.
