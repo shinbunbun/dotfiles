@@ -40,6 +40,7 @@
         "xquartz"
         "discord"
         "vnc-viewer"
+        "claude"
       ];
       masApps = {
         "Brother iPrint&Scan" = 1193539993;
