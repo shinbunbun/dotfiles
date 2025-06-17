@@ -14,7 +14,7 @@ in
     }:
     {
       system.stateVersion = "21.11";
-      system.autoUpgrade.enable = true;
+      system.autoUpgrade.enable = false;
       system.autoUpgrade.allowReboot = false;
       nix.extraOptions = ''
         experimental-features = nix-command flakes
