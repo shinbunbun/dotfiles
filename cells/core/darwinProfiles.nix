@@ -41,6 +41,7 @@
         "discord"
         "vnc-viewer"
         "claude"
+        "obsidian"
       ];
       masApps = {
         "Brother iPrint&Scan" = 1193539993;
