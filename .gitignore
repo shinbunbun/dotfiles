@@ -10,3 +10,4 @@ std
 tui
 std-action
 sops-nix
+.envrc
