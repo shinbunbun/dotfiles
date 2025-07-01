@@ -105,19 +105,18 @@ in
       sops = {
         defaultSopsFile = "${inputs.self}/secrets/ssh-keys.yaml";
         age.keyFile = "/var/lib/sops-nix/key.txt";
+
         secrets."ssh_keys/bunbun" = {
-          owner = "bunbun";
+          # 復号後に **この場所** へシンボリックリンク
+          path = "/etc/ssh/authorized_keys.d/bunbun";
+
+          owner = "bunbun"; # 公開鍵なので bunbun:wheel でも問題なし
+          group = "wheel";
+          mode = "0444";
+
+          # ユーザー作成前に用意してほしい場合
+          neededForUsers = true;
         };
-      };
-      # users.users.bunbun.openssh.authorizedKeys.keyFiles = [
-      #   config.sops.secrets."ssh_keys/bunbun".path
-      # ];
-      system.activationScripts.copyBunbunAuthorizedKeys = {
-        text = ''
-          mkdir -p /etc/ssh/authorized_keys.d
-          cp ${config.sops.secrets."ssh_keys/bunbun".path} /etc/ssh/authorized_keys.d/bunbun
-          chmod 0444 /etc/ssh/authorized_keys.d/bunbun
-        '';
       };
 
       security.polkit.enable = true;
