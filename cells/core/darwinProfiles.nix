@@ -119,7 +119,7 @@
             AllowedIPs = 0.0.0.0/0
             PersistentKeepalive = 25
           '';
-          path  = "/etc/wireguard/wg-home.conf";
+          path = "/etc/wireguard/wg-home.conf";
           owner = "root";
           group = "wheel";
           mode = "0600";
