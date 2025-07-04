@@ -110,13 +110,12 @@
           content = ''
             [Interface]
             Address   = 10.100.0.2/32
-            DNS       = 192.168.10.1
             PrivateKey = ${config.sops.placeholder."wireguard/home/macClientPrivKey"}
 
             [Peer]
             PublicKey  = ${config.sops.placeholder."wireguard/home/publicKey"}
             Endpoint   = ${config.sops.placeholder."wireguard/home/endpoint"}
-            AllowedIPs = 0.0.0.0/0
+            AllowedIPs = 192.168.1.0/24, 10.100.0.0/24, 10.100.0.1/32
             PersistentKeepalive = 25
           '';
           path = "/etc/wireguard/wg-home.conf";
