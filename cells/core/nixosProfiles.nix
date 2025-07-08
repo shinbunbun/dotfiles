@@ -46,6 +46,7 @@ in
           workstation = true;
         };
         extraConfig = ''
+          [server]
           allow-interfaces=eth0,wg0
         '';
       };
