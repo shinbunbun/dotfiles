@@ -89,6 +89,7 @@ in
         kubectl
         kubernetes
         polkit
+        wireguard-tools
       ];
 
       virtualisation = {
@@ -117,22 +118,42 @@ in
           # ユーザー作成前に用意してほしい場合
           neededForUsers = true;
         };
+
+        # WireGuard設定の追加
+        secrets."wireguard/home/nixosClientPrivKey" = {
+          sopsFile = "${inputs.self}/secrets/wireguard.yaml";
+        };
+
+        secrets."wireguard/home/publicKey" = {
+          sopsFile = "${inputs.self}/secrets/wireguard.yaml";
+        };
+
+        # WireGuard設定ファイル全体を生成
+        templates."wireguard/wg0.conf" = {
+          content = ''
+            [Interface]
+            PrivateKey = ${config.sops.placeholder."wireguard/home/nixosClientPrivKey"}
+            Address = 10.100.0.4/24
+
+            [Peer]
+            PublicKey = ${config.sops.placeholder."wireguard/home/publicKey"}
+            Endpoint = 192.168.1.1:13231
+            PersistentKeepalive = 25
+            AllowedIPs = 10.100.0.1/32
+          '';
+          path = "/etc/wireguard/wg0.conf";
+          owner = "root";
+          group = "root";
+          mode = "0600";
+        };
       };
 
       security.polkit.enable = true;
 
       # ── 2-1  WireGuard インターフェース ────────────────
       networking.wireguard.interfaces.wg0 = {
-        ips = [ "10.100.0.4/24" ]; # VPN 用アドレス
-        privateKeyFile = "/etc/wireguard/privkey";
-        peers = [
-          {
-            publicKey = "ROUTER_PUB_KEY";
-            endpoint = "192.168.1.1:13231";
-            persistentKeepalive = 25;
-            allowedIPs = [ "10.100.0.1/32" ]; # ルータだけ
-          }
-        ];
+        # sopsで生成された設定ファイルを直接使用
+        configFile = "/etc/wireguard/wg0.conf";
       };
     };
   optimise = {
