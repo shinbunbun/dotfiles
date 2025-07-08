@@ -45,10 +45,10 @@ in
           addresses = false;
           workstation = true;
         };
-        extraConfig = ''
-          [server]
-          allow-interfaces=eth0,wg0
-        '';
+        # extraConfig = ''
+        #   [server]
+        #   allow-interfaces=eth0,wg0
+        # '';
       };
       environment.etc."avahi/hosts".text = ''
         192.168.1.3  nixos.local
