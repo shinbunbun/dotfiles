@@ -37,11 +37,18 @@ in
       '';
       services.avahi = {
         enable = true;
+        nssmdns4 = true;
+        reflector = false;
+        wideArea = true;
         publish = {
           enable = true;
           addresses = true;
           workstation = true;
         };
+        extraConfig = ''
+          allow-interfaces=eth0,wg0
+          ttl-verify=no          # TTL=255 のまま
+        '';
       };
       time.timeZone = "Asia/Tokyo";
       services.openssh = {
@@ -153,7 +160,7 @@ in
         # sopsで生成された設定ファイルを直接使用
         configFile = "/etc/wireguard/wg0.conf";
       };
-      
+
       security.polkit.enable = true;
     };
   optimise = {
