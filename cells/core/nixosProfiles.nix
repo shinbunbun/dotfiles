@@ -47,7 +47,6 @@ in
         };
         extraConfig = ''
           allow-interfaces=eth0,wg0
-          ttl-verify=no          # TTL=255 のまま
         '';
       };
       time.timeZone = "Asia/Tokyo";
