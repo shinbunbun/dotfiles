@@ -151,7 +151,7 @@ in
       security.polkit.enable = true;
 
       # ── 2-1  WireGuard インターフェース ────────────────
-      networking.wireguard.interfaces.wg0 = {
+      networking.wg-quick.interfaces.wg0 = {
         # sopsで生成された設定ファイルを直接使用
         configFile = "/etc/wireguard/wg0.conf";
       };
