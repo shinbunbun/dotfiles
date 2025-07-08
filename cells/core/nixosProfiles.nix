@@ -120,6 +120,20 @@ in
       };
 
       security.polkit.enable = true;
+
+      # ── 2-1  WireGuard インターフェース ────────────────
+      networking.wireguard.interfaces.wg0 = {
+        ips = [ "10.100.0.4/24" ]; # VPN 用アドレス
+        privateKeyFile = "/etc/wireguard/privkey";
+        peers = [
+          {
+            publicKey = "ROUTER_PUB_KEY";
+            endpoint = "192.168.1.1:13231";
+            persistentKeepalive = 25;
+            allowedIPs = [ "10.100.0.1/32" ]; # ルータだけ
+          }
+        ];
+      };
     };
   optimise = {
     nix.settings.auto-optimise-store = true;
