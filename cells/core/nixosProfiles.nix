@@ -54,6 +54,7 @@ in
         192.168.1.3  nixos.local
         10.100.0.4 nixos.local
       '';
+      networking.firewall.allowedUDPPorts = [ 5353 ];
       time.timeZone = "Asia/Tokyo";
       services.openssh = {
         enable = true;
