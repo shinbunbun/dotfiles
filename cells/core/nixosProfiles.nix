@@ -153,7 +153,7 @@ in
         # sopsで生成された設定ファイルを直接使用
         configFile = "/etc/wireguard/wg0.conf";
       };
-      
+
       security.polkit.enable = true;
     };
   optimise = {
