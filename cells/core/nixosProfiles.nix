@@ -42,7 +42,7 @@ in
         wideArea = true;
         publish = {
           enable = true;
-          addresses = true;
+          addresses = false;
           workstation = true;
         };
         # extraConfig = ''
@@ -50,9 +50,10 @@ in
         #   allow-interfaces=eth0,wg0
         # '';
       };
-      # environment.etc."avahi/hosts".text = ''
-      #   192.168.1.3  nixos.local
-      # '';
+      environment.etc."avahi/hosts".text = ''
+        192.168.1.3  nixos.local
+        10.100.0.4 nixos.local
+      '';
       time.timeZone = "Asia/Tokyo";
       services.openssh = {
         enable = true;
