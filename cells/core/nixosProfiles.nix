@@ -151,7 +151,7 @@ in
             PublicKey = ${config.sops.placeholder."wireguard/home/publicKey"}
             Endpoint = 192.168.1.1:13231
             PersistentKeepalive = 25
-            AllowedIPs = 10.100.0.1/32
+            AllowedIPs = 10.100.0.0/24
           '';
           path = "/etc/wireguard/wg0.conf";
           owner = "root";
