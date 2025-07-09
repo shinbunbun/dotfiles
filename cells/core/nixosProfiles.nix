@@ -37,24 +37,12 @@ in
       '';
       services.avahi = {
         enable = true;
-        nssmdns4 = true;
-        reflector = false;
-        wideArea = true;
         publish = {
           enable = true;
-          addresses = false;
+          addresses = true;
           workstation = true;
         };
-        # extraConfig = ''
-        #   [server]
-        #   allow-interfaces=eth0,wg0
-        # '';
       };
-      environment.etc."avahi/hosts".text = ''
-        192.168.1.3  nixos.local
-        10.100.0.4 nixos.local
-      '';
-      networking.firewall.allowedUDPPorts = [ 5353 ];
       time.timeZone = "Asia/Tokyo";
       services.openssh = {
         enable = true;
@@ -151,7 +139,7 @@ in
             PublicKey = ${config.sops.placeholder."wireguard/home/publicKey"}
             Endpoint = 192.168.1.1:13231
             PersistentKeepalive = 25
-            AllowedIPs = 10.100.0.0/24
+            AllowedIPs = 10.100.0.1/32
           '';
           path = "/etc/wireguard/wg0.conf";
           owner = "root";
@@ -165,7 +153,7 @@ in
         # sopsで生成された設定ファイルを直接使用
         configFile = "/etc/wireguard/wg0.conf";
       };
-
+      
       security.polkit.enable = true;
     };
   optimise = {
