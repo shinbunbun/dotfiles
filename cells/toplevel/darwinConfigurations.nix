@@ -15,8 +15,10 @@ in
     };
 
     imports = [
+      inputs.sops-nix.darwinModules.sops
       inputs.cells.core.darwinProfiles.default
       inputs.cells.core.darwinProfiles.optimize
+      inputs.cells.core.darwinProfiles.wireguard
     ];
 
     home-manager.users.${username} = {

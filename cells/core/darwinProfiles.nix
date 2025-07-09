@@ -81,4 +81,52 @@
       options = "--delete-older-than 30d";
     };
   };
+
+  wireguard =
+    {
+      config,
+      lib,
+      pkgs,
+      ...
+    }:
+    let
+
+    in
+    {
+      sops = {
+        defaultSopsFile = "${inputs.self}/secrets/wireguard.yaml";
+        age.keyFile = "/var/lib/sops-nix/key.txt";
+        secrets."wireguard/home/publicKey" = {
+          # key = "wireguard.home.publicKey";
+        };
+        secrets."wireguard/home/endpoint" = {
+          # key = "wireguard.home.endpoint";
+        };
+        secrets."wireguard/home/macClientPrivKey" = {
+          # key = "wireguard.home.macClientPrivKey";
+        };
+
+        templates."wireguard/wg-home.conf" = {
+          content = ''
+            [Interface]
+            Address   = 10.100.0.2/32
+            PrivateKey = ${config.sops.placeholder."wireguard/home/macClientPrivKey"}
+
+            [Peer]
+            PublicKey  = ${config.sops.placeholder."wireguard/home/publicKey"}
+            Endpoint   = ${config.sops.placeholder."wireguard/home/endpoint"}
+            AllowedIPs = 192.168.1.0/24, 10.100.0.0/24, 10.100.0.1/32
+            PersistentKeepalive = 25
+          '';
+          path = "/etc/wireguard/wg-home.conf";
+          owner = "root";
+          group = "wheel";
+          mode = "0600";
+        };
+      };
+
+      environment.systemPackages = with pkgs; [
+        wireguard-tools
+      ];
+    };
 }
