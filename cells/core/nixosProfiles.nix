@@ -22,6 +22,7 @@ in
       boot.loader.systemd-boot.enable = true;
       boot.loader.efi.canTouchEfiVariables = true;
       networking.hostName = "nixos";
+      networking.domain = "shinbunbun.com";
       networking.useDHCP = false;
       networking.interfaces.eno1.useDHCP = true;
       networking.interfaces.wlp1s0.useDHCP = false;
@@ -128,15 +129,51 @@ in
           sopsFile = "${inputs.self}/secrets/wireguard.yaml";
         };
 
-        secrets."couchdb/admin_password" = {
+        secrets."couchdb_admin_password" = {
+          key = "couchdb/admin_password";
+          sopsFile = "${inputs.self}/secrets/couchdb.yaml";
           owner = "root";
-          group = "wheel";
+          group = "root";
           mode = "0400";
         };
 
-        secrets."couchdb/database_name" = {
+        secrets."couchdb_database_name" = {
+          key = "couchdb/database_name";
+          sopsFile = "${inputs.self}/secrets/couchdb.yaml";
           owner = "root";
-          group = "wheel";
+          group = "root";
+          mode = "0400";
+        };
+
+        secrets."cloudflare_tunnel_token" = {
+          key = "cloudflare/tunnel_token";
+          sopsFile = "${inputs.self}/secrets/couchdb.yaml";
+          owner = "root";
+          group = "root";
+          mode = "0400";
+        };
+
+        secrets."cloudflare_account_tag" = {
+          key = "cloudflare/account_tag";
+          sopsFile = "${inputs.self}/secrets/couchdb.yaml";
+          owner = "root";
+          group = "root";
+          mode = "0400";
+        };
+
+        secrets."cloudflare_tunnel_secret" = {
+          key = "cloudflare/tunnel_secret";
+          sopsFile = "${inputs.self}/secrets/couchdb.yaml";
+          owner = "root";
+          group = "root";
+          mode = "0400";
+        };
+
+        secrets."cloudflare_tunnel_id" = {
+          key = "cloudflare/tunnel_id";
+          sopsFile = "${inputs.self}/secrets/couchdb.yaml";
+          owner = "root";
+          group = "root";
           mode = "0400";
         };
 
@@ -159,35 +196,34 @@ in
           mode = "0600";
         };
 
-        templates."couchdb/local.ini" = {
+        # CouchDB environment file template
+        templates."couchdb/env" = {
           content = ''
-            [couchdb]
-            single_node=true
-
-            [chttpd]
-            enable_cors = true
-            bind_address = 0.0.0.0
-            port = 5984
-
-            [cors]
-            origins = app://obsidian.md,capacitor://localhost,http://localhost,https://obsidian.${
-              config.networking.domain or "local"
-            }
-            credentials = true
-            headers = accept, authorization, content-type, origin, referer, x-couch-request-id
-            methods = GET, PUT, POST, HEAD, DELETE, OPTIONS
-
-            [couch_httpd_auth]
-            require_valid_user = true
-
-            [admins]
-            admin = ${config.sops.placeholder."couchdb/admin_password"}
+            COUCHDB_USER=admin
+            COUCHDB_PASSWORD=${config.sops.placeholder."couchdb_admin_password"}
           '';
-          path = "/var/lib/couchdb/local.ini";
+          path = "/run/secrets/rendered/couchdb/env";
           owner = "root";
-          group = "docker";
+          group = "root";
           mode = "0640";
         };
+
+        # Cloudflare credentials file template
+        templates."cloudflare/credentials.json" = {
+          content = ''
+            {
+              "AccountTag": "${config.sops.placeholder."cloudflare_account_tag"}",
+              "TunnelSecret": "${config.sops.placeholder."cloudflare_tunnel_secret"}",
+              "TunnelID": "${config.sops.placeholder."cloudflare_tunnel_id"}"
+            }
+          '';
+          path = "/run/secrets/rendered/cloudflare/credentials.json";
+          owner = "root";
+          group = "root";
+          mode = "0640";
+        };
+
+
       };
 
       # ── 2-1  WireGuard インターフェース ────────────────
@@ -201,85 +237,126 @@ in
         "d /var/lib/couchdb/data 0755 999 999 -"
       ];
 
-      # CouchDBコンテナサービス
-      systemd.services.couchdb-obsidian = {
-        description = "CouchDB for Obsidian LiveSync";
-        after = [
-          "docker.service"
-          "sops-nix.service"
-        ];
-        requires = [ "docker.service" ];
-        wants = [ "sops-nix.service" ];
-        wantedBy = [ "multi-user.target" ];
-
-        serviceConfig = {
-          Type = "notify";
-          Restart = "always";
-          RestartSec = "10s";
-          TimeoutStartSec = "300s";
-
-          ExecStartPre = [
-            # 既存コンテナの停止・削除
-            "-${pkgs.docker}/bin/docker stop couchdb-obsidian"
-            "-${pkgs.docker}/bin/docker rm couchdb-obsidian"
-            # 最新イメージの取得
-            "${pkgs.docker}/bin/docker pull couchdb:3.3.3"
-          ];
-
-          ExecStart = ''
-            ${pkgs.docker}/bin/docker run --name couchdb-obsidian \
-              --restart unless-stopped \
-              -p 127.0.0.1:5984:5984 \
-              -e COUCHDB_USER=admin \
-              -e COUCHDB_PASSWORD_FILE=/run/secrets/couchdb_password \
-              -v /var/lib/couchdb/data:/opt/couchdb/data \
-              -v /var/lib/couchdb/local.ini:/opt/couchdb/etc/local.ini:ro \
-              -v ${config.sops.secrets."couchdb/admin_password".path}:/run/secrets/couchdb_password:ro \
-              couchdb:3.3.3
-          '';
-
-          ExecStop = "${pkgs.docker}/bin/docker stop couchdb-obsidian";
-          ExecReload = "${pkgs.docker}/bin/docker restart couchdb-obsidian";
+      # CouchDB OCI Container
+      virtualisation.oci-containers = {
+        backend = "docker";
+        containers = {
+          couchdb-obsidian = {
+            image = "couchdb:3.3.3";
+            autoStart = true;
+            ports = [ "127.0.0.1:5984:5984" ];
+            volumes = [
+              "/var/lib/couchdb/data:/opt/couchdb/data"
+            ];
+            environmentFiles = [
+              config.sops.templates."couchdb/env".path
+            ];
+            extraOptions = [
+              "--health-cmd=curl -f http://localhost:5984/ || exit 1"
+              "--health-interval=30s"
+              "--health-timeout=10s"
+              "--health-retries=3"
+            ];
+          };
         };
       };
 
-      # ヘルスチェック用サービス
-      systemd.services.couchdb-health-check = {
-        description = "CouchDB Health Check";
-        after = [ "couchdb-obsidian.service" ];
-        wants = [ "couchdb-obsidian.service" ];
+      # CouchDB データベース初期化サービス
+      systemd.services.couchdb-init = {
+        description = "Initialize CouchDB databases";
+        after = [ "docker-couchdb-obsidian.service" ];
+        wants = [ "docker-couchdb-obsidian.service" ];
+        wantedBy = [ "multi-user.target" ];
 
         serviceConfig = {
           Type = "oneshot";
-          ExecStart = pkgs.writeScript "couchdb-health-check" ''
+          RemainAfterExit = true;
+          ExecStart = pkgs.writeScript "couchdb-init" ''
             #!${pkgs.bash}/bin/bash
             set -e
+            
             echo "Waiting for CouchDB to be ready..."
             for i in {1..30}; do
               if ${pkgs.curl}/bin/curl -f http://localhost:5984/ >/dev/null 2>&1; then
                 echo "CouchDB is ready!"
-                exit 0
+                break
               fi
               echo "Attempt $i/30: CouchDB not ready yet, waiting..."
               sleep 2
             done
-            echo "CouchDB failed to start within timeout"
-            exit 1
+            
+            # Read password from sops secret
+            PASSWORD=$(cat ${config.sops.secrets."couchdb_admin_password".path})
+            
+            # Create obsidian-livesync database
+            echo "Creating obsidian-livesync database..."
+            ${pkgs.curl}/bin/curl -f -u admin:$PASSWORD \
+              -X PUT http://localhost:5984/obsidian-livesync 2>/dev/null || {
+              echo "Database obsidian-livesync already exists or creation failed"
+            }
+            
+            # Create database for the configured database name
+            DATABASE_NAME=$(cat ${config.sops.secrets."couchdb_database_name".path})
+            echo "Creating $DATABASE_NAME database..."
+            ${pkgs.curl}/bin/curl -f -u admin:$PASSWORD \
+              -X PUT http://localhost:5984/$DATABASE_NAME 2>/dev/null || {
+              echo "Database $DATABASE_NAME already exists or creation failed"
+            }
+            
+            # Configure CORS settings via CouchDB API
+            echo "Configuring CORS settings..."
+            ${pkgs.curl}/bin/curl -f -u admin:$PASSWORD \
+              -X PUT http://localhost:5984/_node/nonode@nohost/_config/httpd/enable_cors \
+              -H "Content-Type: application/json" \
+              -d '"true"' 2>/dev/null || echo "CORS enable setting failed"
+            
+            ${pkgs.curl}/bin/curl -f -u admin:$PASSWORD \
+              -X PUT http://localhost:5984/_node/nonode@nohost/_config/cors/origins \
+              -H "Content-Type: application/json" \
+              -d '"app://obsidian.md,capacitor://localhost,http://localhost,https://private-obsidian.${config.networking.domain}"' 2>/dev/null || echo "CORS origins setting failed"
+            
+            ${pkgs.curl}/bin/curl -f -u admin:$PASSWORD \
+              -X PUT http://localhost:5984/_node/nonode@nohost/_config/cors/credentials \
+              -H "Content-Type: application/json" \
+              -d '"true"' 2>/dev/null || echo "CORS credentials setting failed"
+            
+            ${pkgs.curl}/bin/curl -f -u admin:$PASSWORD \
+              -X PUT http://localhost:5984/_node/nonode@nohost/_config/cors/methods \
+              -H "Content-Type: application/json" \
+              -d '"GET,PUT,POST,HEAD,DELETE,OPTIONS"' 2>/dev/null || echo "CORS methods setting failed"
+            
+            ${pkgs.curl}/bin/curl -f -u admin:$PASSWORD \
+              -X PUT http://localhost:5984/_node/nonode@nohost/_config/cors/headers \
+              -H "Content-Type: application/json" \
+              -d '"accept,authorization,content-type,origin,referer,x-couch-request-id,x-requested-with"' 2>/dev/null || echo "CORS headers setting failed"
+            
+            echo "CouchDB initialization completed successfully!"
           '';
         };
       };
 
-      systemd.timers.couchdb-health-check = {
-        description = "CouchDB Health Check Timer";
-        wantedBy = [ "timers.target" ];
-        timerConfig = {
-          OnBootSec = "2m";
-          OnUnitActiveSec = "5m";
-          Persistent = true;
-        };
-      };
 
       security.polkit.enable = true;
+
+      # Cloudflare Tunnel for Obsidian LiveSync
+      services.cloudflared = {
+        enable = true;
+        tunnels = {
+          "obsidian-livesync" = {
+            default = "http_status:404";
+            credentialsFile = config.sops.templates."cloudflare/credentials.json".path;
+            ingress = {
+              # CouchDB for Obsidian LiveSync
+              "private-obsidian.${config.networking.domain}" = {
+                service = "http://localhost:5984";
+                originRequest = {
+                  noTLSVerify = true;
+                };
+              };
+            };
+          };
+        };
+      };
     };
   optimise = {
     nix.settings.auto-optimise-store = true;
