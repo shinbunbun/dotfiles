@@ -223,7 +223,6 @@ in
           mode = "0640";
         };
 
-
       };
 
       # ── 2-1  WireGuard インターフェース ────────────────
@@ -274,7 +273,7 @@ in
           ExecStart = pkgs.writeScript "couchdb-init" ''
             #!${pkgs.bash}/bin/bash
             set -e
-            
+
             echo "Waiting for CouchDB to be ready..."
             for i in {1..30}; do
               if ${pkgs.curl}/bin/curl -f http://localhost:5984/ >/dev/null 2>&1; then
@@ -284,17 +283,17 @@ in
               echo "Attempt $i/30: CouchDB not ready yet, waiting..."
               sleep 2
             done
-            
+
             # Read password from sops secret
             PASSWORD=$(cat ${config.sops.secrets."couchdb_admin_password".path})
-            
+
             # Create obsidian-livesync database
             echo "Creating obsidian-livesync database..."
             ${pkgs.curl}/bin/curl -f -u admin:$PASSWORD \
               -X PUT http://localhost:5984/obsidian-livesync 2>/dev/null || {
               echo "Database obsidian-livesync already exists or creation failed"
             }
-            
+
             # Create database for the configured database name
             DATABASE_NAME=$(cat ${config.sops.secrets."couchdb_database_name".path})
             echo "Creating $DATABASE_NAME database..."
@@ -302,39 +301,38 @@ in
               -X PUT http://localhost:5984/$DATABASE_NAME 2>/dev/null || {
               echo "Database $DATABASE_NAME already exists or creation failed"
             }
-            
+
             # Configure CORS settings via CouchDB API
             echo "Configuring CORS settings..."
             ${pkgs.curl}/bin/curl -f -u admin:$PASSWORD \
               -X PUT http://localhost:5984/_node/nonode@nohost/_config/httpd/enable_cors \
               -H "Content-Type: application/json" \
               -d '"true"' 2>/dev/null || echo "CORS enable setting failed"
-            
+
             ${pkgs.curl}/bin/curl -f -u admin:$PASSWORD \
               -X PUT http://localhost:5984/_node/nonode@nohost/_config/cors/origins \
               -H "Content-Type: application/json" \
               -d '"app://obsidian.md,capacitor://localhost,http://localhost,https://private-obsidian.${config.networking.domain}"' 2>/dev/null || echo "CORS origins setting failed"
-            
+
             ${pkgs.curl}/bin/curl -f -u admin:$PASSWORD \
               -X PUT http://localhost:5984/_node/nonode@nohost/_config/cors/credentials \
               -H "Content-Type: application/json" \
               -d '"true"' 2>/dev/null || echo "CORS credentials setting failed"
-            
+
             ${pkgs.curl}/bin/curl -f -u admin:$PASSWORD \
               -X PUT http://localhost:5984/_node/nonode@nohost/_config/cors/methods \
               -H "Content-Type: application/json" \
               -d '"GET,PUT,POST,HEAD,DELETE,OPTIONS"' 2>/dev/null || echo "CORS methods setting failed"
-            
+
             ${pkgs.curl}/bin/curl -f -u admin:$PASSWORD \
               -X PUT http://localhost:5984/_node/nonode@nohost/_config/cors/headers \
               -H "Content-Type: application/json" \
               -d '"accept,authorization,content-type,origin,referer,x-couch-request-id,x-requested-with"' 2>/dev/null || echo "CORS headers setting failed"
-            
+
             echo "CouchDB initialization completed successfully!"
           '';
         };
       };
-
 
       security.polkit.enable = true;
 
