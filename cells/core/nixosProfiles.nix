@@ -128,6 +128,18 @@ in
           sopsFile = "${inputs.self}/secrets/wireguard.yaml";
         };
 
+        secrets."couchdb/admin_password" = {
+          owner = "root";
+          group = "wheel";
+          mode = "0400";
+        };
+
+        secrets."couchdb/database_name" = {
+          owner = "root";
+          group = "wheel";
+          mode = "0400";
+        };
+
         # WireGuard設定ファイル全体を生成
         templates."wireguard/wg0.conf" = {
           content = ''
@@ -146,12 +158,125 @@ in
           group = "root";
           mode = "0600";
         };
+
+        templates."couchdb/local.ini" = {
+          content = ''
+            [couchdb]
+            single_node=true
+
+            [chttpd]
+            enable_cors = true
+            bind_address = 0.0.0.0
+            port = 5984
+
+            [cors]
+            origins = app://obsidian.md,capacitor://localhost,http://localhost,https://obsidian.${
+              config.networking.domain or "local"
+            }
+            credentials = true
+            headers = accept, authorization, content-type, origin, referer, x-couch-request-id
+            methods = GET, PUT, POST, HEAD, DELETE, OPTIONS
+
+            [couch_httpd_auth]
+            require_valid_user = true
+
+            [admins]
+            admin = ${config.sops.placeholder."couchdb/admin_password"}
+          '';
+          path = "/var/lib/couchdb/local.ini";
+          owner = "root";
+          group = "docker";
+          mode = "0640";
+        };
       };
 
       # ── 2-1  WireGuard インターフェース ────────────────
       networking.wg-quick.interfaces.wg0 = {
         # sopsで生成された設定ファイルを直接使用
         configFile = "/etc/wireguard/wg0.conf";
+      };
+
+      systemd.tmpfiles.rules = [
+        "d /var/lib/couchdb 0755 root docker -"
+        "d /var/lib/couchdb/data 0755 999 999 -"
+      ];
+
+      # CouchDBコンテナサービス
+      systemd.services.couchdb-obsidian = {
+        description = "CouchDB for Obsidian LiveSync";
+        after = [
+          "docker.service"
+          "sops-nix.service"
+        ];
+        requires = [ "docker.service" ];
+        wants = [ "sops-nix.service" ];
+        wantedBy = [ "multi-user.target" ];
+
+        serviceConfig = {
+          Type = "notify";
+          Restart = "always";
+          RestartSec = "10s";
+          TimeoutStartSec = "300s";
+
+          ExecStartPre = [
+            # 既存コンテナの停止・削除
+            "-${pkgs.docker}/bin/docker stop couchdb-obsidian"
+            "-${pkgs.docker}/bin/docker rm couchdb-obsidian"
+            # 最新イメージの取得
+            "${pkgs.docker}/bin/docker pull couchdb:3.3.3"
+          ];
+
+          ExecStart = ''
+            ${pkgs.docker}/bin/docker run --name couchdb-obsidian \
+              --restart unless-stopped \
+              -p 127.0.0.1:5984:5984 \
+              -e COUCHDB_USER=admin \
+              -e COUCHDB_PASSWORD_FILE=/run/secrets/couchdb_password \
+              -v /var/lib/couchdb/data:/opt/couchdb/data \
+              -v /var/lib/couchdb/local.ini:/opt/couchdb/etc/local.ini:ro \
+              -v ${config.sops.secrets."couchdb/admin_password".path}:/run/secrets/couchdb_password:ro \
+              couchdb:3.3.3
+          '';
+
+          ExecStop = "${pkgs.docker}/bin/docker stop couchdb-obsidian";
+          ExecReload = "${pkgs.docker}/bin/docker restart couchdb-obsidian";
+        };
+      };
+
+      # ヘルスチェック用サービス
+      systemd.services.couchdb-health-check = {
+        description = "CouchDB Health Check";
+        after = [ "couchdb-obsidian.service" ];
+        wants = [ "couchdb-obsidian.service" ];
+
+        serviceConfig = {
+          Type = "oneshot";
+          ExecStart = pkgs.writeScript "couchdb-health-check" ''
+            #!${pkgs.bash}/bin/bash
+            set -e
+            echo "Waiting for CouchDB to be ready..."
+            for i in {1..30}; do
+              if ${pkgs.curl}/bin/curl -f http://localhost:5984/ >/dev/null 2>&1; then
+                echo "CouchDB is ready!"
+                exit 0
+              fi
+              echo "Attempt $i/30: CouchDB not ready yet, waiting..."
+              sleep 2
+            done
+            echo "CouchDB failed to start within timeout"
+            exit 1
+          '';
+        };
+      };
+
+      systemd.timers.couchdb-health-check = {
+        description = "CouchDB Health Check Timer";
+        wantedBy = [ "timers.target" ];
+        timerConfig = {
+          OnBootSec = "2m";
+          OnUnitActiveSec = "5m";
+          Persistent = true;
+        };
       };
 
       security.polkit.enable = true;
