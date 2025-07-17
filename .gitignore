@@ -11,3 +11,7 @@ tui
 std-action
 sops-nix
 .envrc
+*.swp
+*.swo
+nixos-efi-vars.fd
+nixos.qcow2
