@@ -56,6 +56,7 @@ in
           inputs.cells.dev.homeProfiles.zsh
           inputs.cells.dev.homeProfiles.vim
           inputs.cells.dev.homeProfiles.manage_secrets
+          inputs.cells.dev.homeProfiles.claude_code
         ];
       };
     };
