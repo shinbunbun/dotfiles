@@ -28,6 +28,7 @@ in
       [
         inputs.cells.core.nixosProfiles.default
         inputs.cells.core.nixosProfiles.optimise
+        inputs.cells.core.nixosProfiles.obsidian-livesync
 
         inputs.home-manager.nixosModules.home-manager
         inputs.sops-nix.nixosModules.sops
