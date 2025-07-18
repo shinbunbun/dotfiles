@@ -9,6 +9,7 @@
 {
   # Obsidian LiveSync用のSOPS secrets設定
   sops = {
+    age.keyFile = "/var/lib/sops-nix/key.txt";
     secrets."couchdb_admin_password" = {
       key = "couchdb/admin_password";
       sopsFile = "${inputs.self}/secrets/couchdb.yaml";
@@ -167,7 +168,12 @@
         ${pkgs.curl}/bin/curl -f -u admin:$PASSWORD \
           -X PUT http://localhost:5984/_node/nonode@nohost/_config/cors/origins \
           -H "Content-Type: application/json" \
-          -d '"app://obsidian.md,capacitor://localhost,http://localhost,https://private-obsidian.${config.networking.domain}"' 2>/dev/null || echo "CORS origins setting failed"
+          -d '"app://obsidian.md,capacitor://localhost,http://localhost,https://private-obsidian.${
+            if config.networking ? domain && config.networking.domain != null then
+              config.networking.domain
+            else
+              "shinbunbun.com"
+          }"' 2>/dev/null || echo "CORS origins setting failed"
 
         ${pkgs.curl}/bin/curl -f -u admin:$PASSWORD \
           -X PUT http://localhost:5984/_node/nonode@nohost/_config/cors/credentials \
@@ -198,12 +204,18 @@
         credentialsFile = config.sops.templates."cloudflare/credentials.json".path;
         ingress = {
           # CouchDB for Obsidian LiveSync
-          "private-obsidian.${config.networking.domain}" = {
-            service = "http://localhost:5984";
-            originRequest = {
-              noTLSVerify = true;
+          "private-obsidian.${
+            if config.networking ? domain && config.networking.domain != null then
+              config.networking.domain
+            else
+              "shinbunbun.com"
+          }" =
+            {
+              service = "http://localhost:5984";
+              originRequest = {
+                noTLSVerify = true;
+              };
             };
-          };
         };
       };
     };
