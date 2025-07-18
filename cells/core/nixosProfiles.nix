@@ -129,7 +129,6 @@ in
           sopsFile = "${inputs.self}/secrets/wireguard.yaml";
         };
 
-
         # WireGuard設定ファイル全体を生成
         templates."wireguard/wg0.conf" = {
           content = ''
@@ -148,7 +147,6 @@ in
           group = "root";
           mode = "0600";
         };
-
 
       };
 
