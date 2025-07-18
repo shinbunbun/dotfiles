@@ -1,147 +1,16 @@
 # cells/core/nixosProfiles.nix
 { inputs, cell }:
-let
-  kubeMasterIP = "192.168.1.3";
-  kubeMasterHostname = "api.kube";
-  sopsWireGuardHelper = import ./sops-wireguard.nix { inherit inputs cell; };
-in
 {
-  default =
-    {
-      config,
-      pkgs,
-      lib,
-      ...
-    }:
-    {
-      system.stateVersion = "21.11";
-      system.autoUpgrade.enable = false;
-      system.autoUpgrade.allowReboot = false;
-      nix.extraOptions = ''
-        experimental-features = nix-command flakes
-      '';
-      boot.loader.systemd-boot.enable = true;
-      boot.loader.efi.canTouchEfiVariables = true;
-      networking.hostName = "nixos";
-      networking.domain = "shinbunbun.com";
-      networking.useDHCP = false;
-      networking.interfaces.eno1.useDHCP = true;
-      networking.interfaces.wlp1s0.useDHCP = false;
-      networking.enableIPv6 = true;
-      networking.firewall.allowedTCPPorts = [
-        6443
-        8888
-        2049
-      ];
-      networking.extraHosts = ''
-        ${kubeMasterIP} ${kubeMasterHostname}
-        192.168.1.4 nixos-desktop
-      '';
-      services.avahi = {
-        enable = true;
-        publish = {
-          enable = true;
-          addresses = true;
-          workstation = true;
-        };
-      };
-      time.timeZone = "Asia/Tokyo";
-      services.openssh = {
-        enable = true;
-        ports = [ 31415 ];
-        settings = {
-          X11Forwarding = true;
-          PermitRootLogin = "no";
-          PasswordAuthentication = false;
-        };
-        extraConfig = ''
-          AuthorizedKeysFile /etc/ssh/authorized_keys.d/%u
-        '';
-      };
-      services.fail2ban = {
-        enable = true;
-        ignoreIP = [
-          "192.168.11.0/24"
-          "163.143.0.0/16"
-        ];
-      };
-      security.pam.services = {
-        sudo.sshAgentAuth = true;
-      };
-      virtualisation.docker.enable = true;
-      services.nfs.server.enable = true;
-      services.nfs.server.exports = ''
-        /export/k8s  192.168.1.4(rw,nohide,insecure,no_subtree_check,no_root_squash)
-        /export/k8s  192.168.1.3(rw,nohide,insecure,no_subtree_check,no_root_squash)
-      '';
-      users.users.bunbun = {
-        isNormalUser = true;
-        extraGroups = [
-          "wheel"
-          "docker"
-        ];
-        shell = pkgs.zsh;
-        # authorizedKeys.keyFilesはprofileごとに上書き
-      };
-      programs.zsh.enable = true;
-      environment.systemPackages = with pkgs; [
-        vim
-        wget
-        kompose
-        kubectl
-        kubernetes
-        polkit
-        wireguard-tools
-      ];
+  # 分割されたモジュール
+  base = import ./nixosProfiles/base.nix { inherit inputs cell; };
+  networking = import ./nixosProfiles/networking.nix { inherit inputs cell; };
+  services = import ./nixosProfiles/services.nix { inherit inputs cell; };
+  security = import ./nixosProfiles/security.nix { inherit inputs cell; };
+  kubernetes = import ./nixosProfiles/kubernetes.nix { inherit inputs cell; };
+  systemTools = import ./nixosProfiles/system-tools.nix { inherit inputs cell; };
 
-      virtualisation = {
-        vmVariantWithBootLoader = {
-          virtualisation = {
-            memorySize = 2048;
-            cores = 2;
-            graphics = false;
-            useEFIBoot = true;
-          };
-        };
-      };
-
-      # SOPS設定
-      sops = {
-        defaultSopsFile = "${inputs.self}/secrets/ssh-keys.yaml";
-        age.keyFile = "/var/lib/sops-nix/key.txt";
-
-        secrets."ssh_keys/bunbun" = {
-          # 復号後に **この場所** へシンボリックリンク
-          path = "/etc/ssh/authorized_keys.d/bunbun";
-
-          owner = "bunbun"; # 公開鍵なので bunbun:wheel でも問題なし
-          group = "wheel";
-          mode = "0444";
-
-          # ユーザー作成前に用意してほしい場合
-          neededForUsers = true;
-        };
-      };
-    }
-    // (
-      # WireGuard設定を共通モジュールから適用
-      sopsWireGuardHelper.mkSopsWireGuardConfig { inherit config pkgs lib; } {
-        sopsFile = "${inputs.self}/secrets/wireguard.yaml";
-        privateKeyPath = "wireguard/home/nixosClientPrivKey";
-        publicKeyPath = "wireguard/home/publicKey";
-        interfaceName = "wg0";
-        interfaceAddress = "10.100.0.4/24";
-        peerEndpoint = "192.168.1.1:13231";
-        peerAllowedIPs = [ "10.100.0.1/32" ];
-        persistentKeepalive = 25;
-        isDarwin = false;
-      }
-    )
-    // {
-      # nixosProfiles.nixで独自に追加する設定をここに記載
-
-      security.polkit.enable = true;
-    };
+  # 既存のモジュール
+  obsidian-livesync = import ./nixosProfiles/obsidian-livesync.nix { inherit inputs cell; };
   optimise = {
     nix.settings.auto-optimise-store = true;
     nix.gc = {
@@ -171,5 +40,23 @@ in
         fsType = "vfat";
       };
     };
-  obsidian-livesync = import ./nixosProfiles/obsidian-livesync.nix { inherit inputs cell; };
+
+  # 互換性のためのdefaultプロファイル（全モジュールを統合）
+  default =
+    {
+      config,
+      pkgs,
+      lib,
+      ...
+    }:
+    {
+      imports = [
+        cell.nixosProfiles.base
+        cell.nixosProfiles.networking
+        cell.nixosProfiles.services
+        cell.nixosProfiles.security
+        cell.nixosProfiles.kubernetes
+        cell.nixosProfiles.systemTools
+      ];
+    };
 }
