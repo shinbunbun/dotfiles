@@ -6,10 +6,6 @@
   lib,
   ...
 }:
-let
-  kubeMasterIP = "192.168.1.3";
-  kubeMasterHostname = "api.kube";
-in
 {
   networking.hostName = "nixos";
   networking.domain = "shinbunbun.com";
@@ -19,13 +15,10 @@ in
   networking.enableIPv6 = true;
 
   networking.firewall.allowedTCPPorts = [
-    6443 # Kubernetes API
     8888 # General purpose
-    2049 # NFS
   ];
 
   networking.extraHosts = ''
-    ${kubeMasterIP} ${kubeMasterHostname}
     192.168.1.4 nixos-desktop
   '';
 

@@ -7,6 +7,7 @@
   services = import ./nixosProfiles/services.nix { inherit inputs cell; };
   security = import ./nixosProfiles/security.nix { inherit inputs cell; };
   kubernetes = import ./nixosProfiles/kubernetes.nix { inherit inputs cell; };
+  nfs = import ./nixosProfiles/nfs.nix { inherit inputs cell; };
   systemTools = import ./nixosProfiles/system-tools.nix { inherit inputs cell; };
 
   # 既存のモジュール
@@ -56,6 +57,7 @@
         cell.nixosProfiles.services
         cell.nixosProfiles.security
         cell.nixosProfiles.kubernetes
+        cell.nixosProfiles.nfs
         cell.nixosProfiles.systemTools
       ];
     };
