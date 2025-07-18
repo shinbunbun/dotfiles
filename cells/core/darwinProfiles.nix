@@ -90,43 +90,28 @@
       ...
     }:
     let
-
+      sopsWireGuardHelper = import ./sops-wireguard.nix { inherit inputs cell; };
     in
-    {
+    sopsWireGuardHelper.mkSopsWireGuardConfig { inherit config pkgs lib; } {
+      sopsFile = "${inputs.self}/secrets/wireguard.yaml";
+      privateKeyPath = "wireguard/home/macClientPrivKey";
+      publicKeyPath = "wireguard/home/publicKey";
+      endpointPath = "wireguard/home/endpoint";
+      interfaceName = "wg-home";
+      interfaceAddress = "10.100.0.2/32";
+      peerAllowedIPs = [
+        "192.168.1.0/24"
+        "10.100.0.0/24"
+        "10.100.0.1/32"
+      ];
+      persistentKeepalive = 25;
+      isDarwin = true;
+    }
+    // {
+      # Darwin用のSOPS基本設定
       sops = {
         defaultSopsFile = "${inputs.self}/secrets/wireguard.yaml";
         age.keyFile = "/var/lib/sops-nix/key.txt";
-        secrets."wireguard/home/publicKey" = {
-          # key = "wireguard.home.publicKey";
-        };
-        secrets."wireguard/home/endpoint" = {
-          # key = "wireguard.home.endpoint";
-        };
-        secrets."wireguard/home/macClientPrivKey" = {
-          # key = "wireguard.home.macClientPrivKey";
-        };
-
-        templates."wireguard/wg-home.conf" = {
-          content = ''
-            [Interface]
-            Address   = 10.100.0.2/32
-            PrivateKey = ${config.sops.placeholder."wireguard/home/macClientPrivKey"}
-
-            [Peer]
-            PublicKey  = ${config.sops.placeholder."wireguard/home/publicKey"}
-            Endpoint   = ${config.sops.placeholder."wireguard/home/endpoint"}
-            AllowedIPs = 192.168.1.0/24, 10.100.0.0/24, 10.100.0.1/32
-            PersistentKeepalive = 25
-          '';
-          path = "/etc/wireguard/wg-home.conf";
-          owner = "root";
-          group = "wheel";
-          mode = "0600";
-        };
       };
-
-      environment.systemPackages = with pkgs; [
-        wireguard-tools
-      ];
     };
 }
