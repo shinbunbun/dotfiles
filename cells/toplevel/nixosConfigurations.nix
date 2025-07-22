@@ -24,26 +24,25 @@ in
       };
     */
 
-    imports =
-      [
-        inputs.cells.core.nixosProfiles.default
-        inputs.cells.core.nixosProfiles.optimise
-        inputs.cells.core.nixosProfiles.obsidian-livesync
+    imports = [
+      inputs.cells.core.nixosProfiles.default
+      inputs.cells.core.nixosProfiles.optimise
+      inputs.cells.core.nixosProfiles.obsidian-livesync
 
-        inputs.home-manager.nixosModules.home-manager
-        inputs.sops-nix.nixosModules.sops
-      ]
-      ++ (
-        if isVM then
-          [
-            inputs.cells.core.nixosProfiles.vm
-          ]
-        else
-          [
-            ./hardwareConfigurations/homeMachine.nix
-            # inputs.cells.core.nixosProfiles.sops
-          ]
-      );
+      inputs.home-manager.nixosModules.home-manager
+      inputs.sops-nix.nixosModules.sops
+    ]
+    ++ (
+      if isVM then
+        [
+          inputs.cells.core.nixosProfiles.vm
+        ]
+      else
+        [
+          ./hardwareConfigurations/homeMachine.nix
+          # inputs.cells.core.nixosProfiles.sops
+        ]
+    );
 
     home-manager = {
       useGlobalPkgs = true;
