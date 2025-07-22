@@ -100,9 +100,7 @@
       endpointPath = cfg.wireguard.darwin.endpointPath;
       interfaceName = cfg.wireguard.darwin.interfaceName;
       interfaceAddress = "${cfg.wireguard.darwin.clientIp}/32";
-      peerAllowedIPs = 
-        cfg.wireguard.darwin.allowedNetworks ++ 
-        [ "${cfg.wireguard.network.serverIp}/32" ];
+      peerAllowedIPs = cfg.wireguard.darwin.allowedNetworks ++ [ "${cfg.wireguard.network.serverIp}/32" ];
       persistentKeepalive = cfg.wireguard.persistentKeepalive;
       isDarwin = true;
     }
