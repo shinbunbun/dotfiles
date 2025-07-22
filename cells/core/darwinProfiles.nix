@@ -91,20 +91,19 @@
     }:
     let
       sopsWireGuardHelper = import ./sops-wireguard.nix { inherit inputs cell; };
+      cfg = import ./config.nix;
     in
     sopsWireGuardHelper.mkSopsWireGuardConfig { inherit config pkgs lib; } {
       sopsFile = "${inputs.self}/secrets/wireguard.yaml";
-      privateKeyPath = "wireguard/home/macClientPrivKey";
-      publicKeyPath = "wireguard/home/publicKey";
-      endpointPath = "wireguard/home/endpoint";
-      interfaceName = "wg-home";
-      interfaceAddress = "10.100.0.2/32";
-      peerAllowedIPs = [
-        "192.168.1.0/24"
-        "10.100.0.0/24"
-        "10.100.0.1/32"
-      ];
-      persistentKeepalive = 25;
+      privateKeyPath = cfg.wireguard.darwin.privateKeyPath;
+      publicKeyPath = cfg.wireguard.darwin.publicKeyPath;
+      endpointPath = cfg.wireguard.darwin.endpointPath;
+      interfaceName = cfg.wireguard.darwin.interfaceName;
+      interfaceAddress = "${cfg.wireguard.darwin.clientIp}/32";
+      peerAllowedIPs = 
+        cfg.wireguard.darwin.allowedNetworks ++ 
+        [ "${cfg.wireguard.network.serverIp}/32" ];
+      persistentKeepalive = cfg.wireguard.persistentKeepalive;
       isDarwin = true;
     }
     // {
