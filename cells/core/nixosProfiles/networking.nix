@@ -6,20 +6,23 @@
   lib,
   ...
 }:
+let
+  cfg = import ../config.nix;
+in
 {
-  networking.hostName = "nixos";
-  networking.domain = "shinbunbun.com";
+  networking.hostName = cfg.networking.hosts.nixos.hostname;
+  networking.domain = cfg.networking.hosts.nixos.domain;
   networking.useDHCP = false;
-  networking.interfaces.eno1.useDHCP = true;
-  networking.interfaces.wlp1s0.useDHCP = false;
+  networking.interfaces.${cfg.networking.interfaces.primary}.useDHCP = true;
+  networking.interfaces.${cfg.networking.interfaces.wireless}.useDHCP = false;
   networking.enableIPv6 = true;
 
   networking.firewall.allowedTCPPorts = [
-    8888 # General purpose
+    cfg.networking.firewall.generalPort # General purpose
   ];
 
   networking.extraHosts = ''
-    192.168.1.4 nixos-desktop
+    ${cfg.networking.hosts.nixosDesktop.ip} ${cfg.networking.hosts.nixosDesktop.hostname}
   '';
 
   services.avahi = {
