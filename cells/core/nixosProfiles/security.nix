@@ -8,6 +8,7 @@
 }:
 let
   sopsWireGuardHelper = import ../sops-wireguard.nix { inherit inputs cell; };
+  cfg = import ../config.nix;
 in
 {
   # PAM設定
@@ -36,13 +37,13 @@ in
   # WireGuard設定を共通モジュールから適用
   sopsWireGuardHelper.mkSopsWireGuardConfig { inherit config pkgs lib; } {
     sopsFile = "${inputs.self}/secrets/wireguard.yaml";
-    privateKeyPath = "wireguard/home/nixosClientPrivKey";
-    publicKeyPath = "wireguard/home/publicKey";
-    interfaceName = "wg0";
-    interfaceAddress = "10.100.0.4/24";
-    peerEndpoint = "192.168.1.1:13231";
-    peerAllowedIPs = [ "10.100.0.1/32" ];
-    persistentKeepalive = 25;
+    privateKeyPath = cfg.wireguard.nixos.privateKeyPath;
+    publicKeyPath = cfg.wireguard.nixos.publicKeyPath;
+    interfaceName = cfg.wireguard.nixos.interfaceName;
+    interfaceAddress = "${cfg.wireguard.nixos.clientIp}/24";
+    peerEndpoint = cfg.wireguard.nixos.serverEndpoint;
+    peerAllowedIPs = [ "${cfg.wireguard.network.serverIp}/32" ];
+    persistentKeepalive = cfg.wireguard.persistentKeepalive;
     isDarwin = false;
   }
 )
