@@ -6,16 +6,18 @@
   lib,
   ...
 }:
+let
+  cfg = import ../config.nix;
+in
 {
   # NFS server configuration
   services.nfs.server.enable = true;
-  services.nfs.server.exports = ''
-    /export/k8s  192.168.1.4(rw,nohide,insecure,no_subtree_check,no_root_squash)
-    /export/k8s  192.168.1.3(rw,nohide,insecure,no_subtree_check,no_root_squash)
-  '';
+  services.nfs.server.exports = lib.concatMapStringsSep "\n" (
+    client: "${cfg.nfs.exportPath}  ${client.ip}(${cfg.nfs.options})"
+  ) cfg.nfs.clients;
 
   # Open NFS port in firewall
   networking.firewall.allowedTCPPorts = [
-    2049 # NFS
+    cfg.networking.firewall.nfsPort # NFS
   ];
 }
