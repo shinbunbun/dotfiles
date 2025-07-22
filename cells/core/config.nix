@@ -14,13 +14,13 @@
         hostname = "nixos-desktop";
       };
     };
-    
+
     # インターフェース設定
     interfaces = {
       primary = "eno1";
       wireless = "wlp1s0";
     };
-    
+
     # ファイアウォール設定
     firewall = {
       generalPort = 8888;
@@ -28,13 +28,13 @@
       nfsPort = 2049;
     };
   };
-  
+
   # SSH設定
   ssh = {
     port = 31415;
     authorizedKeysPath = "/etc/ssh/authorized_keys.d/%u";
   };
-  
+
   # Fail2ban設定
   fail2ban = {
     ignoreNetworks = [
@@ -42,7 +42,7 @@
       "163.143.0.0/16"
     ];
   };
-  
+
   # Kubernetes設定
   kubernetes = {
     master = {
@@ -50,7 +50,7 @@
       hostname = "api.kube";
     };
   };
-  
+
   # NFS設定
   nfs = {
     exportPath = "/export/k8s";
