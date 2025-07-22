@@ -6,28 +6,28 @@
   lib,
   ...
 }:
+let
+  cfg = import ../config.nix;
+in
 {
   # SSH service
   services.openssh = {
     enable = true;
-    ports = [ 31415 ];
+    ports = [ cfg.ssh.port ];
     settings = {
       X11Forwarding = true;
       PermitRootLogin = "no";
       PasswordAuthentication = false;
     };
     extraConfig = ''
-      AuthorizedKeysFile /etc/ssh/authorized_keys.d/%u
+      AuthorizedKeysFile ${cfg.ssh.authorizedKeysPath}
     '';
   };
 
   # Fail2ban for SSH protection
   services.fail2ban = {
     enable = true;
-    ignoreIP = [
-      "192.168.11.0/24"
-      "163.143.0.0/16"
-    ];
+    ignoreIP = cfg.fail2ban.ignoreNetworks;
   };
 
   # Docker

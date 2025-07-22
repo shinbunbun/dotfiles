@@ -7,8 +7,7 @@
   ...
 }:
 let
-  kubeMasterIP = "192.168.1.3";
-  kubeMasterHostname = "api.kube";
+  cfg = import ../config.nix;
 in
 {
   # Kubernetes tools
@@ -20,11 +19,11 @@ in
 
   # Kubernetes API port
   networking.firewall.allowedTCPPorts = [
-    6443 # Kubernetes API
+    cfg.networking.firewall.kubernetesApiPort # Kubernetes API
   ];
 
   # Kubernetes hosts configuration
   networking.extraHosts = ''
-    ${kubeMasterIP} ${kubeMasterHostname}
+    ${cfg.kubernetes.master.ip} ${cfg.kubernetes.master.hostname}
   '';
 }
