@@ -25,15 +25,13 @@ in
       imports = [
         inputs.cells.core.homeProfiles.default
 
-        inputs.cells.dev.homeProfiles.git
-        inputs.cells.dev.homeProfiles.zsh
-        inputs.cells.dev.homeProfiles.vim
-        inputs.cells.dev.homeProfiles.google_cloud_sdk
-        inputs.cells.dev.homeProfiles.manage_secrets
-        inputs.cells.dev.homeProfiles.cocoapods
-        inputs.cells.dev.homeProfiles.claude_code
-        # inputs.cells.dev.homeProfiles.biome
-        # inputs.cells.dev.homeProfiles.graphql
+        inputs.cells.dev.homeProfiles.versionControl
+        inputs.cells.dev.homeProfiles.shellTools
+        inputs.cells.dev.homeProfiles.editors
+        inputs.cells.dev.homeProfiles.cloudTools
+        inputs.cells.dev.homeProfiles.securityTools
+        inputs.cells.dev.homeProfiles.developmentTools
+        inputs.cells.dev.homeProfiles.aiTools
 
         inputs.cells.shinbunbun.homeProfiles.default
       ];
