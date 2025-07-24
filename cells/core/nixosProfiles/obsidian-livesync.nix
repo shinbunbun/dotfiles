@@ -152,7 +152,7 @@
         NETRC_FILE=$(mktemp)
         chmod 600 "$NETRC_FILE"
         echo "machine localhost login admin password $PASSWORD" > "$NETRC_FILE"
-        
+
         # netrc-fileオプションを使用して安全に認証
         echo "Creating obsidian-livesync database..."
         ${pkgs.curl}/bin/curl -f --netrc-file "$NETRC_FILE" \
