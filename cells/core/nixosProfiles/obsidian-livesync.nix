@@ -60,10 +60,10 @@
 
     # CouchDB environment file template
     templates."couchdb/env" = {
-      content = ''
-        COUCHDB_USER=admin
-        COUCHDB_PASSWORD=${config.sops.placeholder."couchdb_admin_password"}
-      '';
+      content = lib.generators.toKeyValue { } {
+        COUCHDB_USER = "admin";
+        COUCHDB_PASSWORD = config.sops.placeholder."couchdb_admin_password";
+      };
       path = "/run/secrets/rendered/couchdb/env";
       owner = "root";
       group = "root";
@@ -72,13 +72,11 @@
 
     # Cloudflare credentials file template
     templates."cloudflare/credentials.json" = {
-      content = ''
-        {
-          "AccountTag": "${config.sops.placeholder."cloudflare_account_tag"}",
-          "TunnelSecret": "${config.sops.placeholder."cloudflare_tunnel_secret"}",
-          "TunnelID": "${config.sops.placeholder."cloudflare_tunnel_id"}"
-        }
-      '';
+      content = builtins.toJSON {
+        AccountTag = config.sops.placeholder."cloudflare_account_tag";
+        TunnelSecret = config.sops.placeholder."cloudflare_tunnel_secret";
+        TunnelID = config.sops.placeholder."cloudflare_tunnel_id";
+      };
       path = "/run/secrets/rendered/cloudflare/credentials.json";
       owner = "root";
       group = "root";
