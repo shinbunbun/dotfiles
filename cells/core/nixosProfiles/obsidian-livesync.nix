@@ -126,6 +126,11 @@
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
+      # systemdのLoadCredentialを使用してシークレットを安全に渡す
+      LoadCredential = [
+        "couchdb_admin_password:${config.sops.secrets."couchdb_admin_password".path}"
+        "couchdb_database_name:${config.sops.secrets."couchdb_database_name".path}"
+      ];
       ExecStart = pkgs.writeScript "couchdb-init" ''
         #!${pkgs.bash}/bin/bash
         set -e
@@ -140,32 +145,37 @@
           sleep 2
         done
 
-        # Read password from sops secret
-        PASSWORD=$(cat ${config.sops.secrets."couchdb_admin_password".path})
+        # systemdのCREDENTIALS_DIRECTORYからパスワードを読み込む
+        PASSWORD=$(cat "$CREDENTIALS_DIRECTORY/couchdb_admin_password")
 
-        # Create obsidian-livesync database
+        # 認証情報用の一時ファイルを作成（安全なディレクトリに）
+        NETRC_FILE=$(mktemp)
+        chmod 600 "$NETRC_FILE"
+        echo "machine localhost login admin password $PASSWORD" > "$NETRC_FILE"
+
+        # netrc-fileオプションを使用して安全に認証
         echo "Creating obsidian-livesync database..."
-        ${pkgs.curl}/bin/curl -f -u admin:$PASSWORD \
+        ${pkgs.curl}/bin/curl -f --netrc-file "$NETRC_FILE" \
           -X PUT http://localhost:5984/obsidian-livesync 2>/dev/null || {
           echo "Database obsidian-livesync already exists or creation failed"
         }
 
         # Create database for the configured database name
-        DATABASE_NAME=$(cat ${config.sops.secrets."couchdb_database_name".path})
+        DATABASE_NAME=$(cat "$CREDENTIALS_DIRECTORY/couchdb_database_name")
         echo "Creating $DATABASE_NAME database..."
-        ${pkgs.curl}/bin/curl -f -u admin:$PASSWORD \
+        ${pkgs.curl}/bin/curl -f --netrc-file "$NETRC_FILE" \
           -X PUT http://localhost:5984/$DATABASE_NAME 2>/dev/null || {
           echo "Database $DATABASE_NAME already exists or creation failed"
         }
 
         # Configure CORS settings via CouchDB API
         echo "Configuring CORS settings..."
-        ${pkgs.curl}/bin/curl -f -u admin:$PASSWORD \
+        ${pkgs.curl}/bin/curl -f --netrc-file "$NETRC_FILE" \
           -X PUT http://localhost:5984/_node/nonode@nohost/_config/httpd/enable_cors \
           -H "Content-Type: application/json" \
           -d '"true"' 2>/dev/null || echo "CORS enable setting failed"
 
-        ${pkgs.curl}/bin/curl -f -u admin:$PASSWORD \
+        ${pkgs.curl}/bin/curl -f --netrc-file "$NETRC_FILE" \
           -X PUT http://localhost:5984/_node/nonode@nohost/_config/cors/origins \
           -H "Content-Type: application/json" \
           -d '"app://obsidian.md,capacitor://localhost,http://localhost,https://private-obsidian.${
@@ -175,20 +185,23 @@
               "shinbunbun.com"
           }"' 2>/dev/null || echo "CORS origins setting failed"
 
-        ${pkgs.curl}/bin/curl -f -u admin:$PASSWORD \
+        ${pkgs.curl}/bin/curl -f --netrc-file "$NETRC_FILE" \
           -X PUT http://localhost:5984/_node/nonode@nohost/_config/cors/credentials \
           -H "Content-Type: application/json" \
           -d '"true"' 2>/dev/null || echo "CORS credentials setting failed"
 
-        ${pkgs.curl}/bin/curl -f -u admin:$PASSWORD \
+        ${pkgs.curl}/bin/curl -f --netrc-file "$NETRC_FILE" \
           -X PUT http://localhost:5984/_node/nonode@nohost/_config/cors/methods \
           -H "Content-Type: application/json" \
           -d '"GET,PUT,POST,HEAD,DELETE,OPTIONS"' 2>/dev/null || echo "CORS methods setting failed"
 
-        ${pkgs.curl}/bin/curl -f -u admin:$PASSWORD \
+        ${pkgs.curl}/bin/curl -f --netrc-file "$NETRC_FILE" \
           -X PUT http://localhost:5984/_node/nonode@nohost/_config/cors/headers \
           -H "Content-Type: application/json" \
           -d '"accept,authorization,content-type,origin,referer,x-couch-request-id,x-requested-with"' 2>/dev/null || echo "CORS headers setting failed"
+
+        # 一時ファイルを削除
+        rm -f "$NETRC_FILE"
 
         echo "CouchDB initialization completed successfully!"
       '';
