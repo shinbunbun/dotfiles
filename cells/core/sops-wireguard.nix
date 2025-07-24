@@ -43,22 +43,18 @@ let
         ];
 
         templates."wireguard/${interfaceName}.conf" = {
-          content = ''
-            [Interface]
-            PrivateKey = ${config.sops.placeholder.${privateKeyPath}}
-            Address = ${interfaceAddress}
-
-            [Peer]
-            PublicKey = ${config.sops.placeholder.${publicKeyPath}}
-            ${
-              if peerEndpoint != null then
-                "Endpoint = ${peerEndpoint}"
-              else
-                "Endpoint = ${config.sops.placeholder.${endpointPath}}"
-            }
-            AllowedIPs = ${lib.concatStringsSep ", " peerAllowedIPs}
-            PersistentKeepalive = ${toString persistentKeepalive}
-          '';
+          content = lib.generators.toINI { } {
+            Interface = {
+              PrivateKey = config.sops.placeholder.${privateKeyPath};
+              Address = interfaceAddress;
+            };
+            Peer = {
+              PublicKey = config.sops.placeholder.${publicKeyPath};
+              Endpoint = if peerEndpoint != null then peerEndpoint else config.sops.placeholder.${endpointPath};
+              AllowedIPs = lib.concatStringsSep ", " peerAllowedIPs;
+              PersistentKeepalive = persistentKeepalive;
+            };
+          };
           path = configPath;
           owner = "root";
           group = if isDarwin then "wheel" else "root";
