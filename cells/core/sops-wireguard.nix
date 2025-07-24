@@ -50,11 +50,7 @@ let
             };
             Peer = {
               PublicKey = config.sops.placeholder.${publicKeyPath};
-              Endpoint =
-                if peerEndpoint != null then
-                  peerEndpoint
-                else
-                  config.sops.placeholder.${endpointPath};
+              Endpoint = if peerEndpoint != null then peerEndpoint else config.sops.placeholder.${endpointPath};
               AllowedIPs = lib.concatStringsSep ", " peerAllowedIPs;
               PersistentKeepalive = persistentKeepalive;
             };
