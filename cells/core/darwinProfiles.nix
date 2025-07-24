@@ -108,7 +108,7 @@
       # Darwin用のSOPS基本設定
       sops = {
         defaultSopsFile = "${inputs.self}/secrets/wireguard.yaml";
-        age.keyFile = "/var/lib/sops-nix/key.txt";
+        age.keyFile = cfg.sops.keyFile;
       };
     };
 }
