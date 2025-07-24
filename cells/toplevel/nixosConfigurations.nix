@@ -8,7 +8,8 @@
 }:
 let
   isVM = builtins.getEnv "NIXOS_BUILD_VM" == "1";
-  homeMachineUsername = "bunbun";
+  cfg = import ../core/config.nix;
+  homeMachineUsername = cfg.users.nixos.username;
 in
 {
   homeMachine = {

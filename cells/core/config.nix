@@ -1,6 +1,18 @@
 # cells/core/config.nix
 # 共通設定値を管理するファイル
 {
+  # ユーザー設定
+  users = {
+    nixos = {
+      username = "bunbun";
+      homeDirectory = "/home/bunbun";
+    };
+    darwin = {
+      username = "shinbunbun";
+      homeDirectory = "/Users/shinbunbun";
+    };
+  };
+
   # ネットワーク設定
   networking = {
     # ホスト情報
@@ -41,6 +53,11 @@
       "192.168.11.0/24"
       "163.143.0.0/16"
     ];
+  };
+
+  # SOPS設定
+  sops = {
+    keyFile = "/var/lib/sops-nix/key.txt";
   };
 
   # Kubernetes設定

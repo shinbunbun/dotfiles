@@ -3,7 +3,8 @@
   cell,
 }:
 let
-  username = "shinbunbun";
+  cfg = import ../core/config.nix;
+  username = cfg.users.darwin.username;
 in
 {
   macOS = {
@@ -40,7 +41,7 @@ in
     users.users = {
       ${username} = {
         name = username;
-        home = "/Users/${username}";
+        home = cfg.users.darwin.homeDirectory;
         shell = inputs.nixpkgs.pkgs.zsh;
         createHome = true;
       };
