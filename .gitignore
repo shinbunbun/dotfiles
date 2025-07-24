@@ -13,5 +13,7 @@ sops-nix
 .envrc
 *.swp
 *.swo
+
+# VM関連ファイル
 nixos-efi-vars.fd
 nixos.qcow2
