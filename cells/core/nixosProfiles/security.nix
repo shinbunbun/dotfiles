@@ -22,7 +22,7 @@ in
   # SOPS設定
   sops = {
     defaultSopsFile = "${inputs.self}/secrets/ssh-keys.yaml";
-    age.keyFile = "/var/lib/sops-nix/key.txt";
+    age.keyFile = cfg.sops.keyFile;
 
     secrets."ssh_keys/bunbun" = {
       path = "/etc/ssh/authorized_keys.d/bunbun";
