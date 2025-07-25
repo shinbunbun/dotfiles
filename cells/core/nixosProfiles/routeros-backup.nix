@@ -87,9 +87,9 @@ let
 
     # Push to remote
     ${lib.optionalString cfg.pushToRemote ''
-        echo "Pushing to remote repository..."
-        export GIT_SSH_COMMAND="${sshCommand}"
-        ${pkgs.git}/bin/git push origin main || error_exit "Failed to push to remote repository"
+      echo "Pushing to remote repository..."
+      export GIT_SSH_COMMAND="${sshCommand}"
+      ${pkgs.git}/bin/git push origin main || error_exit "Failed to push to remote repository"
     ''}
 
     echo "Backup completed successfully: $BACKUP_FILE"
