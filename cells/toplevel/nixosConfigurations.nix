@@ -29,9 +29,21 @@ in
       inputs.cells.core.nixosProfiles.default
       inputs.cells.core.nixosProfiles.optimise
       inputs.cells.core.nixosProfiles.obsidian-livesync
+      inputs.cells.core.nixosProfiles.routeros-backup
 
       inputs.home-manager.nixosModules.home-manager
       inputs.sops-nix.nixosModules.sops
+
+      # RouterOSバックアップ設定
+      (
+        { config, ... }:
+        {
+          services.routerosBackup = {
+            enable = true;
+            gitRepo = "git@github.com:shinbunbun/routeros-backups.git"; # GitHubユーザー名を変更してください
+          };
+        }
+      )
     ]
     ++ (
       if isVM then

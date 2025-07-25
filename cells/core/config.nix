@@ -111,4 +111,16 @@
     # 共通のkeepalive設定
     persistentKeepalive = 25;
   };
+
+  # RouterOSバックアップ設定
+  routerosBackup = {
+    routerIP = "192.168.1.1";
+    routerUser = "admin";
+    sshKeyPath = "/home/bunbun/.ssh/id_ed25519";
+    backupDir = "/var/lib/routeros-backup";
+    git = {
+      userName = "RouterOS Backup Service";
+      userEmail = "routeros-backup@localhost";
+    };
+  };
 }
