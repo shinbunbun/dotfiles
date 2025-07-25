@@ -12,7 +12,7 @@
 
   # 既存のモジュール
   obsidian-livesync = import ./nixosProfiles/obsidian-livesync.nix { inherit inputs cell; };
-  routeros-backup = import ./nixosProfiles/routeros-backup.nix;
+  routeros-backup = import ./nixosProfiles/routeros-backup.nix { inherit inputs cell; };
   optimise = {
     nix.settings.auto-optimise-store = true;
     nix.gc = {
