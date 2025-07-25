@@ -136,5 +136,8 @@
       userName = "RouterOS Backup Service";
       userEmail = "routeros-backup@localhost";
     };
+    # リトライ設定
+    maxRetries = 3;
+    retryDelay = 30;
   };
 }

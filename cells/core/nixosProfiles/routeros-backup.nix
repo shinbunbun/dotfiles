@@ -30,11 +30,40 @@ let
     BACKUP_DIR="${cfg.backupDir}"
     DATE=$(date +%Y%m%d_%H%M%S)
     BACKUP_FILE="routeros_backup_''${DATE}.rsc"
+    MAX_RETRIES=${toString cfg.maxRetries}
+    RETRY_DELAY=${toString cfg.retryDelay}
 
     # Helper function for error messages
     error_exit() {
         echo "ERROR: $1" >&2
+        ${lib.optionalString cfg.enableNotifications ''
+          # Send notification on error
+          if command -v ${cfg.notificationCommand} >/dev/null 2>&1; then
+              ${cfg.notificationCommand} "RouterOS Backup Failed" "$1" || true
+          fi
+        ''}
         exit 1
+    }
+
+    # Retry function
+    retry_command() {
+        local cmd="$1"
+        local description="$2"
+        local retries=0
+        
+        while [ $retries -lt $MAX_RETRIES ]; do
+            if eval "$cmd"; then
+                return 0
+            fi
+            
+            retries=$((retries + 1))
+            if [ $retries -lt $MAX_RETRIES ]; then
+                echo "Attempt $retries failed for: $description. Retrying in $RETRY_DELAY seconds..."
+                sleep $RETRY_DELAY
+            fi
+        done
+        
+        return 1
     }
 
     # Create backup directory if it doesn't exist
@@ -56,14 +85,14 @@ let
 
     # Export RouterOS configuration
     echo "Exporting RouterOS configuration from $ROUTER_IP..."
-    ${sshCommand} "$ROUTER_USER@$ROUTER_IP" "/export file=$BACKUP_FILE" || error_exit "Failed to export configuration from RouterOS"
+    retry_command "${sshCommand} '$ROUTER_USER@$ROUTER_IP' '/export file=$BACKUP_FILE'" "RouterOS export" || error_exit "Failed to export configuration from RouterOS after $MAX_RETRIES attempts"
 
     # Wait for file to be written
     sleep 2
 
     # Download the backup file
     echo "Downloading backup file..."
-    ${scpCommand} "$ROUTER_USER@$ROUTER_IP:/$BACKUP_FILE" . || error_exit "Failed to download backup file"
+    retry_command "${scpCommand} '$ROUTER_USER@$ROUTER_IP:/$BACKUP_FILE' ." "SCP download" || error_exit "Failed to download backup file after $MAX_RETRIES attempts"
 
     # Verify downloaded file
     if [ ! -f "$BACKUP_FILE" ]; then
@@ -89,10 +118,16 @@ let
     ${lib.optionalString cfg.pushToRemote ''
       echo "Pushing to remote repository..."
       export GIT_SSH_COMMAND="${sshCommand}"
-      ${pkgs.git}/bin/git push origin main || error_exit "Failed to push to remote repository"
+      retry_command "${pkgs.git}/bin/git push origin main" "Git push" || error_exit "Failed to push to remote repository after $MAX_RETRIES attempts"
     ''}
 
     echo "Backup completed successfully: $BACKUP_FILE"
+    ${lib.optionalString cfg.enableNotifications ''
+      # Send success notification
+      if command -v ${cfg.notificationCommand} >/dev/null 2>&1; then
+          ${cfg.notificationCommand} "RouterOS Backup Success" "Backup completed: $BACKUP_FILE" || true
+      fi
+    ''}
   '';
 in
 {
@@ -163,6 +198,30 @@ in
       default = configValues.users.nixos.username;
       description = "User to run the backup service as";
     };
+
+    maxRetries = mkOption {
+      type = types.int;
+      default = configValues.routerosBackup.maxRetries;
+      description = "Maximum number of retry attempts for failed operations";
+    };
+
+    retryDelay = mkOption {
+      type = types.int;
+      default = configValues.routerosBackup.retryDelay;
+      description = "Delay in seconds between retry attempts";
+    };
+
+    enableNotifications = mkOption {
+      type = types.bool;
+      default = false;
+      description = "Enable notifications for backup status";
+    };
+
+    notificationCommand = mkOption {
+      type = types.str;
+      default = "notify-send";
+      description = "Command to use for sending notifications";
+    };
   };
 
   config = mkIf cfg.enable {
@@ -170,6 +229,9 @@ in
       description = "RouterOS Configuration Backup";
       after = [ "network-online.target" ];
       wants = [ "network-online.target" ];
+
+      # Error notification
+      onFailure = lib.optional cfg.enableNotifications "routeros-backup-notify-failure@%n.service";
 
       serviceConfig = {
         Type = "oneshot";
@@ -192,6 +254,11 @@ in
         RestrictRealtime = true;
         RestrictSUIDSGID = true;
         RemoveIPC = true;
+
+        # Restart policy
+        Restart = "on-failure";
+        RestartSec = "5min";
+        RestartPreventExitStatus = "0";
       };
     };
 
@@ -210,5 +277,18 @@ in
     systemd.tmpfiles.rules = [
       "d ${cfg.backupDir} 0750 ${cfg.user} users -"
     ];
+
+    # Failure notification service template
+    systemd.services."routeros-backup-notify-failure@" = mkIf cfg.enableNotifications {
+      description = "Notify RouterOS backup failure for %i";
+      serviceConfig = {
+        Type = "oneshot";
+        ExecStart = pkgs.writeShellScript "notify-failure" ''
+          SERVICE_NAME="$1"
+          ${cfg.notificationCommand} "RouterOS Backup Failed" "Service $SERVICE_NAME failed. Check logs: journalctl -u $SERVICE_NAME" || true
+        '';
+        User = cfg.user;
+      };
+    };
   };
 }
