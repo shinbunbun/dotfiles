@@ -6,8 +6,11 @@
   lib,
   ...
 }:
+let
+  configValues = import ../config.nix;
+in
 {
-  system.stateVersion = "21.11";
+  system.stateVersion = configValues.system.nixosStateVersion;
   system.autoUpgrade.enable = false;
   system.autoUpgrade.allowReboot = false;
 
@@ -18,7 +21,7 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  time.timeZone = "Asia/Tokyo";
+  time.timeZone = configValues.system.timeZone;
 
   users.users.bunbun = {
     isNormalUser = true;
