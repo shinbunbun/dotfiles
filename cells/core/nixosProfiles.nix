@@ -9,6 +9,7 @@
   kubernetes = import ./nixosProfiles/kubernetes.nix { inherit inputs cell; };
   nfs = import ./nixosProfiles/nfs.nix { inherit inputs cell; };
   systemTools = import ./nixosProfiles/system-tools.nix { inherit inputs cell; };
+  wireguard = import ./nixosProfiles/wireguard.nix { inherit inputs cell; };
 
   # 既存のモジュール
   obsidian-livesync = import ./nixosProfiles/obsidian-livesync.nix { inherit inputs cell; };
