@@ -13,6 +13,20 @@
     };
   };
 
+  # Git設定
+  git = {
+    userName = "shinbunbun";
+    userEmail = "34409044+shinbunbun@users.noreply.github.com";
+    coreEditor = "code --wait";
+  };
+
+  # システムバージョン設定
+  system = {
+    nixosStateVersion = "21.11";
+    homeStateVersion = "24.11";
+    timeZone = "Asia/Tokyo";
+  };
+
   # ネットワーク設定
   networking = {
     # ホスト情報
