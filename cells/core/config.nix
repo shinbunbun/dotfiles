@@ -305,6 +305,16 @@ let
           assertType "monitoring.alertmanager.port" 9093 isValidPort
             "Must be a valid port number (1-65535)";
       };
+
+      # SNMP Exporter設定
+      snmpExporter = {
+        port =
+          assertType "monitoring.snmpExporter.port" 9116 isValidPort
+            "Must be a valid port number (1-65535)";
+        communityString =
+          assertType "monitoring.snmpExporter.communityString" "prometheus" builtins.isString
+            "Must be a string";
+      };
     };
   };
 

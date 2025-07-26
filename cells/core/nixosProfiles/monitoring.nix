@@ -57,6 +57,33 @@ in
           }
         ];
       }
+      {
+        job_name = "snmp_routeros";
+        static_configs = [
+          {
+            targets = [ "${cfg.routerosBackup.routerIP}" ]; # RouterOSのIPアドレス
+          }
+        ];
+        metrics_path = "/snmp";
+        params = {
+          module = [ "mikrotik" ];
+          auth = [ "public_v2" ];
+        };
+        relabel_configs = [
+          {
+            source_labels = [ "__address__" ];
+            target_label = "__param_target";
+          }
+          {
+            source_labels = [ "__param_target" ];
+            target_label = "instance";
+          }
+          {
+            target_label = "__address__";
+            replacement = "localhost:${toString cfg.monitoring.snmpExporter.port}"; # SNMP Exporter
+          }
+        ];
+      }
     ];
   };
 
@@ -81,6 +108,13 @@ in
       "--collector.filesystem.mount-points-exclude=^/(dev|proc|sys|run/user/.+)($|/)"
       "--collector.netdev.device-exclude=^(veth.*|br.*|docker.*|virbr.*|lo)$"
     ];
+  };
+
+  # SNMP Exporter設定
+  services.prometheus.exporters.snmp = {
+    enable = true;
+    port = cfg.monitoring.snmpExporter.port;
+    configurationPath = ./snmp-exporter-config.yml;
   };
 
   # Grafana設定
@@ -143,13 +177,16 @@ in
     cfg.monitoring.prometheus.port # Prometheus (内部アクセスのみ)
     cfg.monitoring.nodeExporter.port # Node Exporter (内部アクセスのみ)
     cfg.monitoring.grafana.port # Grafana (Cloudflare Tunnel経由)
+    cfg.monitoring.snmpExporter.port # SNMP Exporter (内部アクセスのみ)
   ];
 
   # システムパッケージにPrometheusツールを追加
   environment.systemPackages = [
     pkgs.prometheus
     pkgs.prometheus-node-exporter
+    pkgs.prometheus-snmp-exporter
     pkgs.grafana
+    pkgs.net-snmp # snmpwalkなどのツール
   ];
 
   # Cloudflare Tunnel用のSOPS secrets設定
