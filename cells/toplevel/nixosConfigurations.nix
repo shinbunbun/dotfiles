@@ -24,6 +24,7 @@ in
       inputs.cells.core.nixosProfiles.optimise
       inputs.cells.core.nixosProfiles.obsidian-livesync
       inputs.cells.core.nixosProfiles.routeros-backup
+      inputs.cells.core.nixosProfiles.monitoring
 
       inputs.home-manager.nixosModules.home-manager
       inputs.sops-nix.nixosModules.sops
