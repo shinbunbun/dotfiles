@@ -10,6 +10,7 @@
   - NFS設定: エクスポート、許可ホスト
   - WireGuard設定: VPN接続情報
   - RouterOSバックアップ設定
+  - 監視システム設定: Prometheus、Grafana、Alertmanager
   - Fail2ban設定: 除外ネットワーク
   - SOPS設定: 秘密鍵パス
 
@@ -261,6 +262,49 @@ let
       retryDelay = assertType "routerosBackup.retryDelay" 30 (
         n: builtins.isInt n && n > 0
       ) "Must be a positive integer";
+    };
+
+    # 監視システム設定
+    monitoring = {
+      # Prometheus設定
+      prometheus = {
+        port =
+          assertType "monitoring.prometheus.port" 9090 isValidPort
+            "Must be a valid port number (1-65535)";
+        retentionDays = assertType "monitoring.prometheus.retentionDays" 30 (
+          n: builtins.isInt n && n > 0
+        ) "Must be a positive integer";
+        scrapeInterval =
+          assertType "monitoring.prometheus.scrapeInterval" "15s" builtins.isString
+            "Must be a string";
+        evaluationInterval =
+          assertType "monitoring.prometheus.evaluationInterval" "15s" builtins.isString
+            "Must be a string";
+      };
+
+      # Node Exporter設定
+      nodeExporter = {
+        port =
+          assertType "monitoring.nodeExporter.port" 9100 isValidPort
+            "Must be a valid port number (1-65535)";
+      };
+
+      # Grafana設定
+      grafana = {
+        port =
+          assertType "monitoring.grafana.port" 3000 isValidPort
+            "Must be a valid port number (1-65535)";
+        domain =
+          assertType "monitoring.grafana.domain" "grafana.shinbunbun.com" builtins.isString
+            "Must be a string";
+      };
+
+      # Alertmanager設定
+      alertmanager = {
+        port =
+          assertType "monitoring.alertmanager.port" 9093 isValidPort
+            "Must be a valid port number (1-65535)";
+      };
     };
   };
 
