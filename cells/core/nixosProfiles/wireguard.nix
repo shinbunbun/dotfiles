@@ -1,4 +1,17 @@
 # cells/core/nixosProfiles/wireguard.nix
+/*
+  WireGuard VPN設定モジュール
+
+  このモジュールはWireGuard VPNの設定を提供します：
+  - SOPSを使用したセキュアな鍵管理
+  - 自動的なインターフェース設定
+  - ピア設定（サーバーとの接続）
+  - ルーティング設定
+
+  sops-wireguard.nixヘルパーを使用して、NixOSとDarwinで
+  共通の設定を実現します。config.nixの値を参照して
+  クライアント固有の設定を行います。
+*/
 { inputs, cell }:
 {
   config,

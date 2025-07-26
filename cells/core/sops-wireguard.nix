@@ -1,5 +1,19 @@
 # cells/core/sops-wireguard.nix
-# SOPS and WireGuard shared configuration helper
+/*
+  SOPS + WireGuard共通設定ヘルパー
+
+  このモジュールはNixOSとDarwinでWireGuard設定を
+  共通化するためのヘルパー関数を提供します：
+
+  mkSopsWireGuardConfig:
+  - SOPSを使用した秘密鍵管理
+  - WireGuardインターフェースの設定
+  - ピア設定とルーティング
+  - Darwin用の特別な設定対応
+
+  このヘルパーを使用することで、WireGuard設定の
+  重複を避け、一貫性を保ちます。
+*/
 { inputs, cell }:
 let
   mkSopsWireGuardConfig =
