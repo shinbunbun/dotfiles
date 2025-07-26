@@ -11,8 +11,8 @@
 { inputs, cell }:
 { pkgs, ... }:
 {
-  home.packages = with pkgs; [
-    claude-code
+  home.packages = [
+    pkgs.claude-code
   ];
 
   home.file.".claude/CLAUDE.md" = {
