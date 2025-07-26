@@ -19,12 +19,6 @@ in
       home = inputs.home-manager;
     };
 
-    /*
-      meta = {
-        description = "Home machine NixOS configuration";
-      };
-    */
-
     imports = [
       inputs.cells.core.nixosProfiles.default
       inputs.cells.core.nixosProfiles.optimise
@@ -53,7 +47,6 @@ in
       else
         [
           ./hardwareConfigurations/homeMachine.nix
-          # inputs.cells.core.nixosProfiles.sops
         ]
     );
 
@@ -74,17 +67,4 @@ in
       };
     };
   };
-
-  # ciMachine = {
-  #   bee = {
-  #     system = "x86_64-linux";
-  #     pkgs = inputs.nixpkgs;
-  #   };
-
-  #   imports = [
-  #     ./hardwareConfigurations/homeMachine.nix
-  #     inputs.cells.core.ciNixosProfiles.ciMachine
-  #   ];
-
-  # };
 }
