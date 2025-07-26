@@ -1,3 +1,20 @@
+/*
+  Nix Flakeエントリポイント
+
+  このflakeは以下の機能を提供します：
+  - NixOSシステム設定
+  - Darwin（macOS）システム設定
+  - home-manager設定
+  - 開発シェル環境
+
+  std（Standard）フレームワークを使用して、
+  モジュラーな設定構造を実現しています。
+
+  使用方法:
+  - nixos-rebuild switch --flake .#<hostname>
+  - darwin-rebuild switch --flake .#<hostname>
+  - nix develop
+*/
 {
   description = "nix-dotfiles-template";
 

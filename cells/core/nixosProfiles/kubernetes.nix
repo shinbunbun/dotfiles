@@ -1,4 +1,14 @@
 # cells/core/nixosProfiles/kubernetes.nix
+/*
+  Kubernetes関連ツール設定モジュール
+
+  このモジュールはKubernetes関連のツールを提供します：
+  - kubectl: KubernetesのCLIツール
+  - helm: Kubernetesパッケージマネージャー
+  - stern: 複数Podのログを同時にテールするツール
+
+  これらのツールをシステム全体で利用可能にします。
+*/
 { inputs, cell }:
 {
   config,
