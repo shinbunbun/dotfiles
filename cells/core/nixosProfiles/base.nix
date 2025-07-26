@@ -48,9 +48,9 @@ in
 
   programs.zsh.enable = true;
 
-  environment.systemPackages = with pkgs; [
-    vim
-    wget
+  environment.systemPackages = [
+    pkgs.vim
+    pkgs.wget
   ];
 
   virtualisation = {
