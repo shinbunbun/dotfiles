@@ -114,7 +114,7 @@ in
   services.prometheus.exporters.snmp = {
     enable = true;
     port = cfg.monitoring.snmpExporter.port;
-    configurationPath = ./snmp-exporter-config.yml;
+    configurationPath = ./snmp.yml;
   };
 
   # Grafana設定
@@ -166,7 +166,15 @@ in
       dashboards.settings.providers = [
         {
           name = "default";
-          options.path = ./dashboards;
+          orgId = 1;
+          folder = "";
+          type = "file";
+          disableDeletion = false;
+          updateIntervalSeconds = 10;
+          allowUiUpdates = true;
+          options = {
+            path = ./dashboards;
+          };
         }
       ];
     };
