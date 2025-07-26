@@ -40,45 +40,68 @@
         cleanup = "zap";
       };
       brews = [
-        "go"
-        "jq"
-        "yamllint"
-        "nvm"
-        "yq"
-        "mas"
+        # 開発ツール
+        "go" # Goプログラミング言語
+        "nvm" # Node.jsバージョンマネージャー
+
+        # CLIツール
+        "jq" # JSONプロセッサ
+        "yq" # YAMLプロセッサ
+        "yamllint" # YAMLリンター
+        "mas" # Mac App Store CLI
       ];
       casks = [
-        "graphql-playground"
-        "altair-graphql-client"
-        "cursor"
-        "copilot-for-xcode"
-        "adobe-creative-cloud"
-        "xquartz"
-        "discord"
-        "vnc-viewer"
-        "claude"
-        "obsidian"
+        # 開発ツール
+        "cursor" # AIパワードエディタ
+        "copilot-for-xcode" # GitHub Copilot for Xcode
+        "graphql-playground" # GraphQLクライアント
+        "altair-graphql-client" # GraphQLクライアント
+        "xquartz" # X11サーバー
+
+        # 生産性ツール
+        "obsidian" # ナレッジマネジメント
+        "claude" # Claude AIアシスタント
+
+        # クリエイティブツール
+        "adobe-creative-cloud" # Adobe Creative Cloud
+
+        # コミュニケーション
+        "discord" # Discordチャット
+
+        # ユーティリティ
+        "vnc-viewer" # VNCクライアント
       ];
       masApps = {
-        "Brother iPrint&Scan" = 1193539993;
-        "CommentScreen" = 1450950860;
+        # Apple製アプリ
         "GarageBand" = 682658836;
-        "Goodnotes" = 1444383602;
         "iMovie" = 408981434;
         "Keynote" = 409183694;
-        "LINE" = 539883307;
+        "Numbers" = 409203825;
+        "Pages" = 409201541;
+
+        # Microsoft Office
         "Microsoft Excel" = 462058435;
         "Microsoft OneNote" = 784801555;
         "Microsoft Outlook" = 985367838;
         "Microsoft PowerPoint" = 462062816;
         "Microsoft Word" = 462054704;
-        "Numbers" = 409203825;
         "OneDrive" = 823766827;
-        "Pages" = 409201541;
-        "RunCat" = 1429033973;
+
+        # 生産性ツール
+        "Goodnotes" = 1444383602;
         "Spark" = 1176895641;
-        "Xcode" = 497799835;
+
+        # コミュニケーション
+        "LINE" = 539883307;
         "Slack for Desktop" = 803453959;
+
+        # 開発ツール
+        "Xcode" = 497799835;
+
+        # ユーティリティ
+        "Brother iPrint&Scan" = 1193539993;
+        "CommentScreen" = 1450950860;
+        "RunCat" = 1429033973;
       };
     };
   };
