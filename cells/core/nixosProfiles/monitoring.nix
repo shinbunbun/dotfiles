@@ -151,4 +151,59 @@ in
     pkgs.prometheus-node-exporter
     pkgs.grafana
   ];
+
+  # Cloudflare Tunnel用のSOPS secrets設定
+  sops = {
+    secrets."monitoring_cloudflare_account_tag" = {
+      key = "cloudflare/account_tag";
+      sopsFile = "${inputs.self}/secrets/monitoring.yaml";
+      owner = "root";
+      group = "root";
+      mode = "0400";
+    };
+
+    secrets."monitoring_cloudflare_tunnel_secret" = {
+      key = "cloudflare/tunnel_secret";
+      sopsFile = "${inputs.self}/secrets/monitoring.yaml";
+      owner = "root";
+      group = "root";
+      mode = "0400";
+    };
+
+    secrets."monitoring_cloudflare_tunnel_id" = {
+      key = "cloudflare/tunnel_id";
+      sopsFile = "${inputs.self}/secrets/monitoring.yaml";
+      owner = "root";
+      group = "root";
+      mode = "0400";
+    };
+
+    # Cloudflare credentials file template
+    templates."monitoring/cloudflare/credentials.json" = {
+      content = builtins.toJSON {
+        AccountTag = config.sops.placeholder."monitoring_cloudflare_account_tag";
+        TunnelSecret = config.sops.placeholder."monitoring_cloudflare_tunnel_secret";
+        TunnelID = config.sops.placeholder."monitoring_cloudflare_tunnel_id";
+      };
+      path = "/run/secrets/rendered/monitoring/cloudflare/credentials.json";
+      owner = "root";
+      group = "root";
+      mode = "0640";
+    };
+  };
+
+  # Cloudflare Tunnel for monitoring services
+  services.cloudflared.tunnels."monitoring" = {
+    default = "http_status:404";
+    credentialsFile = config.sops.templates."monitoring/cloudflare/credentials.json".path;
+    ingress = {
+      # Grafana
+      "${cfg.monitoring.grafana.domain}" = {
+        service = "http://localhost:${toString cfg.monitoring.grafana.port}";
+        originRequest = {
+          noTLSVerify = true;
+        };
+      };
+    };
+  };
 }
