@@ -83,15 +83,72 @@ in
     ];
   };
 
+  # Grafana設定
+  services.grafana = {
+    enable = true;
+    settings = {
+      server = {
+        http_addr = "127.0.0.1";
+        http_port = cfg.monitoring.grafana.port;
+        domain = cfg.monitoring.grafana.domain;
+        root_url = "https://${cfg.monitoring.grafana.domain}";
+      };
+
+      security = {
+        admin_user = "admin";
+        # 初期パスワードは初回ログイン後に変更必須
+        admin_password = "admin";
+      };
+
+      # 匿名アクセスを無効化
+      "auth.anonymous" = {
+        enabled = false;
+      };
+
+      # 基本設定
+      analytics = {
+        reporting_enabled = false;
+        check_for_updates = false;
+      };
+    };
+
+    # Prometheusデータソースの自動設定
+    provision = {
+      enable = true;
+      datasources.settings.datasources = [
+        {
+          name = "Prometheus";
+          type = "prometheus";
+          access = "proxy";
+          url = "http://localhost:${toString cfg.monitoring.prometheus.port}";
+          jsonData = {
+            timeInterval = cfg.monitoring.prometheus.scrapeInterval;
+          };
+          isDefault = true;
+        }
+      ];
+
+      # 基本ダッシュボードの設定
+      dashboards.settings.providers = [
+        {
+          name = "default";
+          options.path = ./dashboards;
+        }
+      ];
+    };
+  };
+
   # ファイアウォール設定
   networking.firewall.allowedTCPPorts = [
     cfg.monitoring.prometheus.port # Prometheus (内部アクセスのみ)
     cfg.monitoring.nodeExporter.port # Node Exporter (内部アクセスのみ)
+    cfg.monitoring.grafana.port # Grafana (Cloudflare Tunnel経由)
   ];
 
   # システムパッケージにPrometheusツールを追加
   environment.systemPackages = [
     pkgs.prometheus
     pkgs.prometheus-node-exporter
+    pkgs.grafana
   ];
 }
