@@ -21,10 +21,10 @@ let
 in
 {
   # Kubernetes tools
-  environment.systemPackages = with pkgs; [
-    kompose
-    kubectl
-    kubernetes
+  environment.systemPackages = [
+    pkgs.kompose
+    pkgs.kubectl
+    pkgs.kubernetes
   ];
 
   # Kubernetes API port

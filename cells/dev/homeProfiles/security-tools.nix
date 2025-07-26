@@ -11,8 +11,8 @@
 { inputs, cell }:
 { pkgs, ... }:
 {
-  home.packages = with pkgs; [
-    age
-    sops
+  home.packages = [
+    pkgs.age
+    pkgs.sops
   ];
 }
