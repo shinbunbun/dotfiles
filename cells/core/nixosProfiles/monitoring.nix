@@ -18,21 +18,22 @@
   ...
 }:
 let
-  cfg = config.services;
+  # config.nixから設定を読み込み
+  cfg = import ../config.nix;
 in
 {
   # Prometheus設定
   services.prometheus = {
     enable = true;
-    port = 9090;
+    port = cfg.monitoring.prometheus.port;
 
     # データ保持期間を30日に設定
-    retentionTime = "30d";
+    retentionTime = "${toString cfg.monitoring.prometheus.retentionDays}d";
 
     # グローバル設定
     globalConfig = {
-      scrape_interval = "15s";
-      evaluation_interval = "15s";
+      scrape_interval = cfg.monitoring.prometheus.scrapeInterval;
+      evaluation_interval = cfg.monitoring.prometheus.evaluationInterval;
     };
 
     # スクレイプ設定
@@ -41,9 +42,9 @@ in
         job_name = "node";
         static_configs = [
           {
-            targets = [ "localhost:9100" ];
+            targets = [ "localhost:${toString cfg.monitoring.nodeExporter.port}" ];
             labels = {
-              instance = "nixos.shinbunbun.com";
+              instance = "${cfg.networking.hosts.nixos.hostname}.${cfg.networking.hosts.nixos.domain}";
             };
           }
         ];
@@ -52,7 +53,7 @@ in
         job_name = "prometheus";
         static_configs = [
           {
-            targets = [ "localhost:9090" ];
+            targets = [ "localhost:${toString cfg.monitoring.prometheus.port}" ];
           }
         ];
       }
@@ -62,7 +63,7 @@ in
   # Node Exporter設定
   services.prometheus.exporters.node = {
     enable = true;
-    port = 9100;
+    port = cfg.monitoring.nodeExporter.port;
     enabledCollectors = [
       "cpu"
       "diskstats"
@@ -84,13 +85,13 @@ in
 
   # ファイアウォール設定
   networking.firewall.allowedTCPPorts = [
-    9090 # Prometheus (内部アクセスのみ)
-    9100 # Node Exporter (内部アクセスのみ)
+    cfg.monitoring.prometheus.port # Prometheus (内部アクセスのみ)
+    cfg.monitoring.nodeExporter.port # Node Exporter (内部アクセスのみ)
   ];
 
   # システムパッケージにPrometheusツールを追加
-  environment.systemPackages = with pkgs; [
-    prometheus
-    prometheus-node-exporter
+  environment.systemPackages = [
+    pkgs.prometheus
+    pkgs.prometheus-node-exporter
   ];
 }
