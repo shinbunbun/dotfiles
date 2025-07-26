@@ -10,7 +10,7 @@
 { inputs, cell }:
 { pkgs, ... }:
 {
-  home.packages = with pkgs; [
-    cocoapods
+  home.packages = [
+    pkgs.cocoapods
   ];
 }

@@ -20,8 +20,8 @@
   ...
 }:
 {
-  environment.systemPackages = with pkgs; [
-    polkit
-    wireguard-tools
+  environment.systemPackages = [
+    pkgs.polkit
+    pkgs.wireguard-tools
   ];
 }

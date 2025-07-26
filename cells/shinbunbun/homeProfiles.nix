@@ -6,15 +6,15 @@
   default =
     { pkgs, ... }:
     {
-      home.packages = with pkgs; [
-        gh
-        llvm
-        nerd-fonts.fira-code
-        nil
-        nixd
-        nixfmt-rfc-style
-        warp-terminal
-        google-chrome
+      home.packages = [
+        pkgs.gh
+        pkgs.llvm
+        pkgs.nerd-fonts.fira-code
+        pkgs.nil
+        pkgs.nixd
+        pkgs.nixfmt-rfc-style
+        pkgs.warp-terminal
+        pkgs.google-chrome
       ];
 
       # Let Home Manager install and manage itself.
