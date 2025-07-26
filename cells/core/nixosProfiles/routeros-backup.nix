@@ -1,4 +1,18 @@
 # cells/core/nixosProfiles/routeros-backup.nix
+/*
+  RouterOSバックアップモジュール
+
+  このモジュールはRouterOSデバイスの自動バックアップを提供します：
+  - 定期的なバックアップスケジュール（systemd timer）
+  - SSH経由でのバックアップ取得
+  - バックアップファイルのバージョン管理
+  - リトライ機構（3回まで再試行）
+  - エラー通知機能（メール・ジャーナル）
+  - 古いバックアップの自動削除
+
+  SOPSを使用してSSH秘密鍵を安全に管理し、config.nixの
+  設定値を参照して動作します。
+*/
 { inputs, cell }:
 {
   config,

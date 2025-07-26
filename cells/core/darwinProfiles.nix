@@ -1,3 +1,19 @@
+/*
+  Darwin（macOS）プロファイルモジュール
+
+  このモジュールはmacOS用の設定プロファイルを提供します：
+  - default: 基本的なmacOS設定
+    - システム設定（stateVersion、ユーザー名）
+    - Nix設定（sandbox、trusted-users）
+    - Touch IDを使用したsudo認証
+    - Homebrew設定（パッケージ、Cask、Mac App Storeアプリ）
+  - optimize: ストレージ最適化設定
+    - Nixストアの自動最適化
+    - 週次のガベージコレクション
+  - wireguard: WireGuard VPN設定
+    - SOPSを使用した鍵管理
+    - sops-wireguardヘルパーを使用した設定
+*/
 {
   inputs,
   cell,

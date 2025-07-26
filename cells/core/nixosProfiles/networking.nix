@@ -1,4 +1,17 @@
 # cells/core/nixosProfiles/networking.nix
+/*
+  ネットワーク設定モジュール
+
+  このモジュールは以下のネットワーク関連設定を提供します：
+  - ホスト名とドメイン名の設定
+  - ネットワークインターフェースの設定（有線・無線）
+  - IPv6サポート
+  - ファイアウォール設定（TCP/UDPポート）
+  - systemd-resolvedによる名前解決
+  - 時刻同期（NTP）設定
+
+  config.nixの値を参照して設定を行います。
+*/
 { inputs, cell }:
 {
   config,
