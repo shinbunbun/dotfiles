@@ -1,4 +1,16 @@
 # cells/core/nixosProfiles/nfs.nix
+/*
+  NFSサーバー設定モジュール
+
+  このモジュールはNFSサーバー機能を提供します：
+  - NFSv4のサポート
+  - /home/shinbunbunディレクトリのエクスポート
+  - ホストベースのアクセス制御
+  - 読み込みサイズの最適化
+
+  config.nixのnfs設定を参照して、許可するホストを
+  設定します。
+*/
 { inputs, cell }:
 {
   config,

@@ -1,4 +1,22 @@
 # cells/core/nixosProfiles.nix
+/*
+  NixOSプロファイルエントリポイント
+
+  このモジュールはNixOS設定プロファイルを統合します：
+  - base: 基本システム設定
+  - networking: ネットワーク設定
+  - services: サービス設定（SSH、Fail2ban、Docker）
+  - security: セキュリティ設定
+  - kubernetes: Kubernetesツール
+  - nfs: NFSサーバー設定
+  - system-tools: システム管理ツール
+  - obsidian-livesync: Obsidian同期サービス
+  - routeros-backup: RouterOSバックアップ
+  - wireguard: WireGuard VPN設定
+
+  各プロファイルは独立したモジュールとして管理され、
+  必要に応じて組み合わせて使用します。
+*/
 { inputs, cell }:
 {
   # 分割されたモジュール

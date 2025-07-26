@@ -1,4 +1,16 @@
 # cells/dev/homeProfiles/version-control.nix
+/*
+  バージョン管理ツール設定モジュール
+
+  このモジュールはGitの設定を提供します：
+  - Gitユーザー情報の設定
+  - GPG署名の設定
+  - Gitエイリアスの定義
+  - git-ignoreヘルパー
+  - github-cliツール
+
+  config.nixからユーザー情報や設定を読み込みます。
+*/
 { inputs, cell }:
 { pkgs, ... }:
 let

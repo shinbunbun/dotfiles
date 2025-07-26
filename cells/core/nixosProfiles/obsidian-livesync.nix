@@ -1,4 +1,17 @@
 # cells/core/nixosProfiles/obsidian-livesync.nix
+/*
+  Obsidian LiveSyncモジュール
+
+  このモジュールはObsidianノートの同期サービスを提供します：
+  - CouchDB 3.3.3を使用したデータベースサーバー
+  - Cloudflare Tunnelを使用した安全なアクセス
+  - SOPSを使用した認証情報の管理
+  - 自動データベース初期化
+  - CORS設定の自動構成
+
+  データは/var/lib/couchdb/dataに保存され、Cloudflare Tunnelを
+  通じて外部から安全にアクセスできます。
+*/
 { inputs, cell }:
 {
   config,
