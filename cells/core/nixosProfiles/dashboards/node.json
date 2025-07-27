@@ -895,69 +895,196 @@
           "color": {
             "mode": "thresholds"
           },
-          "mappings": [
-            {
-              "options": {
-                "0": {
-                  "text": "Active",
-                  "color": "green"
-                },
-                "1": {
-                  "text": "Failed",
-                  "color": "red"
-                }
-              },
-              "type": "value"
-            }
-          ],
+          "custom": {
+            "align": "auto",
+            "displayMode": "auto"
+          },
+          "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
                 "color": "green",
                 "value": null
-              },
-              {
-                "color": "red",
-                "value": 1
               }
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Active"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "0": {
+                        "color": "red",
+                        "index": 1,
+                        "text": "✗"
+                      },
+                      "1": {
+                        "color": "green",
+                        "index": 0,
+                        "text": "✓"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              },
+              {
+                "id": "custom.displayMode",
+                "value": "color-background"
+              },
+              {
+                "id": "custom.width",
+                "value": 80
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Failed"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "0": {
+                        "color": "green",
+                        "index": 0,
+                        "text": "✓"
+                      },
+                      "1": {
+                        "color": "red",
+                        "index": 1,
+                        "text": "✗"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              },
+              {
+                "id": "custom.displayMode",
+                "value": "color-background"
+              },
+              {
+                "id": "custom.width",
+                "value": 80
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "サービス名"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 300
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
+        "h": 12,
+        "w": 24,
         "x": 0,
         "y": 36
       },
       "id": 13,
       "options": {
-        "colorMode": "background",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "text": {},
-        "textMode": "auto"
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Failed"
+          }
+        ]
       },
       "pluginVersion": "8.0.0",
       "targets": [
         {
+          "expr": "node_systemd_unit_state{instance=\"nixos.shinbunbun.com\",state=\"active\"}",
+          "format": "table",
+          "instant": true,
+          "refId": "A"
+        },
+        {
           "expr": "node_systemd_unit_state{instance=\"nixos.shinbunbun.com\",state=\"failed\"}",
-          "refId": "A",
-          "legendFormat": "{{name}}"
+          "format": "table",
+          "instant": true,
+          "refId": "B"
         }
       ],
       "title": "Systemdサービス状態",
-      "type": "stat"
+      "transformations": [
+        {
+          "id": "seriesToColumns",
+          "options": {
+            "byField": "name"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Time 1": true,
+              "Time 2": true,
+              "__name__": true,
+              "__name__ 1": true,
+              "__name__ 2": true,
+              "instance": true,
+              "instance 1": true,
+              "instance 2": true,
+              "state": true,
+              "state 1": true,
+              "state 2": true
+            },
+            "indexByName": {
+              "name": 0,
+              "Value #A": 1,
+              "Value #B": 2
+            },
+            "renameByName": {
+              "name": "サービス名",
+              "Value #A": "Active",
+              "Value #B": "Failed"
+            }
+          }
+        },
+        {
+          "id": "filterByValue",
+          "options": {
+            "filters": [
+              {
+                "config": {
+                  "id": "regex",
+                  "options": {
+                    "value": "^(?!.*\\\\.(scope|slice|device|mount|swap|target)$).*$"
+                  }
+                },
+                "fieldName": "サービス名"
+              }
+            ],
+            "match": "any",
+            "type": "include"
+          }
+        }
+      ],
+      "type": "table"
     },
     {
       "datasource": "Prometheus",
@@ -993,8 +1120,8 @@
       "gridPos": {
         "h": 8,
         "w": 12,
-        "x": 12,
-        "y": 36
+        "x": 0,
+        "y": 48
       },
       "id": 14,
       "options": {
@@ -1072,8 +1199,8 @@
       "gridPos": {
         "h": 8,
         "w": 12,
-        "x": 0,
-        "y": 44
+        "x": 12,
+        "y": 48
       },
       "id": 15,
       "options": {
