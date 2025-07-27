@@ -332,14 +332,14 @@ in
             # RouterOSインターフェースエラー率
             {
               alert = "RouterOSInterfaceErrors";
-              expr = "rate(ifInErrors{job=\"routeros\"}[5m]) > 0.01 or rate(ifOutErrors{job=\"routeros\"}[5m]) > 0.01";
+              expr = "(rate(ifInErrors{job=\"routeros\",ifIndex!=\"12\"}[5m]) > 0.01 or rate(ifOutErrors{job=\"routeros\",ifIndex!=\"12\"}[5m]) > 0.01) or (rate(ifInErrors{job=\"routeros\",ifIndex=\"12\"}[5m]) > 0.1 or rate(ifOutErrors{job=\"routeros\",ifIndex=\"12\"}[5m]) > 0.1)";
               for = "5m";
               labels = {
                 severity = "warning";
               };
               annotations = {
-                summary = "High error rate on RouterOS interface {{ $labels.ifDescr }}";
-                description = "Interface {{ $labels.ifDescr }} is experiencing high error rates.";
+                summary = "High error rate on RouterOS interface ifIndex={{ $labels.ifIndex }}";
+                description = "Interface ifIndex={{ $labels.ifIndex }} is experiencing high error rates ({{ $value }} errors/sec).";
               };
             }
             # RouterOSメモリ使用率
