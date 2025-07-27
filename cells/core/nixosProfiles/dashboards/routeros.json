@@ -68,7 +68,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "sysUpTime{instance=\"192.168.1.1\"}",
+          "expr": "sysUpTime{instance=\"192.168.1.1\",job=\"routeros\"}",
           "refId": "A"
         }
       ],
@@ -131,7 +131,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "avg(hrProcessorLoad{instance=\"192.168.1.1\"})",
+          "expr": "avg(hrProcessorLoad{instance=\"192.168.1.1\",job=\"routeros\"})",
           "refId": "A"
         }
       ],
@@ -194,7 +194,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "(hrStorageUsed{instance=\"192.168.1.1\",hrStorageDescr=\"main memory\"} / hrStorageSize{instance=\"192.168.1.1\",hrStorageDescr=\"main memory\"}) * 100",
+          "expr": "(hrStorageUsed{instance=\"192.168.1.1\",job=\"routeros\",hrStorageIndex=\"65536\"} / hrStorageSize{instance=\"192.168.1.1\",job=\"routeros\",hrStorageIndex=\"65536\"}) * 100",
           "refId": "A"
         }
       ],
@@ -255,7 +255,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "mtxrHlTemperature{instance=\"192.168.1.1\"} / 10",
+          "expr": "mtxrHlTemperature{instance=\"192.168.1.1\",job=\"routeros\"} / 10",
           "refId": "A"
         }
       ],
@@ -331,12 +331,12 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "rate(ifInOctets{instance=\"192.168.1.1\"}[5m]) * 8",
+          "expr": "rate(ifInOctets{instance=\"192.168.1.1\",job=\"routeros\"}[5m]) * 8",
           "refId": "A",
           "legendFormat": "受信 {{ifDescr}}"
         },
         {
-          "expr": "-rate(ifOutOctets{instance=\"192.168.1.1\"}[5m]) * 8",
+          "expr": "-rate(ifOutOctets{instance=\"192.168.1.1\",job=\"routeros\"}[5m]) * 8",
           "refId": "B",
           "legendFormat": "送信 {{ifDescr}}"
         }
@@ -413,7 +413,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "avg(hrProcessorLoad{instance=\"192.168.1.1\"})",
+          "expr": "avg(hrProcessorLoad{instance=\"192.168.1.1\",job=\"routeros\"})",
           "refId": "A",
           "legendFormat": "CPU使用率"
         }
@@ -490,12 +490,12 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "(hrStorageUsed{instance=\"192.168.1.1\"} / hrStorageSize{instance=\"192.168.1.1\"}) * 100",
+          "expr": "(hrStorageUsed{instance=\"192.168.1.1\",job=\"routeros\",hrStorageIndex=\"65536\"} / hrStorageSize{instance=\"192.168.1.1\",job=\"routeros\",hrStorageIndex=\"65536\"}) * 100",
           "refId": "A",
-          "legendFormat": "{{hrStorageDescr}}"
+          "legendFormat": "メモリ"
         }
       ],
-      "title": "ストレージ使用率",
+      "title": "メモリ使用率履歴",
       "type": "timeseries"
     },
     {
@@ -581,19 +581,19 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "ifOperStatus{instance=\"192.168.1.1\"}",
+          "expr": "ifOperStatus{instance=\"192.168.1.1\",job=\"routeros\"}",
           "format": "table",
           "instant": true,
           "refId": "A"
         },
         {
-          "expr": "ifSpeed{instance=\"192.168.1.1\"}",
+          "expr": "ifSpeed{instance=\"192.168.1.1\",job=\"routeros\"}",
           "format": "table",
           "instant": true,
           "refId": "B"
         },
         {
-          "expr": "ifDescr{instance=\"192.168.1.1\"}",
+          "expr": "ifDescr{instance=\"192.168.1.1\",job=\"routeros\"}",
           "format": "table",
           "instant": true,
           "refId": "C"
@@ -694,12 +694,12 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "rate(ifInErrors{instance=\"192.168.1.1\"}[5m])",
+          "expr": "rate(ifInErrors{instance=\"192.168.1.1\",job=\"routeros\"}[5m])",
           "refId": "A",
           "legendFormat": "受信エラー Interface {{ifIndex}}"
         },
         {
-          "expr": "rate(ifOutErrors{instance=\"192.168.1.1\"}[5m])",
+          "expr": "rate(ifOutErrors{instance=\"192.168.1.1\",job=\"routeros\"}[5m])",
           "refId": "B",
           "legendFormat": "送信エラー Interface {{ifIndex}}"
         }
@@ -760,9 +760,9 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "(hrStorageUsed{instance=\"192.168.1.1\"} / hrStorageSize{instance=\"192.168.1.1\"}) * 100",
+          "expr": "(hrStorageUsed{instance=\"192.168.1.1\",job=\"routeros\",hrStorageIndex=\"131072\"} / hrStorageSize{instance=\"192.168.1.1\",job=\"routeros\",hrStorageIndex=\"131072\"}) * 100",
           "refId": "A",
-          "legendFormat": "{{hrStorageDescr}}"
+          "legendFormat": "システムディスク"
         }
       ],
       "title": "ディスク使用率",
@@ -837,12 +837,12 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "mtxrHlTemperature{instance=\"192.168.1.1\"} / 10",
+          "expr": "mtxrHlTemperature{instance=\"192.168.1.1\",job=\"routeros\"} / 10",
           "refId": "A",
           "legendFormat": "システム温度"
         },
         {
-          "expr": "mtxrHlProcessorTemperature{instance=\"192.168.1.1\"} / 10",
+          "expr": "mtxrHlProcessorTemperature{instance=\"192.168.1.1\",job=\"routeros\"} / 10",
           "refId": "B",
           "legendFormat": "CPU温度"
         }
@@ -901,7 +901,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "mtxrHlVoltage{instance=\"192.168.1.1\"} / 10",
+          "expr": "mtxrHlVoltage{instance=\"192.168.1.1\",job=\"routeros\"} / 10",
           "refId": "A"
         }
       ],
@@ -971,7 +971,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "ifOperStatus{instance=\"192.168.1.1\",ifDescr=\"pppoe-out1\"}",
+          "expr": "ifOperStatus{instance=\"192.168.1.1\",job=\"routeros\",ifIndex=\"10\"}",
           "refId": "A",
           "legendFormat": "PPPoE接続"
         }
@@ -986,16 +986,16 @@
           "color": {
             "mode": "thresholds"
           },
-          "custom": {
-            "align": "auto",
-            "displayMode": "auto"
-          },
           "mappings": [
             {
               "options": {
-                "0": {
-                  "text": "Connected",
+                "1": {
+                  "text": "UP",
                   "color": "green"
+                },
+                "2": {
+                  "text": "DOWN",
+                  "color": "red"
                 }
               },
               "type": "value"
@@ -1005,63 +1005,50 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "red",
                 "value": null
               },
               {
-                "color": "yellow",
-                "value": 60
-              },
-              {
-                "color": "red",
-                "value": 180
+                "color": "green",
+                "value": 1
               }
             ]
-          },
-          "unit": "s"
+          }
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 18,
+        "h": 4,
+        "w": 6,
         "x": 6,
         "y": 36
       },
       "id": 14,
       "options": {
-        "showHeader": true,
-        "sortBy": []
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
       },
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "mtxrWgPeerLastHandshake{instance=\"192.168.1.1\"}",
-          "format": "table",
-          "instant": true,
-          "refId": "A"
+          "expr": "ifOperStatus{instance=\"192.168.1.1\",job=\"routeros\",ifIndex=\"12\"}",
+          "refId": "A",
+          "legendFormat": "WireGuard (wg-home)"
         }
       ],
-      "title": "WireGuardピア接続状態",
-      "transformations": [
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Time": true,
-              "__name__": true,
-              "instance": true,
-              "job": true
-            },
-            "renameByName": {
-              "mtxrWgPeerAddr": "ピアアドレス",
-              "mtxrWgPeerIface": "インターフェース",
-              "Value": "最終ハンドシェイク(秒前)"
-            }
-          }
-        }
-      ],
-      "type": "table"
+      "title": "WireGuard接続状態",
+      "type": "stat"
     },
     {
       "datasource": "Prometheus",
@@ -1108,15 +1095,15 @@
               }
             ]
           },
-          "unit": "short"
+          "unit": "bps"
         },
         "overrides": []
       },
       "gridPos": {
         "h": 8,
         "w": 12,
-        "x": 0,
-        "y": 40
+        "x": 12,
+        "y": 36
       },
       "id": 15,
       "options": {
@@ -1132,94 +1119,17 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "mtxrWgPeerRx{instance=\"192.168.1.1\"}",
+          "expr": "rate(ifInOctets{instance=\"192.168.1.1\",job=\"routeros\",ifIndex=\"12\"}[5m]) * 8",
           "refId": "A",
-          "legendFormat": "受信 {{mtxrWgPeerAddr}}"
+          "legendFormat": "WireGuard受信"
         },
         {
-          "expr": "mtxrWgPeerTx{instance=\"192.168.1.1\"}",
+          "expr": "-rate(ifOutOctets{instance=\"192.168.1.1\",job=\"routeros\",ifIndex=\"12\"}[5m]) * 8",
           "refId": "B",
-          "legendFormat": "送信 {{mtxrWgPeerAddr}}"
+          "legendFormat": "WireGuard送信"
         }
       ],
-      "title": "WireGuardトラフィック（バイト）",
-      "type": "timeseries"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "hideFrom": {
-              "tooltip": false,
-              "viz": false,
-              "legend": false
-            },
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "percent"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 40
-      },
-      "id": 16,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi"
-        }
-      },
-      "pluginVersion": "8.0.0",
-      "targets": [
-        {
-          "expr": "(hrStorageUsed{instance=\"192.168.1.1\",hrStorageDescr=\"main memory\"} / hrStorageSize{instance=\"192.168.1.1\",hrStorageDescr=\"main memory\"}) * 100",
-          "refId": "A",
-          "legendFormat": "メモリ使用率"
-        }
-      ],
-      "title": "メモリ使用率の推移",
+      "title": "WireGuardトラフィック",
       "type": "timeseries"
     }
   ],

@@ -316,17 +316,17 @@ in
           name = "routeros";
           interval = "30s";
           rules = [
-            # RouterOSインターフェースダウン
+            # RouterOSインターフェースダウン（重要なインターフェースのみ）
             {
               alert = "RouterOSInterfaceDown";
-              expr = "ifOperStatus{job=\"routeros\"} == 2";
+              expr = "ifOperStatus{job=\"routeros\",ifIndex!~\"2|4|5|7|8\"} == 2";
               for = "2m";
               labels = {
                 severity = "critical";
               };
               annotations = {
-                summary = "RouterOS interface {{ $labels.ifDescr }} is down";
-                description = "Interface {{ $labels.ifDescr }} on RouterOS has been down for more than 2 minutes.";
+                summary = "RouterOS interface (ifIndex={{ $labels.ifIndex }}) is down";
+                description = "Interface (ifIndex={{ $labels.ifIndex }}) on RouterOS has been down for more than 2 minutes.";
               };
             }
             # RouterOSインターフェースエラー率
@@ -345,7 +345,7 @@ in
             # RouterOSメモリ使用率
             {
               alert = "RouterOSHighMemoryUsage";
-              expr = "(hrStorageUsed{hrStorageDescr=\"main memory\"} / hrStorageSize{hrStorageDescr=\"main memory\"}) * 100 > 85";
+              expr = "(hrStorageUsed{job=\"routeros\",hrStorageIndex=\"65536\"} / hrStorageSize{job=\"routeros\",hrStorageIndex=\"65536\"}) * 100 > 85";
               for = "5m";
               labels = {
                 severity = "warning";
@@ -355,23 +355,36 @@ in
                 description = "RouterOS memory usage is above 85% (free: {{ $value }}%)";
               };
             }
-            # RouterOS WireGuardピア接続状態監視
+            # RouterOS WireGuardインターフェース監視
             {
-              alert = "RouterOSWireGuardPeerDown";
-              expr = "mtxrWgPeerLastHandshake{job=\"routeros\"} > 180";
-              for = "5m";
+              alert = "RouterOSWireGuardDown";
+              expr = "ifOperStatus{job=\"routeros\",ifIndex=\"12\"} == 2";
+              for = "2m";
+              labels = {
+                severity = "critical";
+              };
+              annotations = {
+                summary = "WireGuard interface is down";
+                description = "WireGuard interface (wg-home) has been down for more than 2 minutes.";
+              };
+            }
+            # WireGuardトラフィック停止検知
+            {
+              alert = "RouterOSWireGuardNoTraffic";
+              expr = "rate(ifInOctets{job=\"routeros\",ifIndex=\"12\"}[10m]) == 0 and rate(ifOutOctets{job=\"routeros\",ifIndex=\"12\"}[10m]) == 0";
+              for = "10m";
               labels = {
                 severity = "warning";
               };
               annotations = {
-                summary = "WireGuard peer {{ $labels.mtxrWgPeerAddr }} is down";
-                description = "WireGuard peer {{ $labels.mtxrWgPeerAddr }} on interface {{ $labels.mtxrWgPeerIface }} has not had a handshake for {{ $value }} seconds.";
+                summary = "No WireGuard traffic detected";
+                description = "No traffic has been detected on WireGuard interface (wg-home) for more than 10 minutes.";
               };
             }
             # PPPoE接続ダウン
             {
               alert = "RouterOSPPPoEDown";
-              expr = "ifOperStatus{job=\"routeros\",ifDescr=\"pppoe-out1\"} == 2";
+              expr = "ifOperStatus{job=\"routeros\",ifIndex=\"10\"} == 2";
               for = "2m";
               labels = {
                 severity = "critical";
