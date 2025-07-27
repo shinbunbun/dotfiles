@@ -68,7 +68,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "sysUpTime{instance=\"192.168.1.1\",job=\"routeros\"}",
+          "expr": "sysUpTime{instance=\"192.168.1.1\",job=\"routeros\"} / 100",
           "refId": "A"
         }
       ],
@@ -331,12 +331,12 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "rate(ifInOctets{instance=\"192.168.1.1\",job=\"routeros\"}[5m]) * 8",
+          "expr": "rate(ifInOctets{instance=\"192.168.1.1\",job=\"routeros\",ifDescr!=\"\"}[5m]) * 8",
           "refId": "A",
           "legendFormat": "受信 {{ifDescr}}"
         },
         {
-          "expr": "-rate(ifOutOctets{instance=\"192.168.1.1\",job=\"routeros\"}[5m]) * 8",
+          "expr": "-rate(ifOutOctets{instance=\"192.168.1.1\",job=\"routeros\",ifDescr!=\"\"}[5m]) * 8",
           "refId": "B",
           "legendFormat": "送信 {{ifDescr}}"
         }

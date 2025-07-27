@@ -66,6 +66,12 @@ modules:
       indexes:
       - labelname: ifIndex
         type: gauge
+      lookups:
+      - labels:
+        - ifIndex
+        labelname: ifDescr
+        oid: 1.3.6.1.2.1.2.2.1.2
+        type: DisplayString
     - name: ifOutOctets
       oid: 1.3.6.1.2.1.2.2.1.16
       type: counter
@@ -73,6 +79,12 @@ modules:
       indexes:
       - labelname: ifIndex
         type: gauge
+      lookups:
+      - labels:
+        - ifIndex
+        labelname: ifDescr
+        oid: 1.3.6.1.2.1.2.2.1.2
+        type: DisplayString
     - name: ifInUcastPkts
       oid: 1.3.6.1.2.1.2.2.1.11
       type: counter
