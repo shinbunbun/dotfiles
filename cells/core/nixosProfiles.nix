@@ -29,6 +29,7 @@
   systemTools = import ./nixosProfiles/system-tools.nix { inherit inputs cell; };
   wireguard = import ./nixosProfiles/wireguard.nix { inherit inputs cell; };
   monitoring = import ./nixosProfiles/monitoring.nix { inherit inputs cell; };
+  alertmanager = import ./nixosProfiles/alertmanager.nix { inherit inputs cell; };
 
   # 既存のモジュール
   obsidian-livesync = import ./nixosProfiles/obsidian-livesync.nix { inherit inputs cell; };
