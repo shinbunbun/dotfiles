@@ -27,8 +27,8 @@ in
   services.prometheus.alertmanager = {
     enable = true;
     port = cfg.monitoring.alertmanager.port;
-    checkConfig = false;  # 環境変数を使うため、ビルド時検証を無効化
-    
+    checkConfig = false; # 環境変数を使うため、ビルド時検証を無効化
+
     # configTextではなくconfigurationを使い、環境変数を使用
     configuration = {
       global = {
@@ -37,18 +37,26 @@ in
 
       route = {
         receiver = "discord";
-        group_by = [ "alertname" "cluster" "service" ];
+        group_by = [
+          "alertname"
+          "cluster"
+          "service"
+        ];
         group_wait = "10s";
         group_interval = "10s";
         repeat_interval = "1h";
         routes = [
           {
-            match = { severity = "critical"; };
+            match = {
+              severity = "critical";
+            };
             receiver = "discord";
             repeat_interval = "15m";
           }
           {
-            match = { severity = "warning"; };
+            match = {
+              severity = "warning";
+            };
             receiver = "discord";
             repeat_interval = "30m";
           }
@@ -62,7 +70,7 @@ in
             {
               webhook_url = "$DISCORD_WEBHOOK_URL";
               send_resolved = true;
-              
+
               # メンション付きメッセージ
               message = ''{{ if eq .Status "firing" }}<@$DISCORD_USER_ID> {{ end }}'';
             }
@@ -72,13 +80,20 @@ in
 
       inhibit_rules = [
         {
-          source_match = { severity = "critical"; };
-          target_match = { severity = "warning"; };
-          equal = [ "alertname" "instance" ];
+          source_match = {
+            severity = "critical";
+          };
+          target_match = {
+            severity = "warning";
+          };
+          equal = [
+            "alertname"
+            "instance"
+          ];
         }
       ];
     };
-    
+
     # 環境変数ファイルを指定
     environmentFile = "/run/secrets/rendered/alertmanager/env";
   };
@@ -196,7 +211,7 @@ in
       group = "prometheus";
       mode = "0400";
     };
-    
+
     # Discord ユーザーIDの秘密鍵
     secrets."alertmanager/discord_user_id" = {
       key = "discord/user_id";
@@ -217,7 +232,7 @@ in
       group = "prometheus";
       mode = "0400";
     };
-    
+
     # Alertmanager設定テンプレート（今は使わないがあとで使うかもしれないので残す）
     templates."alertmanager/config.yml" = {
       content = ''
