@@ -70,9 +70,6 @@ in
             {
               webhook_url = "$DISCORD_WEBHOOK_URL";
               send_resolved = true;
-
-              # メンション付きメッセージ
-              message = ''{{ if eq .Status "firing" }}<@$DISCORD_USER_ID> {{ end }}'';
             }
           ];
         }
