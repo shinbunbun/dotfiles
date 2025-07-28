@@ -309,6 +309,32 @@ in
                 description = "Inode usage is above 85% on {{ $labels.mountpoint }} (current value: {{ $value }}%)";
               };
             }
+            # 時刻同期ずれ
+            {
+              alert = "ClockSkewDetected";
+              expr = "abs(node_timex_offset_seconds) > 5";
+              for = "5m";
+              labels = {
+                severity = "warning";
+              };
+              annotations = {
+                summary = "Clock skew detected on {{ $labels.instance }}";
+                description = "System clock is {{ $value }} seconds off from NTP time. This may cause issues with time-sensitive operations.";
+              };
+            }
+            # NTP同期失敗
+            {
+              alert = "NTPSyncFailed";
+              expr = "node_timex_sync_status == 0";
+              for = "10m";
+              labels = {
+                severity = "critical";
+              };
+              annotations = {
+                summary = "NTP synchronization failed on {{ $labels.instance }}";
+                description = "System is not synchronized with NTP servers for more than 10 minutes.";
+              };
+            }
           ];
         }
         # RouterOS専用グループ
