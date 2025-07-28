@@ -335,6 +335,32 @@ in
                 description = "System is not synchronized with NTP servers for more than 10 minutes.";
               };
             }
+            # RouterOSバックアップ失敗
+            {
+              alert = "RouterOSBackupFailed";
+              expr = "node_systemd_unit_state{name=\"routeros-backup.service\",state=\"failed\"} == 1";
+              for = "5m";
+              labels = {
+                severity = "critical";
+              };
+              annotations = {
+                summary = "RouterOS backup service failed on {{ $labels.instance }}";
+                description = "RouterOS backup service has been in failed state for more than 5 minutes. Check logs: journalctl -u routeros-backup.service";
+              };
+            }
+            # RouterOSバックアップ長時間未実行
+            {
+              alert = "RouterOSBackupStale";
+              expr = "time() - node_systemd_unit_last_trigger_timestamp_seconds{name=\"routeros-backup.timer\"} > 86400";
+              for = "1h";
+              labels = {
+                severity = "warning";
+              };
+              annotations = {
+                summary = "RouterOS backup has not run for more than 24 hours";
+                description = "RouterOS backup timer has not triggered for {{ $value | humanizeDuration }}. Last run was at {{ $labels.last_trigger_timestamp | humanizeTimestamp }}.";
+              };
+            }
           ];
         }
         # RouterOS専用グループ
