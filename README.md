@@ -16,6 +16,10 @@ NixOSとmacOS (Darwin)用の個人dotfiles。[std-hive](https://github.com/divni
 │   │   ├── config.nix     # 中央設定ファイル（ユーザー、ネットワーク、サービス）
 │   │   ├── homeProfiles/  # Home Manager プロファイル
 │   │   ├── nixosProfiles/ # NixOS システムプロファイル
+│   │   │   ├── dashboards/    # Grafanaダッシュボード定義
+│   │   │   ├── alertmanager.nix    # アラート設定
+│   │   │   ├── monitoring.nix      # 監視スタック設定
+│   │   │   └── ...
 │   │   └── darwinProfiles.nix # macOS (Darwin) プロファイル
 │   ├── dev/               # 開発環境設定
 │   │   └── homeProfiles/  # 開発ツール用Home Managerプロファイル
@@ -25,6 +29,10 @@ NixOSとmacOS (Darwin)用の個人dotfiles。[std-hive](https://github.com/divni
 │   └── toplevel/          # トップレベル設定
 │       ├── nixosConfigurations.nix  # NixOSマシン設定
 │       └── darwinConfigurations.nix # macOSマシン設定
+├── docs/                  # ドキュメント
+│   ├── monitoring-implementation-plan.md  # 監視システム実装計画
+│   ├── monitoring-alerts-summary.md       # アラート設定まとめ
+│   └── ...
 ├── secrets/               # SOPS暗号化シークレット
 └── flake.nix             # Flakeエントリーポイント
 ```
@@ -76,14 +84,18 @@ NixOSとmacOS (Darwin)用の個人dotfiles。[std-hive](https://github.com/divni
 ### Core Profiles
 
 #### nixosProfiles
-- `base` - 基本的なシステム設定（ブート、Nix設定、ユーザー）
+- `base` - 基本的なシステム設定（ブート、Nix設定、ユーザー、NTP）
 - `networking` - ネットワーク設定（ファイアウォール、Avahi）
-- `services` - サービス設定（SSH、Docker、NFS）
-- `security` - セキュリティ設定（PAM、Polkit、SOPS、WireGuard）
+- `services` - サービス設定（SSH、Docker、Fail2ban）
+- `security` - セキュリティ設定（PAM、Polkit、SOPS）
 - `kubernetes` - Kubernetesツールと設定
 - `nfs` - NFSサーバー設定
-- `systemTools` - システムツール（polkit、wireguard-tools）
+- `system-tools` - システムツール（polkit、wireguard-tools）
 - `obsidian-livesync` - Obsidian LiveSync設定
+- `monitoring` - Prometheus、Grafana、Node Exporter監視スタック
+- `alertmanager` - アラート管理とDiscord通知
+- `routeros-backup` - RouterOS設定の自動バックアップ
+- `wireguard` - WireGuard VPN設定
 
 #### darwinProfiles
 - `default` - macOS基本設定とHomebrew

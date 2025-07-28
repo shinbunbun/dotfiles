@@ -36,6 +36,16 @@ in
 
   time.timeZone = configValues.system.timeZone;
 
+  # NTPサービスの設定（systemd-timesyncd）
+  services.timesyncd = {
+    enable = true;
+    servers = [
+      "ntp.nict.jp"
+      "ntp.jst.mfeed.ad.jp"
+      "ntp1.jst.mfeed.ad.jp"
+    ];
+  };
+
   users.users.bunbun = {
     isNormalUser = true;
     extraGroups = [
