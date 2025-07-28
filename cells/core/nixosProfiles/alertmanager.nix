@@ -351,14 +351,40 @@ in
             # RouterOSバックアップ長時間未実行
             {
               alert = "RouterOSBackupStale";
-              expr = "time() - node_systemd_unit_last_trigger_timestamp_seconds{name=\"routeros-backup.timer\"} > 86400";
+              expr = "time() - node_systemd_timer_last_trigger_seconds{name=\"routeros-backup.timer\"} > 90000";
               for = "1h";
               labels = {
                 severity = "warning";
               };
               annotations = {
-                summary = "RouterOS backup has not run for more than 24 hours";
-                description = "RouterOS backup timer has not triggered for {{ $value | humanizeDuration }}. Last run was at {{ $labels.last_trigger_timestamp | humanizeTimestamp }}.";
+                summary = "RouterOS backup has not run for more than 25 hours";
+                description = "RouterOS backup timer has not triggered for {{ $value | humanizeDuration }}.";
+              };
+            }
+            # /var/logディレクトリサイズ監視
+            {
+              alert = "LogDirectoryLarge";
+              expr = "node_filesystem_size_bytes{mountpoint=\"/\"} - node_filesystem_free_bytes{mountpoint=\"/\"} > 1073741824 and node_filesystem_files{mountpoint=\"/\"} - node_filesystem_files_free{mountpoint=\"/\"} > 100000";
+              for = "5m";
+              labels = {
+                severity = "warning";
+              };
+              annotations = {
+                summary = "Log directory may be consuming excessive space";
+                description = "Root filesystem has {{ $value | humanize }}B used with high inode usage, which may indicate excessive logging. Check /var/log size.";
+              };
+            }
+            # ディスク使用量の急激な増加
+            {
+              alert = "DiskUsageRapidIncrease";
+              expr = "delta(node_filesystem_size_bytes{mountpoint=\"/\"}[1h]) - delta(node_filesystem_free_bytes{mountpoint=\"/\"}[1h]) > 104857600";
+              for = "10m";
+              labels = {
+                severity = "warning";
+              };
+              annotations = {
+                summary = "Rapid disk usage increase detected";
+                description = "Disk usage on {{ $labels.mountpoint }} is increasing rapidly ({{ $value | humanize }}B in the last hour). This may be due to excessive logging.";
               };
             }
           ];
