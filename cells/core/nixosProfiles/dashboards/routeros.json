@@ -1119,17 +1119,13 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "rate(ifInOctets{instance=\"192.168.1.1\",job=\"routeros\",ifIndex=\"12\"}[5m]) * 8",
+          "expr": "rate(ifOutOctets{instance=\"192.168.1.1\",job=\"routeros\",ifIndex=\"12\"}[5m]) * 8",
           "refId": "A",
-          "legendFormat": "WireGuard受信"
-        },
-        {
-          "expr": "-rate(ifOutOctets{instance=\"192.168.1.1\",job=\"routeros\",ifIndex=\"12\"}[5m]) * 8",
-          "refId": "B",
           "legendFormat": "WireGuard送信"
         }
       ],
-      "title": "WireGuardトラフィック",
+      "title": "WireGuardトラフィック（送信のみ）",
+      "description": "注: RouterOSの制限により、WireGuard受信トラフィックは正しく計測されません",
       "type": "timeseries"
     }
   ],
