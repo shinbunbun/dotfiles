@@ -257,6 +257,19 @@ in
                 description = "Interface {{ $labels.ifDescr }} experiencing high error rate ({{ $value }} errors/sec)";
               };
             }
+            # パケットドロップ率
+            {
+              alert = "RouterOSHighPacketDropRate";
+              expr = "rate(mtxrInterfaceRxDrop{job=\"routeros\"}[5m]) > 1000 or rate(mtxrInterfaceTxDrop{job=\"routeros\"}[5m]) > 1000";
+              for = "5m";
+              labels = {
+                severity = "warning";
+              };
+              annotations = {
+                summary = "High packet drop rate on RouterOS interface";
+                description = "Interface {{ $labels.mtxrInterfaceName }} is dropping packets at {{ $value }} packets/sec";
+              };
+            }
             # ネットワークインターフェースダウン
             {
               alert = "NetworkInterfaceDown";

@@ -31,6 +31,11 @@ modules:
     - 1.3.6.1.4.1.14988.1.1.6
     - 1.3.6.1.4.1.14988.1.1.7
     - 1.3.6.1.4.1.14988.1.1.13
+    - 1.3.6.1.4.1.14988.1.1.14.1.1.2
+    - 1.3.6.1.4.1.14988.1.1.14.1.1.15
+    - 1.3.6.1.4.1.14988.1.1.14.1.1.16
+    - 1.3.6.1.4.1.14988.1.1.14.1.1.17
+    - 1.3.6.1.4.1.14988.1.1.14.1.1.18
     - 1.3.6.1.4.1.14988.1.1.19
     get: []
     metrics:
@@ -214,6 +219,59 @@ modules:
       oid: 1.3.6.1.4.1.14988.1.1.7.7
       type: DisplayString
       help: Available RouterOS upgrade version
+    # Interface Detailed Statistics
+    - name: mtxrInterfaceRxDrop
+      oid: 1.3.6.1.4.1.14988.1.1.14.1.1.17
+      type: counter
+      help: Number of received packets dropped
+      indexes:
+      - labelname: mtxrInterfaceIndex
+        type: gauge
+      lookups:
+      - labels:
+        - mtxrInterfaceIndex
+        labelname: mtxrInterfaceName
+        oid: 1.3.6.1.4.1.14988.1.1.14.1.1.2
+        type: DisplayString
+    - name: mtxrInterfaceTxDrop
+      oid: 1.3.6.1.4.1.14988.1.1.14.1.1.18
+      type: counter
+      help: Number of transmitted packets dropped
+      indexes:
+      - labelname: mtxrInterfaceIndex
+        type: gauge
+      lookups:
+      - labels:
+        - mtxrInterfaceIndex
+        labelname: mtxrInterfaceName
+        oid: 1.3.6.1.4.1.14988.1.1.14.1.1.2
+        type: DisplayString
+    - name: mtxrInterfaceRxError
+      oid: 1.3.6.1.4.1.14988.1.1.14.1.1.15
+      type: counter
+      help: Number of receive errors
+      indexes:
+      - labelname: mtxrInterfaceIndex
+        type: gauge
+      lookups:
+      - labels:
+        - mtxrInterfaceIndex
+        labelname: mtxrInterfaceName
+        oid: 1.3.6.1.4.1.14988.1.1.14.1.1.2
+        type: DisplayString
+    - name: mtxrInterfaceTxError
+      oid: 1.3.6.1.4.1.14988.1.1.14.1.1.16
+      type: counter
+      help: Number of transmit errors
+      indexes:
+      - labelname: mtxrInterfaceIndex
+        type: gauge
+      lookups:
+      - labels:
+        - mtxrInterfaceIndex
+        labelname: mtxrInterfaceName
+        oid: 1.3.6.1.4.1.14988.1.1.14.1.1.2
+        type: DisplayString
     - name: mtxrWgPeerLastHandshake
       oid: 1.3.6.1.4.1.14988.1.1.19.1.1.6
       type: gauge
