@@ -179,6 +179,19 @@ in
                 description = "RouterOS temperature is above 60°C (current value: {{ $value }}°C)";
               };
             }
+            # CPUスロットリング検知
+            {
+              alert = "RouterOSCPUThrottling";
+              expr = "mtxrHlCpuFrequency < 600 and mtxrHlTemperature / 10 > 50";
+              for = "5m";
+              labels = {
+                severity = "warning";
+              };
+              annotations = {
+                summary = "CPU throttling detected on RouterOS";
+                description = "CPU frequency dropped to {{ $value }}MHz while temperature is high. This may indicate thermal throttling.";
+              };
+            }
             # RouterOS CPU高使用率
             {
               alert = "RouterOSHighCPU";
