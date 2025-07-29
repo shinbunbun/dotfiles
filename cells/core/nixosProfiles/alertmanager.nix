@@ -192,6 +192,71 @@ in
                 description = "RouterOS CPU usage is above 80% (current value: {{ $value }}%)";
               };
             }
+            # RouterOS再起動検知
+            {
+              alert = "RouterOSRestarted";
+              expr = "increase(mtxrSystemRebootCount[1h]) > 0";
+              for = "1m";
+              labels = {
+                severity = "warning";
+              };
+              annotations = {
+                summary = "RouterOS has been restarted";
+                description = "RouterOS device has been restarted (reboot count increased by {{ $value }})";
+              };
+            }
+            # RouterOS不良ブロック検出
+            {
+              alert = "RouterOSBadBlocks";
+              expr = "mtxrSystemBadBlocks > 0";
+              for = "5m";
+              labels = {
+                severity = "critical";
+              };
+              annotations = {
+                summary = "Bad blocks detected on RouterOS";
+                description = "RouterOS has detected {{ $value }} bad blocks in memory";
+              };
+            }
+            # RouterOS USB電源問題
+            {
+              alert = "RouterOSUSBPowerIssue";
+              expr = "increase(mtxrSystemUSBPowerResets[24h]) > 0";
+              for = "5m";
+              labels = {
+                severity = "warning";
+              };
+              annotations = {
+                summary = "USB power resets detected on RouterOS";
+                description = "RouterOS USB power has been reset {{ $value }} times in the last 24 hours";
+              };
+            }
+            # DHCP枯渇警告
+            {
+              alert = "DHCPPoolNearExhaustion";
+              expr = "mtxrDHCPLeaseCount > 200";
+              for = "10m";
+              labels = {
+                severity = "warning";
+              };
+              annotations = {
+                summary = "DHCP pool near exhaustion";
+                description = "Active DHCP leases ({{ $value }}) approaching pool limit";
+              };
+            }
+            # インターフェースエラー率
+            {
+              alert = "RouterOSHighErrorRate";
+              expr = "rate(ifInErrors{job=\"routeros\"}[5m]) > 100";
+              for = "5m";
+              labels = {
+                severity = "warning";
+              };
+              annotations = {
+                summary = "High interface error rate on RouterOS";
+                description = "Interface {{ $labels.ifDescr }} experiencing high error rate ({{ $value }} errors/sec)";
+              };
+            }
             # ネットワークインターフェースダウン
             {
               alert = "NetworkInterfaceDown";
