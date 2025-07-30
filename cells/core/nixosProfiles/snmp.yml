@@ -37,6 +37,7 @@ modules:
     - 1.3.6.1.4.1.14988.1.1.14.1.1.16
     - 1.3.6.1.4.1.14988.1.1.14.1.1.17
     - 1.3.6.1.4.1.14988.1.1.14.1.1.18
+    - 1.3.6.1.4.1.14988.1.1.17
     - 1.3.6.1.4.1.14988.1.1.19
     get: []
     metrics:
@@ -233,6 +234,42 @@ modules:
       oid: 1.3.6.1.4.1.14988.1.1.7.9
       type: DisplayString
       help: Device model name
+    # Partition Information
+    - name: mtxrPartitionName
+      oid: 1.3.6.1.4.1.14988.1.1.17.1.1.2
+      type: DisplayString
+      help: Partition name
+      indexes:
+      - labelname: mtxrPartitionIndex
+        type: gauge
+    - name: mtxrPartitionSize
+      oid: 1.3.6.1.4.1.14988.1.1.17.1.1.3
+      type: gauge
+      help: Partition size in MB
+      indexes:
+      - labelname: mtxrPartitionIndex
+        type: gauge
+    - name: mtxrPartitionVersion
+      oid: 1.3.6.1.4.1.14988.1.1.17.1.1.4
+      type: DisplayString
+      help: Partition version information
+      indexes:
+      - labelname: mtxrPartitionIndex
+        type: gauge
+    - name: mtxrPartitionActive
+      oid: 1.3.6.1.4.1.14988.1.1.17.1.1.5
+      type: gauge
+      help: Partition active state (1=active)
+      indexes:
+      - labelname: mtxrPartitionIndex
+        type: gauge
+    - name: mtxrPartitionRunning
+      oid: 1.3.6.1.4.1.14988.1.1.17.1.1.6
+      type: gauge
+      help: Partition running state (1=running)
+      indexes:
+      - labelname: mtxrPartitionIndex
+        type: gauge
     # Interface Detailed Statistics
     - name: mtxrInterfaceRxDrop
       oid: 1.3.6.1.4.1.14988.1.1.14.1.1.17
