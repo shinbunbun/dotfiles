@@ -1946,6 +1946,207 @@
       ],
       "title": "モデル名", 
       "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "displayMode": "auto"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "アクティブ"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "0": {
+                        "color": "gray",
+                        "index": 0,
+                        "text": "非アクティブ"
+                      },
+                      "1": {
+                        "color": "green",
+                        "index": 1,
+                        "text": "アクティブ"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              },
+              {
+                "id": "custom.displayMode",
+                "value": "color-background"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "実行中"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "0": {
+                        "color": "gray",
+                        "index": 0,
+                        "text": "停止"
+                      },
+                      "1": {
+                        "color": "green",
+                        "index": 1,
+                        "text": "実行中"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              },
+              {
+                "id": "custom.displayMode",
+                "value": "color-background"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "サイズ (MB)"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "decmbytes"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 40
+      },
+      "id": 32,
+      "options": {
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "8.5.2",
+      "targets": [
+        {
+          "expr": "mtxrPartitionName{job=\"routeros\"}",
+          "format": "table",
+          "instant": true,
+          "refId": "A"
+        },
+        {
+          "expr": "mtxrPartitionSize{job=\"routeros\"}",
+          "format": "table",
+          "instant": true,
+          "refId": "B"
+        },
+        {
+          "expr": "mtxrPartitionVersion{job=\"routeros\"}",
+          "format": "table",
+          "instant": true,
+          "refId": "C"
+        },
+        {
+          "expr": "mtxrPartitionActive{job=\"routeros\"}",
+          "format": "table",
+          "instant": true,
+          "refId": "D"
+        },
+        {
+          "expr": "mtxrPartitionRunning{job=\"routeros\"}",
+          "format": "table",
+          "instant": true,
+          "refId": "E"
+        }
+      ],
+      "title": "パーティション情報",
+      "transformations": [
+        {
+          "id": "seriesToColumns",
+          "options": {
+            "byField": "mtxrPartitionIndex"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Time 1": true,
+              "Time 2": true,
+              "Time 3": true,
+              "Time 4": true,
+              "Time 5": true,
+              "__name__": true,
+              "__name__ 1": true,
+              "__name__ 2": true,
+              "__name__ 3": true,
+              "__name__ 4": true,
+              "__name__ 5": true,
+              "instance": true,
+              "instance 1": true,
+              "instance 2": true,
+              "instance 3": true,
+              "instance 4": true,
+              "instance 5": true,
+              "job": true,
+              "job 1": true,
+              "job 2": true,
+              "job 3": true,
+              "job 4": true,
+              "job 5": true
+            },
+            "indexByName": {
+              "mtxrPartitionIndex": 0,
+              "Value #A": 1,
+              "Value #B": 2,
+              "Value #C": 3,
+              "Value #D": 4,
+              "Value #E": 5
+            },
+            "renameByName": {
+              "mtxrPartitionIndex": "Index",
+              "Value #A": "パーティション名",
+              "Value #B": "サイズ (MB)",
+              "Value #C": "バージョン",
+              "Value #D": "アクティブ",
+              "Value #E": "実行中"
+            }
+          }
+        }
+      ],
+      "type": "table",
+      "description": "RouterOSファームウェアパーティションの状態"
     }
   ],
   "schemaVersion": 27,
