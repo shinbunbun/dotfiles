@@ -153,6 +153,19 @@ in
                 description = "Memory usage is above 85% (current value: {{ $value }}%)";
               };
             }
+            # メモリ不足クリティカル
+            {
+              alert = "CriticalMemoryUsage";
+              expr = "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 90";
+              for = "2m";
+              labels = {
+                severity = "critical";
+              };
+              annotations = {
+                summary = "Critical memory usage on {{ $labels.instance }}";
+                description = "Memory usage is above 90% (current value: {{ $value }}%). System may become unstable.";
+              };
+            }
             # ディスク容量不足
             {
               alert = "DiskSpaceLow";
@@ -164,6 +177,19 @@ in
               annotations = {
                 summary = "Low disk space on {{ $labels.instance }}";
                 description = "Disk usage is above 85% on {{ $labels.mountpoint }} (current value: {{ $value }}%)";
+              };
+            }
+            # Swap使用量警告
+            {
+              alert = "HighSwapUsage";
+              expr = "(1 - (node_memory_SwapFree_bytes / node_memory_SwapTotal_bytes)) * 100 > 50";
+              for = "5m";
+              labels = {
+                severity = "warning";
+              };
+              annotations = {
+                summary = "High swap usage on {{ $labels.instance }}";
+                description = "Swap usage is above 50% (current value: {{ $value }}%). This may indicate memory pressure.";
               };
             }
             # RouterOS高温度
@@ -231,6 +257,9 @@ in
                 description = "RouterOS has detected {{ $value }} bad blocks in memory";
               };
             }
+            # RouterOSアップデート通知
+            # 注: RouterOSのバージョン文字列比較はPromQLでは直接サポートされないため、
+            # 手動チェックまたは外部スクリプトで実装することを推奨
             # RouterOS USB電源問題
             {
               alert = "RouterOSUSBPowerIssue";
@@ -247,14 +276,14 @@ in
             # DHCP枯渇警告
             {
               alert = "DHCPPoolNearExhaustion";
-              expr = "mtxrDHCPLeaseCount > 200";
+              expr = "mtxrDHCPLeaseCount > 200";  # 約80% of typical 250 address pool
               for = "10m";
               labels = {
                 severity = "warning";
               };
               annotations = {
                 summary = "DHCP pool near exhaustion";
-                description = "Active DHCP leases ({{ $value }}) approaching pool limit";
+                description = "Active DHCP leases ({{ $value }}) approaching pool limit (80% threshold)";
               };
             }
             # インターフェースエラー率
@@ -281,6 +310,19 @@ in
               annotations = {
                 summary = "High packet drop rate on RouterOS interface";
                 description = "Interface {{ $labels.mtxrInterfaceName }} is dropping packets at {{ $value }} packets/sec";
+              };
+            }
+            # インターフェース帯域使用率
+            {
+              alert = "RouterOSHighBandwidthUsage";
+              expr = "(rate(ifInOctets{job=\"routeros\"}[5m]) * 8 / ifSpeed{job=\"routeros\"}) > 0.8 or (rate(ifOutOctets{job=\"routeros\"}[5m]) * 8 / ifSpeed{job=\"routeros\"}) > 0.8";
+              for = "5m";
+              labels = {
+                severity = "warning";
+              };
+              annotations = {
+                summary = "High bandwidth usage on RouterOS interface";
+                description = "Interface {{ $labels.ifDescr }} is using more than 80% of its bandwidth ({{ $value | humanizePercentage }})";
               };
             }
             # ネットワークインターフェースダウン
@@ -403,7 +445,7 @@ in
             # 時刻同期ずれ
             {
               alert = "ClockSkewDetected";
-              expr = "abs(node_timex_offset_seconds) > 5";
+              expr = "abs(node_timex_offset_seconds) > 10";
               for = "5m";
               labels = {
                 severity = "warning";
@@ -535,6 +577,19 @@ in
               annotations = {
                 summary = "No WireGuard traffic detected";
                 description = "No traffic has been detected on WireGuard interface (wg-home) for more than 10 minutes.";
+              };
+            }
+            # WireGuardハンドシェイク監視
+            {
+              alert = "RouterOSWireGuardHandshakeStale";
+              expr = "time() - mtxrWgPeerLastHandshake{job=\"routeros\"} > 300 and mtxrWgPeerLastHandshake{job=\"routeros\"} > 0";
+              for = "5m";
+              labels = {
+                severity = "warning";
+              };
+              annotations = {
+                summary = "WireGuard handshake is stale";
+                description = "WireGuard peer {{ $labels.mtxrWgPeerName }} last handshake was {{ $value | humanizeDuration }} ago";
               };
             }
             # PPPoE接続ダウン
