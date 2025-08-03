@@ -27,8 +27,19 @@ modules:
     - 1.3.6.1.2.1.25.2.3.1.6
     - 1.3.6.1.2.1.25.3.3.1.2
     - 1.3.6.1.4.1.14988.1.1.3
+    - 1.3.6.1.4.1.14988.1.1.4.4
+    - 1.3.6.1.4.1.14988.1.1.6
+    - 1.3.6.1.4.1.14988.1.1.7
+    - 1.3.6.1.4.1.14988.1.1.13
+    - 1.3.6.1.4.1.14988.1.1.3.14
+    - 1.3.6.1.4.1.14988.1.1.14.1.1.2
+    - 1.3.6.1.4.1.14988.1.1.14.1.1.15
+    - 1.3.6.1.4.1.14988.1.1.14.1.1.16
+    - 1.3.6.1.4.1.14988.1.1.14.1.1.17
+    - 1.3.6.1.4.1.14988.1.1.14.1.1.18
+    - 1.3.6.1.4.1.14988.1.1.17
     - 1.3.6.1.4.1.14988.1.1.19
-    get: []
+    get:
     metrics:
     - name: sysUpTime
       oid: 1.3.6.1.2.1.1.3
@@ -183,52 +194,132 @@ modules:
       oid: 1.3.6.1.4.1.14988.1.1.3.19
       type: gauge
       help: Fan 2 speed
-    - name: mtxrWgPeerLastHandshake
-      oid: 1.3.6.1.4.1.14988.1.1.19.1.1.6
+    # System Health Metrics
+    - name: mtxrSystemRebootCount
+      oid: 1.3.6.1.4.1.14988.1.1.13.10
       type: gauge
-      help: WireGuard peer last handshake time in seconds
+      help: Number of system reboots
+    - name: mtxrSystemBadBlocks
+      oid: 1.3.6.1.4.1.14988.1.1.13.11
+      type: gauge
+      help: Number of bad blocks in memory
+    - name: mtxrSystemUSBPowerResets
+      oid: 1.3.6.1.4.1.14988.1.1.13.12
+      type: gauge
+      help: Number of USB power resets
+    # DHCP Metrics
+    - name: mtxrDHCPLeaseCount
+      oid: 1.3.6.1.4.1.14988.1.1.6.1
+      type: gauge
+      help: Number of active DHCP leases
+    # System Version Info
+    - name: mtxrSystemCurrentVersion
+      oid: 1.3.6.1.4.1.14988.1.1.4.4
+      type: DisplayString
+      help: Current RouterOS version
+    - name: mtxrSystemUpgradeVersion
+      oid: 1.3.6.1.4.1.14988.1.1.7.7
+      type: DisplayString
+      help: Available RouterOS upgrade version
+    # Device Identification
+    - name: mtxrSystemSerialNumber
+      oid: 1.3.6.1.4.1.14988.1.1.7.3
+      type: DisplayString
+      help: Device serial number
+    - name: mtxrSystemBoardName
+      oid: 1.3.6.1.4.1.14988.1.1.7.8
+      type: DisplayString
+      help: Device board name
+    - name: mtxrSystemModel
+      oid: 1.3.6.1.4.1.14988.1.1.7.9
+      type: DisplayString
+      help: Device model name
+    # Partition Information
+    - name: mtxrPartitionName
+      oid: 1.3.6.1.4.1.14988.1.1.17.1.1.2
+      type: DisplayString
+      help: Partition name
       indexes:
-      - labelname: mtxrWgPeerIndex
+      - labelname: mtxrPartitionIndex
         type: gauge
-      lookups:
-      - labels:
-        - mtxrWgPeerIndex
-        labelname: mtxrWgPeerAddr
-        oid: 1.3.6.1.4.1.14988.1.1.19.1.1.3
-        type: DisplayString
-      - labels:
-        - mtxrWgPeerIndex
-        labelname: mtxrWgPeerIface
-        oid: 1.3.6.1.4.1.14988.1.1.19.1.1.2
-        type: DisplayString
-      - labels:
-        - mtxrWgPeerIndex
-        labelname: mtxrWgPeerName
-        oid: 1.3.6.1.4.1.14988.1.1.19.1.1.11
-        type: DisplayString
-    - name: mtxrWgPeerRx
-      oid: 1.3.6.1.4.1.14988.1.1.19.1.1.4
+    - name: mtxrPartitionSize
+      oid: 1.3.6.1.4.1.14988.1.1.17.1.1.3
+      type: gauge
+      help: Partition size in MB
+      indexes:
+      - labelname: mtxrPartitionIndex
+        type: gauge
+    - name: mtxrPartitionVersion
+      oid: 1.3.6.1.4.1.14988.1.1.17.1.1.4
+      type: DisplayString
+      help: Partition version information
+      indexes:
+      - labelname: mtxrPartitionIndex
+        type: gauge
+    - name: mtxrPartitionActive
+      oid: 1.3.6.1.4.1.14988.1.1.17.1.1.5
+      type: gauge
+      help: Partition active state (1=active)
+      indexes:
+      - labelname: mtxrPartitionIndex
+        type: gauge
+    - name: mtxrPartitionRunning
+      oid: 1.3.6.1.4.1.14988.1.1.17.1.1.6
+      type: gauge
+      help: Partition running state (1=running)
+      indexes:
+      - labelname: mtxrPartitionIndex
+        type: gauge
+    # Interface Detailed Statistics
+    - name: mtxrInterfaceRxDrop
+      oid: 1.3.6.1.4.1.14988.1.1.14.1.1.17
       type: counter
-      help: WireGuard peer received bytes
+      help: Number of received packets dropped
       indexes:
-      - labelname: mtxrWgPeerIndex
+      - labelname: mtxrInterfaceIndex
         type: gauge
       lookups:
       - labels:
-        - mtxrWgPeerIndex
-        labelname: mtxrWgPeerAddr
-        oid: 1.3.6.1.4.1.14988.1.1.19.1.1.3
+        - mtxrInterfaceIndex
+        labelname: mtxrInterfaceName
+        oid: 1.3.6.1.4.1.14988.1.1.14.1.1.2
         type: DisplayString
-    - name: mtxrWgPeerTx
-      oid: 1.3.6.1.4.1.14988.1.1.19.1.1.5
+    - name: mtxrInterfaceTxDrop
+      oid: 1.3.6.1.4.1.14988.1.1.14.1.1.18
       type: counter
-      help: WireGuard peer transmitted bytes
+      help: Number of transmitted packets dropped
       indexes:
-      - labelname: mtxrWgPeerIndex
+      - labelname: mtxrInterfaceIndex
         type: gauge
       lookups:
       - labels:
-        - mtxrWgPeerIndex
-        labelname: mtxrWgPeerAddr
-        oid: 1.3.6.1.4.1.14988.1.1.19.1.1.3
+        - mtxrInterfaceIndex
+        labelname: mtxrInterfaceName
+        oid: 1.3.6.1.4.1.14988.1.1.14.1.1.2
+        type: DisplayString
+    - name: mtxrInterfaceRxError
+      oid: 1.3.6.1.4.1.14988.1.1.14.1.1.15
+      type: counter
+      help: Number of receive errors
+      indexes:
+      - labelname: mtxrInterfaceIndex
+        type: gauge
+      lookups:
+      - labels:
+        - mtxrInterfaceIndex
+        labelname: mtxrInterfaceName
+        oid: 1.3.6.1.4.1.14988.1.1.14.1.1.2
+        type: DisplayString
+    - name: mtxrInterfaceTxError
+      oid: 1.3.6.1.4.1.14988.1.1.14.1.1.16
+      type: counter
+      help: Number of transmit errors
+      indexes:
+      - labelname: mtxrInterfaceIndex
+        type: gauge
+      lookups:
+      - labels:
+        - mtxrInterfaceIndex
+        labelname: mtxrInterfaceName
+        oid: 1.3.6.1.4.1.14988.1.1.14.1.1.2
         type: DisplayString
