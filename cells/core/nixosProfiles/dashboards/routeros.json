@@ -2209,6 +2209,180 @@
       "title": "アクティブインターフェース数",
       "description": "稼働中のネットワークインターフェース数",
       "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "area"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 50
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent",
+          "min": 0,
+          "max": 100
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 52
+      },
+      "id": 40,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "max"],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "pluginVersion": "8.5.2",
+      "targets": [
+        {
+          "expr": "(rate(ifInOctets{job=\"routeros\"}[5m]) * 8 * on(ifIndex) group_left(ifDescr) ifDescr{job=\"routeros\"} / on(ifIndex) ifSpeed{job=\"routeros\"}) * 100",
+          "refId": "A",
+          "legendFormat": "受信 {{ifDescr}}"
+        },
+        {
+          "expr": "(rate(ifOutOctets{job=\"routeros\"}[5m]) * 8 * on(ifIndex) group_left(ifDescr) ifDescr{job=\"routeros\"} / on(ifIndex) ifSpeed{job=\"routeros\"}) * 100",
+          "refId": "B",
+          "legendFormat": "送信 {{ifDescr}}"
+        }
+      ],
+      "title": "インターフェース帯域使用率",
+      "description": "各インターフェースの帯域使用率（%）",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 5
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 52
+      },
+      "id": 42,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "titleSize": 14,
+          "valueSize": 20
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "8.5.2",
+      "targets": [
+        {
+          "expr": "mtxrSystemRebootCount{job=\"routeros\"}",
+          "refId": "A",
+          "legendFormat": "再起動回数"
+        },
+        {
+          "expr": "mtxrSystemBadBlocks{job=\"routeros\"}",
+          "refId": "B",
+          "legendFormat": "不良ブロック数"
+        },
+        {
+          "expr": "mtxrSystemUSBPowerResets{job=\"routeros\"}",
+          "refId": "C",
+          "legendFormat": "USB電源リセット回数"
+        },
+        {
+          "expr": "up{job=\"routeros\"}",
+          "refId": "D",
+          "legendFormat": "稼働状態"
+        }
+      ],
+      "title": "システムヘルスサマリー",
+      "description": "RouterOSシステムの健全性指標",
+      "type": "stat"
     }
   ],
   "schemaVersion": 27,

@@ -191,11 +191,6 @@
   - 継続時間: 10分
   - 重要度: warning
 
-- **RouterOSWireGuardHandshakeStale**: WireGuardハンドシェイク古い
-  - 条件: 最終ハンドシェイクから5分以上経過
-  - 継続時間: 5分
-  - 重要度: warning
-
 #### PPPoE監視
 - **RouterOSPPPoEDown**: PPPoE接続ダウン
   - 条件: PPPoEインターフェース（ifIndex=10）状態 = down
@@ -251,8 +246,7 @@
 
 2. **RouterOS監視**
    - RouterOSHighBandwidthUsage: インターフェース帯域使用率80%以上で警告
-   - RouterOSWireGuardHandshakeStale: WireGuardハンドシェイクが5分以上古い場合に警告
-   - RouterOSUpdateAvailable: 新しいRouterOSバージョンが利用可能な場合に通知
+   - RouterOSUpdateAvailable: 新しいRouterOSバージョンが利用可能な場合に通知（実装コメントアウト）
 
 ### 既存アラートの改善
 

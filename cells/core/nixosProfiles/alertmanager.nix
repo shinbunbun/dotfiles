@@ -579,19 +579,6 @@ in
                 description = "No traffic has been detected on WireGuard interface (wg-home) for more than 10 minutes.";
               };
             }
-            # WireGuardハンドシェイク監視
-            {
-              alert = "RouterOSWireGuardHandshakeStale";
-              expr = "time() - mtxrWgPeerLastHandshake{job=\"routeros\"} > 300 and mtxrWgPeerLastHandshake{job=\"routeros\"} > 0";
-              for = "5m";
-              labels = {
-                severity = "warning";
-              };
-              annotations = {
-                summary = "WireGuard handshake is stale";
-                description = "WireGuard peer {{ $labels.mtxrWgPeerName }} last handshake was {{ $value | humanizeDuration }} ago";
-              };
-            }
             # PPPoE接続ダウン
             {
               alert = "RouterOSPPPoEDown";
