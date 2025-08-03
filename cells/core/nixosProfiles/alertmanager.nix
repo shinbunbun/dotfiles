@@ -276,7 +276,7 @@ in
             # DHCP枯渇警告
             {
               alert = "DHCPPoolNearExhaustion";
-              expr = "mtxrDHCPLeaseCount > 200";  # 約80% of typical 250 address pool
+              expr = "mtxrDHCPLeaseCount > 200"; # 約80% of typical 250 address pool
               for = "10m";
               labels = {
                 severity = "warning";
