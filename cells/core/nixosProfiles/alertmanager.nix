@@ -153,6 +153,19 @@ in
                 description = "Memory usage is above 85% (current value: {{ $value }}%)";
               };
             }
+            # メモリ不足クリティカル
+            {
+              alert = "CriticalMemoryUsage";
+              expr = "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 90";
+              for = "2m";
+              labels = {
+                severity = "critical";
+              };
+              annotations = {
+                summary = "Critical memory usage on {{ $labels.instance }}";
+                description = "Memory usage is above 90% (current value: {{ $value }}%). System may become unstable.";
+              };
+            }
             # ディスク容量不足
             {
               alert = "DiskSpaceLow";
@@ -164,6 +177,19 @@ in
               annotations = {
                 summary = "Low disk space on {{ $labels.instance }}";
                 description = "Disk usage is above 85% on {{ $labels.mountpoint }} (current value: {{ $value }}%)";
+              };
+            }
+            # Swap使用量警告
+            {
+              alert = "HighSwapUsage";
+              expr = "(1 - (node_memory_SwapFree_bytes / node_memory_SwapTotal_bytes)) * 100 > 50";
+              for = "5m";
+              labels = {
+                severity = "warning";
+              };
+              annotations = {
+                summary = "High swap usage on {{ $labels.instance }}";
+                description = "Swap usage is above 50% (current value: {{ $value }}%). This may indicate memory pressure.";
               };
             }
             # RouterOS高温度
@@ -179,6 +205,19 @@ in
                 description = "RouterOS temperature is above 60°C (current value: {{ $value }}°C)";
               };
             }
+            # CPUスロットリング検知
+            {
+              alert = "RouterOSCPUThrottling";
+              expr = "mtxrHlCpuFrequency < 600 and mtxrHlTemperature / 10 > 50";
+              for = "5m";
+              labels = {
+                severity = "warning";
+              };
+              annotations = {
+                summary = "CPU throttling detected on RouterOS";
+                description = "CPU frequency dropped to {{ $value }}MHz while temperature is high. This may indicate thermal throttling.";
+              };
+            }
             # RouterOS CPU高使用率
             {
               alert = "RouterOSHighCPU";
@@ -190,6 +229,100 @@ in
               annotations = {
                 summary = "High CPU usage on RouterOS";
                 description = "RouterOS CPU usage is above 80% (current value: {{ $value }}%)";
+              };
+            }
+            # RouterOS再起動検知
+            {
+              alert = "RouterOSRestarted";
+              expr = "increase(mtxrSystemRebootCount[1h]) > 0";
+              for = "1m";
+              labels = {
+                severity = "warning";
+              };
+              annotations = {
+                summary = "RouterOS has been restarted";
+                description = "RouterOS device has been restarted (reboot count increased by {{ $value }})";
+              };
+            }
+            # RouterOS不良ブロック検出
+            {
+              alert = "RouterOSBadBlocks";
+              expr = "mtxrSystemBadBlocks > 0";
+              for = "5m";
+              labels = {
+                severity = "critical";
+              };
+              annotations = {
+                summary = "Bad blocks detected on RouterOS";
+                description = "RouterOS has detected {{ $value }} bad blocks in memory";
+              };
+            }
+            # RouterOSアップデート通知
+            # 注: RouterOSのバージョン文字列比較はPromQLでは直接サポートされないため、
+            # 手動チェックまたは外部スクリプトで実装することを推奨
+            # RouterOS USB電源問題
+            {
+              alert = "RouterOSUSBPowerIssue";
+              expr = "increase(mtxrSystemUSBPowerResets[24h]) > 0";
+              for = "5m";
+              labels = {
+                severity = "warning";
+              };
+              annotations = {
+                summary = "USB power resets detected on RouterOS";
+                description = "RouterOS USB power has been reset {{ $value }} times in the last 24 hours";
+              };
+            }
+            # DHCP枯渇警告
+            {
+              alert = "DHCPPoolNearExhaustion";
+              expr = "mtxrDHCPLeaseCount > 200"; # 約80% of typical 250 address pool
+              for = "10m";
+              labels = {
+                severity = "warning";
+              };
+              annotations = {
+                summary = "DHCP pool near exhaustion";
+                description = "Active DHCP leases ({{ $value }}) approaching pool limit (80% threshold)";
+              };
+            }
+            # インターフェースエラー率
+            {
+              alert = "RouterOSHighErrorRate";
+              expr = "rate(ifInErrors{job=\"routeros\"}[5m]) > 100";
+              for = "5m";
+              labels = {
+                severity = "warning";
+              };
+              annotations = {
+                summary = "High interface error rate on RouterOS";
+                description = "Interface {{ $labels.ifDescr }} experiencing high error rate ({{ $value }} errors/sec)";
+              };
+            }
+            # パケットドロップ率
+            {
+              alert = "RouterOSHighPacketDropRate";
+              expr = "rate(mtxrInterfaceRxDrop{job=\"routeros\"}[5m]) > 1000 or rate(mtxrInterfaceTxDrop{job=\"routeros\"}[5m]) > 1000";
+              for = "5m";
+              labels = {
+                severity = "warning";
+              };
+              annotations = {
+                summary = "High packet drop rate on RouterOS interface";
+                description = "Interface {{ $labels.mtxrInterfaceName }} is dropping packets at {{ $value }} packets/sec";
+              };
+            }
+            # インターフェース帯域使用率
+            {
+              alert = "RouterOSHighBandwidthUsage";
+              expr = "(rate(ifInOctets{job=\"routeros\"}[5m]) * 8 / ifSpeed{job=\"routeros\"}) > 0.8 or (rate(ifOutOctets{job=\"routeros\"}[5m]) * 8 / ifSpeed{job=\"routeros\"}) > 0.8";
+              for = "5m";
+              labels = {
+                severity = "warning";
+              };
+              annotations = {
+                summary = "High bandwidth usage on RouterOS interface";
+                description = "Interface {{ $labels.ifDescr }} is using more than 80% of its bandwidth ({{ $value | humanizePercentage }})";
               };
             }
             # ネットワークインターフェースダウン
@@ -312,7 +445,7 @@ in
             # 時刻同期ずれ
             {
               alert = "ClockSkewDetected";
-              expr = "abs(node_timex_offset_seconds) > 5";
+              expr = "abs(node_timex_offset_seconds) > 10";
               for = "5m";
               labels = {
                 severity = "warning";
