@@ -107,12 +107,6 @@
   - 継続時間: 1時間
   - 重要度: warning
 
-#### ログ監視（新規追加）
-- **DiskUsageRapidIncrease**: ディスク使用量の急激な増加
-  - 条件: 1時間で100MB以上の増加
-  - 継続時間: 10分
-  - 重要度: warning
-
 ### 2. RouterOS監視 (routeros)
 
 #### システム監視
