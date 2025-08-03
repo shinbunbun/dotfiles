@@ -494,19 +494,6 @@ in
                 description = "RouterOS backup timer has not triggered for {{ $value | humanizeDuration }}.";
               };
             }
-            # ディスク使用量の急激な増加
-            {
-              alert = "DiskUsageRapidIncrease";
-              expr = "delta(node_filesystem_size_bytes{mountpoint=\"/\"}[1h]) - delta(node_filesystem_free_bytes{mountpoint=\"/\"}[1h]) > 104857600";
-              for = "10m";
-              labels = {
-                severity = "warning";
-              };
-              annotations = {
-                summary = "Rapid disk usage increase detected";
-                description = "Disk usage on {{ $labels.mountpoint }} is increasing rapidly ({{ $value | humanize }}B in the last hour). This may be due to excessive logging.";
-              };
-            }
           ];
         }
         # RouterOS専用グループ
