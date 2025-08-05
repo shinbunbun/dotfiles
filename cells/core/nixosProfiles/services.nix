@@ -93,6 +93,9 @@ in
     mode = "0644";
   };
 
+  # ファイアウォール設定 - SSHポートを許可
+  networking.firewall.allowedTCPPorts = [ cfg.ssh.port ];
+
   # Fail2ban for SSH protection with enhanced configuration
   services.fail2ban = {
     enable = true;

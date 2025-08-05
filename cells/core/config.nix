@@ -13,6 +13,8 @@
   - 監視システム設定: Prometheus、Grafana、Alertmanager
   - Fail2ban設定: 除外ネットワーク
   - SOPS設定: 秘密鍵パス
+  - CouchDB設定: コンテナ名、JWT設定
+  - Authentik設定: ドメイン
 
   型チェックとアサーションを含み、設定エラーを
   早期に発見できるようにしています。このファイルを
@@ -315,6 +317,30 @@ let
           assertType "monitoring.snmpExporter.communityString" "prometheus" builtins.isString
             "Must be a string";
       };
+    };
+
+    # CouchDB設定
+    couchdb = {
+      containerName =
+        assertType "couchdb.containerName" "couchdb-obsidian" builtins.isString
+          "Must be a string";
+      port = assertType "couchdb.port" 5984 isValidPort "Must be a valid port number (1-65535)";
+      configPath =
+        assertType "couchdb.configPath" "/opt/couchdb/etc/local.d/10-jwt.ini" isValidPath
+          "Must be an absolute path";
+      jwt = {
+        rolesClaimPath =
+          assertType "couchdb.jwt.rolesClaimPath" "groups" builtins.isString
+            "Must be a string";
+        allowedAlgorithms =
+          assertType "couchdb.jwt.allowedAlgorithms" "ES256" builtins.isString
+            "Must be a string";
+      };
+    };
+
+    # Authentik設定
+    authentik = {
+      domain = assertType "authentik.domain" "auth.shinbunbun.com" builtins.isString "Must be a string";
     };
   };
 

@@ -26,6 +26,7 @@ in
       inputs.cells.core.nixosProfiles.routeros-backup
       inputs.cells.core.nixosProfiles.monitoring
       inputs.cells.core.nixosProfiles.alertmanager
+      inputs.cells.core.nixosProfiles.authentik
 
       inputs.home-manager.nixosModules.home-manager
       inputs.sops-nix.nixosModules.sops
@@ -65,6 +66,7 @@ in
           inputs.cells.dev.homeProfiles.editors
           inputs.cells.dev.homeProfiles.securityTools
           inputs.cells.dev.homeProfiles.aiTools
+          inputs.cells.dev.homeProfiles.cloudTools
         ];
       };
     };

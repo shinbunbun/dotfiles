@@ -13,6 +13,7 @@
   - obsidian-livesync: Obsidian同期サービス
   - routeros-backup: RouterOSバックアップ
   - wireguard: WireGuard VPN設定
+  - authentik: セルフホストIdP（認証プロバイダー）
 
   各プロファイルは独立したモジュールとして管理され、
   必要に応じて組み合わせて使用します。
@@ -34,6 +35,7 @@
   # 既存のモジュール
   obsidian-livesync = import ./nixosProfiles/obsidian-livesync.nix { inherit inputs cell; };
   routeros-backup = import ./nixosProfiles/routeros-backup.nix { inherit inputs cell; };
+  authentik = import ./nixosProfiles/authentik.nix { inherit inputs cell; };
   optimise = {
     nix.settings.auto-optimise-store = true;
     nix.gc = {
