@@ -17,3 +17,15 @@ sops-nix
 # VM関連ファイル
 nixos-efi-vars.fd
 nixos.qcow2
+
+# Test and debug scripts
+test-*.sh
+*-test.sh
+debug-*.sh
+*-debug.sh
+setup-*.sh
+
+# JWT related temporary files
+*jwt-token*
+*jwt-key*
+EOF < /dev/null
