@@ -3,12 +3,11 @@
   システムツール設定モジュール
 
   このモジュールはシステム管理用のツールを提供します：
-  - fastfetch: システム情報表示ツール
-  - htop: プロセス監視ツール
-  - ripgrep: 高速ファイル検索ツール
-  - fd: 高速ファイル検索ツール
-  - iperf3: ネットワークパフォーマンス測定
-  - speedtest-cli: インターネット速度測定
+  - polkit: 権限管理ツール
+  - wireguard-tools: WireGuard VPN管理ツール
+  - jq: JSONデータ処理ツール
+  - openssl: 暗号化ツール
+  - python3: スクリプト実行環境
 
   これらのツールをシステム全体で利用可能にします。
 */
@@ -23,5 +22,8 @@
   environment.systemPackages = [
     pkgs.polkit
     pkgs.wireguard-tools
+    pkgs.jq
+    pkgs.openssl
+    pkgs.python3
   ];
 }

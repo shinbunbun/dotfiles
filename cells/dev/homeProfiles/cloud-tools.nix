@@ -5,6 +5,7 @@
   このモジュールはクラウド開発に必要なツールを提供します：
   - Google Cloud SDK
   - Cloud Datastore Emulator
+  - Cloudflared (Cloudflare Tunnel CLI)
 
   Google Cloud SDKには必要なコンポーネントが自動的に含まれます。
 */
@@ -18,5 +19,6 @@ in
 {
   home.packages = [
     googleCloudSdkWithCloudDatastoreEmulator
+    pkgs.cloudflared
   ];
 }
