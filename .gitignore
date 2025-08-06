@@ -28,4 +28,4 @@ setup-*.sh
 # JWT related temporary files
 *jwt-token*
 *jwt-key*
-EOF < /dev/null
+
