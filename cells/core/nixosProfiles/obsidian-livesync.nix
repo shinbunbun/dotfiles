@@ -126,7 +126,9 @@
         allowed_algorithms = ES256
 
         [jwt_keys]
-        ${config.sops.placeholder."couchdb_jwt_kid"} = ${config.sops.placeholder."couchdb_jwt_ec_public_key"}
+        ${config.sops.placeholder."couchdb_jwt_kid"} = ${
+          config.sops.placeholder."couchdb_jwt_ec_public_key"
+        }
       '';
       path = "/var/lib/couchdb/config/10-jwt.ini";
       owner = "root";
@@ -185,120 +187,120 @@
         "couchdb_database_name:${config.sops.secrets."couchdb_database_name".path}"
       ];
       ExecStart = pkgs.writeShellScript "couchdb-init" ''
-                set -e
+        set -e
 
-                echo "Waiting for CouchDB to be ready..."
-                for i in {1..30}; do
-                  if ${pkgs.curl}/bin/curl -f http://localhost:5984/ >/dev/null 2>&1; then
-                    echo "CouchDB is ready!"
-                    break
-                  fi
-                  echo "Attempt $i/30: CouchDB not ready yet, waiting..."
-                  sleep 2
-                done
+        echo "Waiting for CouchDB to be ready..."
+        for i in {1..30}; do
+          if ${pkgs.curl}/bin/curl -f http://localhost:5984/ >/dev/null 2>&1; then
+            echo "CouchDB is ready!"
+            break
+          fi
+          echo "Attempt $i/30: CouchDB not ready yet, waiting..."
+          sleep 2
+        done
 
-                # systemdのCREDENTIALS_DIRECTORYからパスワードを読み込む
-                PASSWORD=$(cat "$CREDENTIALS_DIRECTORY/couchdb_admin_password")
+        # systemdのCREDENTIALS_DIRECTORYからパスワードを読み込む
+        PASSWORD=$(cat "$CREDENTIALS_DIRECTORY/couchdb_admin_password")
 
-                # 認証情報用の一時ファイルを作成（安全なディレクトリに）
-                NETRC_FILE=$(mktemp)
-                chmod 600 "$NETRC_FILE"
-                echo "machine localhost login admin password $PASSWORD" > "$NETRC_FILE"
+        # 認証情報用の一時ファイルを作成（安全なディレクトリに）
+        NETRC_FILE=$(mktemp)
+        chmod 600 "$NETRC_FILE"
+        echo "machine localhost login admin password $PASSWORD" > "$NETRC_FILE"
 
-                # netrc-fileオプションを使用して安全に認証
-                echo "Creating obsidian-livesync database..."
-                ${pkgs.curl}/bin/curl -f --netrc-file "$NETRC_FILE" \
-                  -X PUT http://localhost:5984/obsidian-livesync 2>/dev/null || {
-                  echo "Database obsidian-livesync already exists or creation failed"
-                }
+        # netrc-fileオプションを使用して安全に認証
+        echo "Creating obsidian-livesync database..."
+        ${pkgs.curl}/bin/curl -f --netrc-file "$NETRC_FILE" \
+          -X PUT http://localhost:5984/obsidian-livesync 2>/dev/null || {
+          echo "Database obsidian-livesync already exists or creation failed"
+        }
 
-                # Create database for the configured database name
-                DATABASE_NAME=$(cat "$CREDENTIALS_DIRECTORY/couchdb_database_name")
-                echo "Creating $DATABASE_NAME database..."
-                ${pkgs.curl}/bin/curl -f --netrc-file "$NETRC_FILE" \
-                  -X PUT http://localhost:5984/$DATABASE_NAME 2>/dev/null || {
-                  echo "Database $DATABASE_NAME already exists or creation failed"
-                }
+        # Create database for the configured database name
+        DATABASE_NAME=$(cat "$CREDENTIALS_DIRECTORY/couchdb_database_name")
+        echo "Creating $DATABASE_NAME database..."
+        ${pkgs.curl}/bin/curl -f --netrc-file "$NETRC_FILE" \
+          -X PUT http://localhost:5984/$DATABASE_NAME 2>/dev/null || {
+          echo "Database $DATABASE_NAME already exists or creation failed"
+        }
 
-                # Configure CORS settings via CouchDB API
-                echo "Configuring CORS settings..."
-                ${pkgs.curl}/bin/curl -f --netrc-file "$NETRC_FILE" \
-                  -X PUT http://localhost:5984/_node/nonode@nohost/_config/httpd/enable_cors \
-                  -H "Content-Type: application/json" \
-                  -d '"true"' 2>/dev/null || echo "CORS enable setting failed"
+        # Configure CORS settings via CouchDB API
+        echo "Configuring CORS settings..."
+        ${pkgs.curl}/bin/curl -f --netrc-file "$NETRC_FILE" \
+          -X PUT http://localhost:5984/_node/nonode@nohost/_config/httpd/enable_cors \
+          -H "Content-Type: application/json" \
+          -d '"true"' 2>/dev/null || echo "CORS enable setting failed"
 
-                ${pkgs.curl}/bin/curl -f --netrc-file "$NETRC_FILE" \
-                  -X PUT http://localhost:5984/_node/nonode@nohost/_config/cors/origins \
-                  -H "Content-Type: application/json" \
-                  -d '"app://obsidian.md,capacitor://localhost,http://localhost,https://private-obsidian.${
-                    if config.networking ? domain && config.networking.domain != null then
-                      config.networking.domain
-                    else
-                      "shinbunbun.com"
-                  }"' 2>/dev/null || echo "CORS origins setting failed"
+        ${pkgs.curl}/bin/curl -f --netrc-file "$NETRC_FILE" \
+          -X PUT http://localhost:5984/_node/nonode@nohost/_config/cors/origins \
+          -H "Content-Type: application/json" \
+          -d '"app://obsidian.md,capacitor://localhost,http://localhost,https://private-obsidian.${
+            if config.networking ? domain && config.networking.domain != null then
+              config.networking.domain
+            else
+              "shinbunbun.com"
+          }"' 2>/dev/null || echo "CORS origins setting failed"
 
-                ${pkgs.curl}/bin/curl -f --netrc-file "$NETRC_FILE" \
-                  -X PUT http://localhost:5984/_node/nonode@nohost/_config/cors/credentials \
-                  -H "Content-Type: application/json" \
-                  -d '"true"' 2>/dev/null || echo "CORS credentials setting failed"
+        ${pkgs.curl}/bin/curl -f --netrc-file "$NETRC_FILE" \
+          -X PUT http://localhost:5984/_node/nonode@nohost/_config/cors/credentials \
+          -H "Content-Type: application/json" \
+          -d '"true"' 2>/dev/null || echo "CORS credentials setting failed"
 
-                ${pkgs.curl}/bin/curl -f --netrc-file "$NETRC_FILE" \
-                  -X PUT http://localhost:5984/_node/nonode@nohost/_config/cors/methods \
-                  -H "Content-Type: application/json" \
-                  -d '"GET,PUT,POST,HEAD,DELETE,OPTIONS"' 2>/dev/null || echo "CORS methods setting failed"
+        ${pkgs.curl}/bin/curl -f --netrc-file "$NETRC_FILE" \
+          -X PUT http://localhost:5984/_node/nonode@nohost/_config/cors/methods \
+          -H "Content-Type: application/json" \
+          -d '"GET,PUT,POST,HEAD,DELETE,OPTIONS"' 2>/dev/null || echo "CORS methods setting failed"
 
-                ${pkgs.curl}/bin/curl -f --netrc-file "$NETRC_FILE" \
-                  -X PUT http://localhost:5984/_node/nonode@nohost/_config/cors/headers \
-                  -H "Content-Type: application/json" \
-                  -d '"accept,authorization,content-type,origin,referer,x-couch-request-id,x-requested-with"' 2>/dev/null || echo "CORS headers setting failed"
+        ${pkgs.curl}/bin/curl -f --netrc-file "$NETRC_FILE" \
+          -X PUT http://localhost:5984/_node/nonode@nohost/_config/cors/headers \
+          -H "Content-Type: application/json" \
+          -d '"accept,authorization,content-type,origin,referer,x-couch-request-id,x-requested-with"' 2>/dev/null || echo "CORS headers setting failed"
 
-                # JWT設定はjwt-auth.iniファイルで管理されるため、API経由の設定は不要
-                echo "JWT authentication configured via jwt-auth.ini file"
+        # JWT設定はjwt-auth.iniファイルで管理されるため、API経由の設定は不要
+        echo "JWT authentication configured via jwt-auth.ini file"
 
-                # データベースセキュリティ設定（JWT認証ユーザーへの権限付与）
-                echo "Configuring database security for JWT authenticated users..."
-                
-                # obsidian-livesyncデータベースのセキュリティ設定
-                ${pkgs.curl}/bin/curl -f --netrc-file "$NETRC_FILE" \
-                  -X PUT http://localhost:5984/obsidian-livesync/_security \
-                  -H "Content-Type: application/json" \
-                  -d '{
-                    "admins": {
-                      "names": ["admin"],
-                      "roles": ["authentik Admins"]
-                    },
-                    "members": {
-                      "names": [],
-                      "roles": ["Obsidian Users"]
-                    }
-                  }' 2>/dev/null || echo "Security configuration for obsidian-livesync failed"
+        # データベースセキュリティ設定（JWT認証ユーザーへの権限付与）
+        echo "Configuring database security for JWT authenticated users..."
 
-                # 設定されたデータベース名のセキュリティ設定
-                if [ "$DATABASE_NAME" != "obsidian-livesync" ]; then
-                  ${pkgs.curl}/bin/curl -f --netrc-file "$NETRC_FILE" \
-                    -X PUT http://localhost:5984/$DATABASE_NAME/_security \
-                    -H "Content-Type: application/json" \
-                    -d '{
-                      "admins": {
-                        "names": ["admin"],
-                        "roles": ["authentik Admins"]
-                      },
-                      "members": {
-                        "names": [],
-                        "roles": ["Obsidian Users"]
-                      }
-                    }' 2>/dev/null || echo "Security configuration for $DATABASE_NAME failed"
-                fi
+        # obsidian-livesyncデータベースのセキュリティ設定
+        ${pkgs.curl}/bin/curl -f --netrc-file "$NETRC_FILE" \
+          -X PUT http://localhost:5984/obsidian-livesync/_security \
+          -H "Content-Type: application/json" \
+          -d '{
+            "admins": {
+              "names": ["admin"],
+              "roles": ["authentik Admins"]
+            },
+            "members": {
+              "names": [],
+              "roles": ["Obsidian Users"]
+            }
+          }' 2>/dev/null || echo "Security configuration for obsidian-livesync failed"
 
-                # セキュリティ設定の確認
-                echo "Verifying security settings..."
-                ${pkgs.curl}/bin/curl -s --netrc-file "$NETRC_FILE" \
-                  http://localhost:5984/obsidian-livesync/_security | ${pkgs.jq}/bin/jq '.' || true
+        # 設定されたデータベース名のセキュリティ設定
+        if [ "$DATABASE_NAME" != "obsidian-livesync" ]; then
+          ${pkgs.curl}/bin/curl -f --netrc-file "$NETRC_FILE" \
+            -X PUT http://localhost:5984/$DATABASE_NAME/_security \
+            -H "Content-Type: application/json" \
+            -d '{
+              "admins": {
+                "names": ["admin"],
+                "roles": ["authentik Admins"]
+              },
+              "members": {
+                "names": [],
+                "roles": ["Obsidian Users"]
+              }
+            }' 2>/dev/null || echo "Security configuration for $DATABASE_NAME failed"
+        fi
 
-                # 一時ファイルを削除
-                rm -f "$NETRC_FILE"
+        # セキュリティ設定の確認
+        echo "Verifying security settings..."
+        ${pkgs.curl}/bin/curl -s --netrc-file "$NETRC_FILE" \
+          http://localhost:5984/obsidian-livesync/_security | ${pkgs.jq}/bin/jq '.' || true
 
-                echo "CouchDB initialization completed successfully!"
+        # 一時ファイルを削除
+        rm -f "$NETRC_FILE"
+
+        echo "CouchDB initialization completed successfully!"
       '';
     };
   };
