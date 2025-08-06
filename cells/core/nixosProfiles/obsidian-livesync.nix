@@ -3,7 +3,7 @@
   Obsidian LiveSyncモジュール
 
   このモジュールはObsidianノートの同期サービスを提供します：
-  - CouchDB 3.3.3を使用したデータベースサーバー
+  - CouchDB 3.5.0を使用したデータベースサーバー
   - Cloudflare Tunnelを使用した安全なアクセス
   - SOPSを使用した認証情報の管理
   - 自動データベース初期化
@@ -71,6 +71,24 @@
       mode = "0400";
     };
 
+    # Authentik JWT認証用のEC公開鍵
+    secrets."couchdb_jwt_ec_public_key" = {
+      key = "couchdb/jwt_ec_public_key";
+      sopsFile = "${inputs.self}/secrets/couchdb.yaml";
+      owner = "root";
+      group = "root";
+      mode = "0400";
+    };
+
+    # JWT鍵ID
+    secrets."couchdb_jwt_kid" = {
+      key = "couchdb/jwt_kid";
+      sopsFile = "${inputs.self}/secrets/couchdb.yaml";
+      owner = "root";
+      group = "root";
+      mode = "0400";
+    };
+
     # CouchDB environment file template
     templates."couchdb/env" = {
       content = lib.generators.toKeyValue { } {
@@ -79,7 +97,7 @@
       };
       path = "/run/secrets/rendered/couchdb/env";
       owner = "root";
-      group = "root";
+      group = "docker";
       mode = "0640";
     };
 
@@ -95,12 +113,35 @@
       group = "root";
       mode = "0640";
     };
+
+    # JWT設定ファイルテンプレート
+    templates."couchdb/10-jwt.ini" = {
+      content = ''
+        [chttpd]
+        authentication_handlers = {chttpd_auth, jwt_authentication_handler}, {chttpd_auth, cookie_authentication_handler}, {chttpd_auth, default_authentication_handler}
+
+        [jwt_auth]
+        required_claims = exp
+        roles_claim_path = groups
+        allowed_algorithms = ES256
+
+        [jwt_keys]
+        ${config.sops.placeholder."couchdb_jwt_kid"} = ${
+          config.sops.placeholder."couchdb_jwt_ec_public_key"
+        }
+      '';
+      path = "/var/lib/couchdb/config/10-jwt.ini";
+      owner = "root";
+      group = "root";
+      mode = "0644";
+    };
   };
 
   # CouchDBデータディレクトリの作成
   systemd.tmpfiles.rules = [
-    "d /var/lib/couchdb 0755 root docker -"
+    "d /var/lib/couchdb 0755 root root -"
     "d /var/lib/couchdb/data 0755 999 999 -"
+    "d /var/lib/couchdb/config 0755 999 999 -"
   ];
 
   # CouchDB OCI Container
@@ -108,11 +149,14 @@
     backend = "docker";
     containers = {
       couchdb-obsidian = {
-        image = "couchdb:3.3.3";
+        image = "couchdb:3.5.0";
         autoStart = true;
+        user = "couchdb:couchdb";
         ports = [ "127.0.0.1:5984:5984" ];
         volumes = [
           "/var/lib/couchdb/data:/opt/couchdb/data"
+          "/var/lib/couchdb/config:/opt/couchdb/etc/local.d"
+          "/run/secrets/rendered/couchdb/10-jwt.ini:/opt/couchdb/etc/local.d/10-jwt.ini:ro"
         ];
         environmentFiles = [
           config.sops.templates."couchdb/env".path
@@ -142,8 +186,7 @@
         "couchdb_admin_password:${config.sops.secrets."couchdb_admin_password".path}"
         "couchdb_database_name:${config.sops.secrets."couchdb_database_name".path}"
       ];
-      ExecStart = pkgs.writeScript "couchdb-init" ''
-        #!${pkgs.bash}/bin/bash
+      ExecStart = pkgs.writeShellScript "couchdb-init" ''
         set -e
 
         echo "Waiting for CouchDB to be ready..."
@@ -210,6 +253,49 @@
           -X PUT http://localhost:5984/_node/nonode@nohost/_config/cors/headers \
           -H "Content-Type: application/json" \
           -d '"accept,authorization,content-type,origin,referer,x-couch-request-id,x-requested-with"' 2>/dev/null || echo "CORS headers setting failed"
+
+        # JWT設定はjwt-auth.iniファイルで管理されるため、API経由の設定は不要
+        echo "JWT authentication configured via jwt-auth.ini file"
+
+        # データベースセキュリティ設定（JWT認証ユーザーへの権限付与）
+        echo "Configuring database security for JWT authenticated users..."
+
+        # obsidian-livesyncデータベースのセキュリティ設定
+        ${pkgs.curl}/bin/curl -f --netrc-file "$NETRC_FILE" \
+          -X PUT http://localhost:5984/obsidian-livesync/_security \
+          -H "Content-Type: application/json" \
+          -d '{
+            "admins": {
+              "names": ["admin"],
+              "roles": ["authentik Admins"]
+            },
+            "members": {
+              "names": [],
+              "roles": ["Obsidian Users"]
+            }
+          }' 2>/dev/null || echo "Security configuration for obsidian-livesync failed"
+
+        # 設定されたデータベース名のセキュリティ設定
+        if [ "$DATABASE_NAME" != "obsidian-livesync" ]; then
+          ${pkgs.curl}/bin/curl -f --netrc-file "$NETRC_FILE" \
+            -X PUT http://localhost:5984/$DATABASE_NAME/_security \
+            -H "Content-Type: application/json" \
+            -d '{
+              "admins": {
+                "names": ["admin"],
+                "roles": ["authentik Admins"]
+              },
+              "members": {
+                "names": [],
+                "roles": ["Obsidian Users"]
+              }
+            }' 2>/dev/null || echo "Security configuration for $DATABASE_NAME failed"
+        fi
+
+        # セキュリティ設定の確認
+        echo "Verifying security settings..."
+        ${pkgs.curl}/bin/curl -s --netrc-file "$NETRC_FILE" \
+          http://localhost:5984/obsidian-livesync/_security | ${pkgs.jq}/bin/jq '.' || true
 
         # 一時ファイルを削除
         rm -f "$NETRC_FILE"
