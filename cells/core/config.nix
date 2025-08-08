@@ -348,6 +348,7 @@ let
     # Authentik設定
     authentik = {
       domain = assertType "authentik.domain" "auth.shinbunbun.com" builtins.isString "Must be a string";
+      baseUrl = assertType "authentik.baseUrl" "https://auth.shinbunbun.com" builtins.isString "Must be a string";
     };
 
     # 管理インターフェース設定
