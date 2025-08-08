@@ -251,18 +251,6 @@ in
     wantedBy = [ "multi-user.target" ];
   };
 
-  # Cloudflare Tunnel設定にAuthentikを追加
-  services.cloudflared.tunnels."authentik" = {
-    default = "http_status:404";
-    credentialsFile = config.sops.templates."cloudflare/authentik-credentials.json".path;
-    ingress = {
-      "auth.${domain}" = {
-        service = "http://localhost:9000";
-      };
-    };
-  };
-
   # ファイアウォール設定（内部アクセスのみ）
   # Authentikへの外部からの直接アクセスは許可しない（Cloudflare Tunnel経由のみ）
-  # 他のサービスのファイアウォール設定には影響しないようにする
 }
