@@ -132,11 +132,30 @@ in
         admin_user = "admin";
         # 初期パスワードは初回ログイン後に変更必須
         admin_password = "admin";
+        # 自動ログインを無効化（OAuth2使用時）
+        disable_initial_admin_creation = false;
       };
 
       # 匿名アクセスを無効化
       "auth.anonymous" = {
         enabled = false;
+      };
+
+      # OAuth2/OIDC認証設定（Authentik）
+      "auth.generic_oauth" = {
+        enabled = true;
+        name = "Authentik";
+        allow_sign_up = true;
+        client_id = "$__env{GRAFANA_OAUTH_CLIENT_ID}";
+        client_secret = "$__env{GRAFANA_OAUTH_CLIENT_SECRET}";
+        scopes = "openid email profile";
+        auth_url = "${cfg.authentik.baseUrl}/application/o/authorize/";
+        token_url = "${cfg.authentik.baseUrl}/application/o/token/";
+        api_url = "${cfg.authentik.baseUrl}/application/o/userinfo/";
+        # ロールマッピング
+        role_attribute_path = "contains(groups[*], 'Grafana Admins') && 'Admin' || contains(groups[*], 'Grafana Editors') && 'Editor' || 'Viewer'";
+        # 自動ログイン（Cloudflare経由のアクセス時）
+        auto_login = true;
       };
 
       # 基本設定
@@ -188,6 +207,11 @@ in
     cfg.monitoring.snmpExporter.port # SNMP Exporter (内部アクセスのみ)
   ];
 
+  # Grafana用の環境変数設定
+  systemd.services.grafana.serviceConfig = {
+    EnvironmentFile = [ config.sops.templates."grafana/oauth-env".path ];
+  };
+
   # システムパッケージにPrometheusツールを追加
   environment.systemPackages = [
     pkgs.prometheus
@@ -223,6 +247,31 @@ in
       mode = "0400";
     };
 
+    # Grafana OAuth環境変数
+    secrets."grafana/oauth_client_id" = {
+      sopsFile = "${inputs.self}/secrets/grafana.yaml";
+      owner = "grafana";
+      group = "grafana";
+      mode = "0400";
+    };
+
+    secrets."grafana/oauth_client_secret" = {
+      sopsFile = "${inputs.self}/secrets/grafana.yaml";
+      owner = "grafana";
+      group = "grafana";
+      mode = "0400";
+    };
+
+    templates."grafana/oauth-env" = {
+      content = ''
+        GRAFANA_OAUTH_CLIENT_ID=${config.sops.placeholder."grafana/oauth_client_id"}
+        GRAFANA_OAUTH_CLIENT_SECRET=${config.sops.placeholder."grafana/oauth_client_secret"}
+      '';
+      owner = "grafana";
+      group = "grafana";
+      mode = "0400";
+    };
+
     # Cloudflare credentials file template
     templates."monitoring/cloudflare/credentials.json" = {
       content = builtins.toJSON {
@@ -237,18 +286,4 @@ in
     };
   };
 
-  # Cloudflare Tunnel for monitoring services
-  services.cloudflared.tunnels."monitoring" = {
-    default = "http_status:404";
-    credentialsFile = config.sops.templates."monitoring/cloudflare/credentials.json".path;
-    ingress = {
-      # Grafana
-      "${cfg.monitoring.grafana.domain}" = {
-        service = "http://localhost:${toString cfg.monitoring.grafana.port}";
-        originRequest = {
-          noTLSVerify = true;
-        };
-      };
-    };
-  };
 }
