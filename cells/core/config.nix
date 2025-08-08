@@ -115,9 +115,9 @@ let
 
       # 許可されたネットワーク
       allowedNetworks = [
-        "192.168.1.0/24"  # ローカルネットワーク1
+        "192.168.1.0/24" # ローカルネットワーク1
         "192.168.11.0/24" # ローカルネットワーク2
-        "10.100.0.0/24"   # WireGuardネットワーク
+        "10.100.0.0/24" # WireGuardネットワーク
       ];
 
       # ファイアウォール設定
@@ -348,7 +348,9 @@ let
     # Authentik設定
     authentik = {
       domain = assertType "authentik.domain" "auth.shinbunbun.com" builtins.isString "Must be a string";
-      baseUrl = assertType "authentik.baseUrl" "https://auth.shinbunbun.com" builtins.isString "Must be a string";
+      baseUrl =
+        assertType "authentik.baseUrl" "https://auth.shinbunbun.com" builtins.isString
+          "Must be a string";
     };
 
     # 管理インターフェース設定
