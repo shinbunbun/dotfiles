@@ -113,6 +113,13 @@ let
             "Must be a string";
       };
 
+      # 許可されたネットワーク
+      allowedNetworks = [
+        "192.168.1.0/24"  # ローカルネットワーク1
+        "192.168.11.0/24" # ローカルネットワーク2
+        "10.100.0.0/24"   # WireGuardネットワーク
+      ];
+
       # ファイアウォール設定
       firewall = {
         generalPort =
@@ -342,6 +349,50 @@ let
     authentik = {
       domain = assertType "authentik.domain" "auth.shinbunbun.com" builtins.isString "Must be a string";
     };
+
+    # 管理インターフェース設定
+    management = {
+      # Cockpit設定
+      cockpit = {
+        enable = assertType "management.cockpit.enable" true builtins.isBool "Must be a boolean";
+        port =
+          assertType "management.cockpit.port" 9091 isValidPort
+            "Must be a valid port number (1-65535)";
+        domain =
+          assertType "management.cockpit.domain" "cockpit.shinbunbun.com" builtins.isString
+            "Must be a string";
+      };
+
+      # ttyd設定
+      ttyd = {
+        enable = assertType "management.ttyd.enable" true builtins.isBool "Must be a boolean";
+        port = assertType "management.ttyd.port" 7681 isValidPort "Must be a valid port number (1-65535)";
+        domain =
+          assertType "management.ttyd.domain" "terminal.shinbunbun.com" builtins.isString
+            "Must be a string";
+        passwordFile =
+          assertType "management.ttyd.passwordFile" "/var/lib/ttyd/password" isValidPath
+            "Must be an absolute path";
+      };
+
+      # アクセス制限設定
+      access = {
+        allowedNetworks =
+          map
+            (
+              cidr:
+              assertType "management.access.allowedNetworks" cidr isValidCIDR "Must be a valid CIDR notation"
+            )
+            [
+              "192.168.1.0/24"
+              "192.168.11.0/24"
+              "10.100.0.0/24" # WireGuard
+            ];
+        wireguardInterface =
+          assertType "management.access.wireguardInterface" "wg0" builtins.isString
+            "Must be a string";
+      };
+    };
   };
 
   # 追加のアサーション
@@ -361,6 +412,18 @@ let
     {
       assertion = config.networking.firewall.kubernetesApiPort != config.networking.firewall.nfsPort;
       message = "Kubernetes API port must be different from NFS port";
+    }
+    {
+      assertion = config.management.cockpit.port != config.management.ttyd.port;
+      message = "Cockpit port must be different from ttyd port";
+    }
+    {
+      assertion = config.management.cockpit.port != config.monitoring.prometheus.port;
+      message = "Cockpit port must be different from Prometheus port";
+    }
+    {
+      assertion = config.management.ttyd.port != config.monitoring.grafana.port;
+      message = "ttyd port must be different from Grafana port";
     }
   ];
 

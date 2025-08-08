@@ -27,6 +27,10 @@ in
       inputs.cells.core.nixosProfiles.monitoring
       inputs.cells.core.nixosProfiles.alertmanager
       inputs.cells.core.nixosProfiles.authentik
+      inputs.cells.core.nixosProfiles.cockpit
+      inputs.cells.core.nixosProfiles.ttyd
+      # inputs.cells.core.nixosProfiles.managementAccess # Nginx設定を無効化
+      inputs.cells.core.nixosProfiles.unifiedCloudflareTunnel # 統合Cloudflareトンネル
 
       inputs.home-manager.nixosModules.home-manager
       inputs.sops-nix.nixosModules.sops

@@ -305,29 +305,4 @@
     };
   };
 
-  # Cloudflare Tunnel for Obsidian LiveSync
-  services.cloudflared = {
-    enable = true;
-    tunnels = {
-      "obsidian-livesync" = {
-        default = "http_status:404";
-        credentialsFile = config.sops.templates."cloudflare/credentials.json".path;
-        ingress = {
-          # CouchDB for Obsidian LiveSync
-          "private-obsidian.${
-            if config.networking ? domain && config.networking.domain != null then
-              config.networking.domain
-            else
-              "shinbunbun.com"
-          }" =
-            {
-              service = "http://localhost:5984";
-              originRequest = {
-                noTLSVerify = true;
-              };
-            };
-        };
-      };
-    };
-  };
 }

@@ -237,18 +237,4 @@ in
     };
   };
 
-  # Cloudflare Tunnel for monitoring services
-  services.cloudflared.tunnels."monitoring" = {
-    default = "http_status:404";
-    credentialsFile = config.sops.templates."monitoring/cloudflare/credentials.json".path;
-    ingress = {
-      # Grafana
-      "${cfg.monitoring.grafana.domain}" = {
-        service = "http://localhost:${toString cfg.monitoring.grafana.port}";
-        originRequest = {
-          noTLSVerify = true;
-        };
-      };
-    };
-  };
 }
