@@ -26,6 +26,8 @@ in
   ];
 
   # 基本設定
+  home.username = cfg.users.nixos.username;
+  home.homeDirectory = cfg.users.nixos.homeDirectory;
   home.stateVersion = cfg.system.homeStateVersion;
   xdg.enable = true;
 

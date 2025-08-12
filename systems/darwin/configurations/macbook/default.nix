@@ -28,11 +28,15 @@ in
     inputs.sops-nix.darwinModules.sops
   ];
 
+  # Nixpkgs設定
+  nixpkgs.config.allowUnfree = true;
+
   # Home Manager設定
   home-manager = {
     useGlobalPkgs = true;
     useUserPackages = true;
-    users.${username} = import ../../../../home/profiles/shinbunbun { inherit inputs pkgs; };
+    extraSpecialArgs = { inherit inputs; };
+    users.${username} = import ../../../../home/profiles/shinbunbun;
   };
 }
 
