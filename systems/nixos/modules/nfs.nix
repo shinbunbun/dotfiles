@@ -10,7 +10,12 @@
   config.nixのnfs設定を参照して、許可するホストを
   設定します。
 */
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 let
   cfg = import ../../../shared/config.nix;
 in
@@ -26,4 +31,3 @@ in
     cfg.networking.firewall.nfsPort # NFS
   ];
 }
-

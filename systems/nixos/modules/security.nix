@@ -9,7 +9,13 @@
 
   セキュリティ強化のための基本的な設定を提供します。
 */
-{ config, pkgs, lib, inputs, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  inputs,
+  ...
+}:
 let
   cfg = import ../../../shared/config.nix;
 in
@@ -36,4 +42,3 @@ in
     };
   };
 }
-

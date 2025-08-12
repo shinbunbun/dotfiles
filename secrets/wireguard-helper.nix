@@ -86,4 +86,3 @@ in
 {
   inherit mkSopsWireGuardConfig;
 }
-

@@ -11,7 +11,13 @@
     別途Cloudflareダッシュボードまたは
     Terraformで設定する必要があります
 */
-{ config, pkgs, lib, inputs, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  inputs,
+  ...
+}:
 let
   cfg = import ../../../../shared/config.nix;
   domain = cfg.networking.hosts.nixos.domain;
@@ -99,4 +105,3 @@ in
     wants = [ "network-online.target" ];
   };
 }
-

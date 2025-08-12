@@ -50,7 +50,7 @@ in
   # システム設定
   networking.hostName = cfg.networking.hosts.nixos.hostname;
   system.stateVersion = cfg.system.nixosStateVersion;
-  
+
   # Nixpkgs設定
   nixpkgs.config.allowUnfree = true;
 
@@ -67,4 +67,3 @@ in
     users.${homeMachineUsername} = import ../../../../home/profiles/bunbun { inherit inputs pkgs; };
   };
 }
-

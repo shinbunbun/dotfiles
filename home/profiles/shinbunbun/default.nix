@@ -4,7 +4,13 @@
   macOSシステム用のhome-manager設定です。
   開発ツール、シェルツール、GUI アプリケーションなどを含みます。
 */
-{ inputs, pkgs, lib, config, ... }:
+{
+  inputs,
+  pkgs,
+  lib,
+  config,
+  ...
+}:
 
 let
   cfg = import ../../../shared/config.nix;
@@ -54,4 +60,3 @@ in
   # フォント設定
   fonts.fontconfig.enable = true;
 }
-

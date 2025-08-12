@@ -14,7 +14,12 @@
 
   config.nixの値を参照して設定を行います。
 */
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 let
   cfg = import ../../../../shared/config.nix;
 in
@@ -109,4 +114,3 @@ in
   # Docker
   virtualisation.docker.enable = true;
 }
-

@@ -10,7 +10,13 @@
   Authentikを使用することで、CouchDBを含む複数のサービスで
   シングルサインオン（SSO）を実現できます。
 */
-{ config, pkgs, lib, inputs, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  inputs,
+  ...
+}:
 let
   # ドメイン設定
   domain =
@@ -247,4 +253,3 @@ in
   # ファイアウォール設定（内部アクセスのみ）
   # Authentikへの外部からの直接アクセスは許可しない（Cloudflare Tunnel経由のみ）
 }
-

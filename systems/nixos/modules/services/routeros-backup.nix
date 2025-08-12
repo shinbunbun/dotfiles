@@ -12,7 +12,12 @@
   SOPSを使用してSSH秘密鍵を安全に管理し、config.nixの
   設定値を参照して動作します。
 */
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 
 with lib;
 
@@ -299,4 +304,3 @@ in
     };
   };
 }
-

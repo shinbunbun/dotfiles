@@ -11,7 +11,13 @@
   データは/var/lib/couchdb/dataに保存され、Cloudflare Tunnelを
   通じて外部から安全にアクセスできます。
 */
-{ config, pkgs, lib, inputs, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  inputs,
+  ...
+}:
 {
   # Obsidian LiveSync用のSOPS secrets設定
   sops = {
@@ -299,4 +305,3 @@
   };
 
 }
-

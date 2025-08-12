@@ -55,4 +55,3 @@
     enableBashIntegration = true;
   };
 }
-

@@ -13,7 +13,12 @@
   - HTTPS有効化（証明書はnginx/Caddyから取得）
   - PAM認証（将来的にAuthentik OIDC統合予定）
 */
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 let
   cfg = import ../../../../shared/config.nix;
   enable = cfg.management.cockpit.enable;
@@ -83,4 +88,3 @@ in
     # };
   };
 }
-

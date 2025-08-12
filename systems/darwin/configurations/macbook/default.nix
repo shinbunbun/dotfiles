@@ -39,4 +39,3 @@ in
     users.${username} = import ../../../../home/profiles/shinbunbun;
   };
 }
-

@@ -11,7 +11,13 @@
   共通の設定を実現します。config.nixの値を参照して
   クライアント固有の設定を行います。
 */
-{ config, pkgs, lib, inputs, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  inputs,
+  ...
+}:
 let
   sopsWireGuardHelper = import ../../../secrets/wireguard-helper.nix { inherit inputs; };
   cfg = import ../../../shared/config.nix;
@@ -27,4 +33,3 @@ sopsWireGuardHelper.mkSopsWireGuardConfig { inherit config pkgs lib; } {
   persistentKeepalive = cfg.wireguard.persistentKeepalive;
   isDarwin = false;
 }
-
