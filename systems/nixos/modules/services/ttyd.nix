@@ -14,7 +14,12 @@
   - パスワード認証
   - xterm.jsベースのモダンなターミナル
 */
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 let
   cfg = import ../../../../shared/config.nix;
   enable = cfg.management.ttyd.enable;
@@ -126,4 +131,3 @@ in
     ];
   };
 }
-

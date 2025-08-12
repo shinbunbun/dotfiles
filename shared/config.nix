@@ -437,4 +437,3 @@ let
   ) config assertions;
 in
 checkedConfig
-

@@ -9,7 +9,13 @@
 
   外部アクセスはCloudflare Tunnel経由で提供されます。
 */
-{ config, pkgs, lib, inputs, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  inputs,
+  ...
+}:
 let
   # config.nixから設定を読み込み
   cfg = import ../../../../shared/config.nix;
@@ -280,4 +286,3 @@ in
   };
 
 }
-

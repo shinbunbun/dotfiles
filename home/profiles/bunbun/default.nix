@@ -46,4 +46,3 @@ in
   # Home Managerの有効化
   programs.home-manager.enable = true;
 }
-

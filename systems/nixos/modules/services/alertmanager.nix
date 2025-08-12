@@ -10,7 +10,13 @@
   アラートはグループ化され、重複排除された後
   Discordチャンネルに送信されます。
 */
-{ config, pkgs, lib, inputs, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  inputs,
+  ...
+}:
 let
   # config.nixから設定を読み込み
   cfg = import ../../../../shared/config.nix;
@@ -681,4 +687,3 @@ in
     wants = [ "prometheus.service" ];
   };
 }
-

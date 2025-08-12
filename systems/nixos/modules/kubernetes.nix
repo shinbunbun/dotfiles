@@ -8,7 +8,12 @@
 
   これらのツールをシステム全体で利用可能にします。
 */
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 let
   cfg = import ../../../shared/config.nix;
 in
@@ -30,4 +35,3 @@ in
     ${cfg.kubernetes.master.ip} ${cfg.kubernetes.master.hostname}
   '';
 }
-

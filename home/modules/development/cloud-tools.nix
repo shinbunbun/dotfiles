@@ -20,4 +20,3 @@ in
     pkgs.cloudflared
   ];
 }
-

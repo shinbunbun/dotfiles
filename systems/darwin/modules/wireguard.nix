@@ -34,4 +34,3 @@ sopsWireGuardHelper.mkSopsWireGuardConfig { inherit config pkgs lib; } {
     age.keyFile = cfg.sops.keyFile;
   };
 }
-

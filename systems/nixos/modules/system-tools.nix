@@ -10,7 +10,12 @@
 
   これらのツールをシステム全体で利用可能にします。
 */
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 {
   environment.systemPackages = [
     pkgs.polkit
@@ -20,4 +25,3 @@
     pkgs.python3
   ];
 }
-
