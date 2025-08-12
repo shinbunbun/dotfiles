@@ -4,7 +4,7 @@
   macOSシステム用のhome-manager設定です。
   開発ツール、シェルツール、GUI アプリケーションなどを含みます。
 */
-{ inputs, pkgs, ... }:
+{ inputs, pkgs, lib, config, ... }:
 
 let
   cfg = import ../../../shared/config.nix;
@@ -26,7 +26,9 @@ in
   ];
 
   # 基本設定
-  home.stateVersion = cfg.system.homeStateVersion;
+  home.username = lib.mkForce cfg.users.darwin.username;
+  home.homeDirectory = lib.mkForce cfg.users.darwin.homeDirectory;
+  home.stateVersion = lib.mkForce cfg.system.homeStateVersion;
   xdg.enable = true;
 
   # ユーザー固有のパッケージ
