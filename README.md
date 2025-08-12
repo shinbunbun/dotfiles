@@ -2,39 +2,41 @@
 
 [![Auto Update Flakes (PR Mode)](https://github.com/shinbunbun/dotfiles/actions/workflows/auto-update-flake.yaml/badge.svg)](https://github.com/shinbunbun/dotfiles/actions/workflows/auto-update-flake.yaml)
 [![Nix CI](https://github.com/shinbunbun/dotfiles/actions/workflows/ci.yaml/badge.svg)](https://github.com/shinbunbun/dotfiles/actions/workflows/ci.yaml)
-[![std CI(macOS)](https://github.com/shinbunbun/dotfiles/actions/workflows/std-macos.yaml/badge.svg)](https://github.com/shinbunbun/dotfiles/actions/workflows/std-macos.yaml)
-[![std CI(NixOS)](https://github.com/shinbunbun/dotfiles/actions/workflows/std-nixos.yaml/badge.svg)](https://github.com/shinbunbun/dotfiles/actions/workflows/std-nixos.yaml)
 
-NixOSとmacOS (Darwin)用の個人dotfiles。[std-hive](https://github.com/divnix/hive)フレームワークを使用して構成されています。
+NixOSとmacOS (Darwin)用の個人dotfiles。標準的なNix flakeを使用して構成されています。
 
 ## プロジェクト構造
 
 ```
 .
-├── cells/                  # std-hiveのセル（モジュール）
-│   ├── core/              # コアシステム設定
-│   │   ├── config.nix     # 中央設定ファイル（ユーザー、ネットワーク、サービス）
-│   │   ├── homeProfiles/  # Home Manager プロファイル
-│   │   ├── nixosProfiles/ # NixOS システムプロファイル
-│   │   │   ├── dashboards/    # Grafanaダッシュボード定義
-│   │   │   ├── alertmanager.nix    # アラート設定
-│   │   │   ├── monitoring.nix      # 監視スタック設定
-│   │   │   └── ...
-│   │   └── darwinProfiles.nix # macOS (Darwin) プロファイル
-│   ├── dev/               # 開発環境設定
-│   │   └── homeProfiles/  # 開発ツール用Home Managerプロファイル
-│   ├── repo/              # リポジトリ関連
-│   │   └── shells.nix     # Nix開発シェル
-│   ├── shinbunbun/        # 個人設定
-│   └── toplevel/          # トップレベル設定
-│       ├── nixosConfigurations.nix  # NixOSマシン設定
-│       └── darwinConfigurations.nix # macOSマシン設定
-├── docs/                  # ドキュメント
-│   ├── monitoring-implementation-plan.md  # 監視システム実装計画
-│   ├── monitoring-alerts-summary.md       # アラート設定まとめ
-│   └── ...
-├── secrets/               # SOPS暗号化シークレット
-└── flake.nix             # Flakeエントリーポイント
+├── systems/               # システム設定
+│   ├── nixos/            # NixOS設定
+│   │   ├── configurations/   # マシン別設定
+│   │   │   └── homeMachine/ # NixOSマシン設定
+│   │   └── modules/          # NixOSモジュール
+│   │       ├── services/     # サービス設定
+│   │       │   ├── monitoring.nix    # 監視スタック
+│   │       │   ├── dashboards/       # Grafanaダッシュボード
+│   │       │   └── ...
+│   │       └── ...
+│   └── darwin/           # macOS (Darwin)設定
+│       ├── configurations/   # マシン別設定
+│       └── modules/          # Darwinモジュール
+├── home/                  # Home Manager設定
+│   ├── profiles/         # ユーザープロファイル
+│   │   ├── bunbun/      # bunbunユーザー設定
+│   │   └── shinbunbun/  # shinbunbunユーザー設定
+│   └── modules/          # Home Managerモジュール
+│       ├── development/  # 開発ツール
+│       ├── shell/       # シェル関連
+│       └── security/    # セキュリティツール
+├── shared/               # 共有設定
+│   └── config.nix       # 中央設定ファイル
+├── devshell/            # 開発環境
+│   └── default.nix      # Nix開発シェル
+├── secrets/             # SOPS暗号化シークレット
+├── docs/                # ドキュメント
+└── flake.nix           # Flakeエントリーポイント
 ```
 
 ## セットアップ
@@ -76,47 +78,54 @@ NixOSとmacOS (Darwin)用の個人dotfiles。[std-hive](https://github.com/divni
 
 3. Darwin設定を適用:
    ```bash
-   std //toplevel/darwinConfigurations/macOS:switch
+   darwin-rebuild switch --flake .#macbook
    ```
 
-## 主要なプロファイル
+## 主要なモジュール
 
-### Core Profiles
-
-#### nixosProfiles
+### NixOSモジュール (systems/nixos/modules/)
 - `base` - 基本的なシステム設定（ブート、Nix設定、ユーザー、NTP）
 - `networking` - ネットワーク設定（ファイアウォール、Avahi）
-- `services` - サービス設定（SSH、Docker、Fail2ban）
 - `security` - セキュリティ設定（PAM、Polkit、SOPS）
 - `kubernetes` - Kubernetesツールと設定
 - `nfs` - NFSサーバー設定
 - `system-tools` - システムツール（polkit、wireguard-tools）
-- `obsidian-livesync` - Obsidian LiveSync設定
-- `monitoring` - Prometheus、Grafana、Node Exporter監視スタック
-- `alertmanager` - アラート管理とDiscord通知
-- `routeros-backup` - RouterOS設定の自動バックアップ
+- `wireguard` - WireGuard VPN設定
+- **services/** - サービス設定
+  - `monitoring` - Prometheus、Grafana、Node Exporter監視スタック
+  - `alertmanager` - アラート管理とDiscord通知
+  - `obsidian-livesync` - Obsidian LiveSync設定
+  - `routeros-backup` - RouterOS設定の自動バックアップ
+  - `cockpit` - Webベースのシステム管理ツール
+  - `ttyd` - Webベースのターミナルエミュレータ
+  - `authentik` - IdP（Identity Provider）
+  - `unified-cloudflare-tunnel` - Cloudflare Tunnel統合設定
+
+### Darwinモジュール (systems/darwin/modules/)
+- `base` - macOS基本設定とHomebrew
+- `optimise` - Nixストア最適化設定
 - `wireguard` - WireGuard VPN設定
 
-#### darwinProfiles
-- `default` - macOS基本設定とHomebrew
-- `optimize` - Nixストア最適化設定
-- `wireguard` - WireGuard VPN設定
+### Home Managerモジュール (home/modules/)
 
-### Dev Profiles (Home Manager)
-
-- `versionControl` - Git設定
-- `shellTools` - シェル関連ツール（zsh、starship、direnv、lsd）
+#### development/
+- `ai-tools` - AIツール（claude-code）
+- `cloud-tools` - クラウドツール（Google Cloud SDK）
+- `development-tools` - 開発ツール（cocoapods - macOSのみ）
 - `editors` - エディタ設定（vim）
-- `cloudTools` - クラウドツール（Google Cloud SDK）
-- `securityTools` - セキュリティツール（age、sops）
-- `developmentTools` - 開発ツール（cocoapods）
-- `aiTools` - AIツール（claude-code）
+
+#### shell/
+- `shell-tools` - シェル関連ツール（zsh、starship、direnv、lsd）
+- `version-control` - Git設定
+
+#### security/
+- `security-tools` - セキュリティツール（age、sops）
 
 ## 設定のカスタマイズ
 
 ### 中央設定
 
-`cells/core/config.nix`ファイルで以下の設定を管理:
+`shared/config.nix`ファイルで以下の設定を管理:
 
 - ユーザー名とホームディレクトリ
 - ネットワーク設定（ホスト名、IPアドレス、ポート）
@@ -126,9 +135,10 @@ NixOSとmacOS (Darwin)用の個人dotfiles。[std-hive](https://github.com/divni
 
 ### 新しいマシンの追加
 
-1. `cells/core/config.nix`に必要な設定を追加
-2. `cells/toplevel/nixosConfigurations.nix`または`darwinConfigurations.nix`に新しいマシン設定を追加
-3. 必要なプロファイルをインポート
+1. `shared/config.nix`に必要な設定を追加
+2. `systems/nixos/configurations/`または`systems/darwin/configurations/`に新しいマシン設定ディレクトリを作成
+3. `default.nix`ファイルを作成し、必要なモジュールをインポート
+4. `flake.nix`のnixosConfigurationsまたはdarwinConfigurationsに新しいマシンを追加
 
 ## シークレット管理
 
