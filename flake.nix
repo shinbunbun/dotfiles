@@ -7,8 +7,7 @@
   - home-manager設定
   - 開発シェル環境
 
-  std（Standard）フレームワークを使用して、
-  モジュラーな設定構造を実現しています。
+  std/hiveへの依存を削除し、標準的なflake構造を採用しています。
 
   使用方法:
   - nixos-rebuild switch --flake .#<hostname>
@@ -40,17 +39,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    std = {
-      url = "github:divnix/std";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.devshell.follows = "devshell";
-    };
-
-    hive = {
-      url = "github:shinbunbun/hive?ref=shinbunbun";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     sops-nix = {
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -65,59 +53,86 @@
     {
       self,
       nixpkgs,
-      std,
-      hive,
+      nix-darwin,
+      home-manager,
+      devshell,
+      sops-nix,
       flake-utils,
       ...
     }@inputs:
     let
-      base =
-        std.growOn
-          {
-            inherit inputs;
-            nixpkgsConfig = {
-              allowUnfree = true;
-            };
-            systems = [
-              "x86_64-linux"
-              "aarch64-linux"
-              "x86_64-darwin"
-              "aarch64-darwin"
-            ];
-            cellsFrom = ./cells;
-            cellBlocks =
-              with std.blockTypes;
-              with hive.blockTypes;
-              [
-                (functions "nixosProfiles")
-                (functions "darwinProfiles")
-                (functions "homeProfiles")
-                (
-                  nixosConfigurations
-                  // {
-                    ci.build-vm-with-bootloader = true;
-                    ci.build = true;
-                  }
-                )
-                (darwinConfigurations // { ci.build = true; })
-                (devshells "shells" { ci.build = true; })
-              ];
-          }
-          {
-            nixosConfigurations = hive.collect self "nixosConfigurations";
-            darwinConfigurations = hive.collect self "darwinConfigurations";
-            devShells = hive.harvest self [
-              "repo"
-              "shells"
-            ];
-          };
-      formatter = flake-utils.lib.eachDefaultSystemMap (
+      # サポートするシステムのリスト
+      systems = [
+        "x86_64-linux"
+        "aarch64-linux"
+        "x86_64-darwin"
+        "aarch64-darwin"
+      ];
+
+      # nixpkgsの共通設定
+      nixpkgsConfig = {
+        allowUnfree = true;
+      };
+
+      # システムごとの関数を作成
+      forAllSystems = f: nixpkgs.lib.genAttrs systems (system: f system);
+
+      # システムごとのpkgsを取得
+      pkgsFor =
+        system:
+        import nixpkgs {
+          inherit system;
+          config = nixpkgsConfig;
+        };
+    in
+    {
+      # NixOS設定
+      nixosConfigurations = {
+        homeMachine = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          specialArgs = { inherit inputs; };
+          modules = [
+            ./systems/nixos/configurations/homeMachine/default.nix
+          ];
+        };
+      };
+
+      # Darwin設定
+      darwinConfigurations = {
+        macbook = nix-darwin.lib.darwinSystem {
+          system = "aarch64-darwin";
+          specialArgs = { inherit inputs; };
+          modules = [
+            ./systems/darwin/configurations/macbook/default.nix
+          ];
+        };
+      };
+
+      # 開発シェル
+      devShells = forAllSystems (
         system:
         let
-          pkgs = nixpkgs.legacyPackages.${system};
+          pkgs = pkgsFor system;
+        in
+        {
+          default = import ./devshell { inherit pkgs inputs; };
+        }
+      );
+
+      # フォーマッター
+      formatter = forAllSystems (
+        system:
+        let
+          pkgs = pkgsFor system;
         in
         pkgs.nixfmt-tree
       );
-    in
-    base // { inherit formatter; };
+
+      # パッケージ（将来の拡張用）
+      packages = forAllSystems (system: { });
+
+      # アプリケーション（将来の拡張用）
+      apps = forAllSystems (system: { });
+    };
 }
+
