@@ -1,9 +1,6 @@
 name: Nix CI
-on:
-  push:
-    branches: [ main, feature/* ]
-  pull_request:
-    branches: [ main ]
+
+on: [push]
 
 jobs:
   format-check:
@@ -42,6 +39,11 @@ jobs:
           purge-prefixes: nix-${{ runner.os }}-
           purge-created: 0
           purge-primary-key: never
+      - name: Setup SOPS
+        run: |
+          sudo mkdir -p /var/lib/sops-nix
+          echo "${{ secrets.SOPS_AGE_KEY }}" | sudo tee /var/lib/sops-nix/key.txt > /dev/null
+          sudo chmod 600 /var/lib/sops-nix/key.txt
       - name: Build NixOS configuration
         run: |
           nix build .#nixosConfigurations.${{ matrix.configuration }}.config.system.build.toplevel \
@@ -71,6 +73,11 @@ jobs:
           purge-prefixes: nix-${{ runner.os }}-
           purge-created: 0
           purge-primary-key: never
+      - name: Setup SOPS
+        run: |
+          sudo mkdir -p /var/lib/sops-nix
+          echo "${{ secrets.SOPS_AGE_KEY }}" | sudo tee /var/lib/sops-nix/key.txt > /dev/null
+          sudo chmod 600 /var/lib/sops-nix/key.txt
       - name: Build Darwin configuration
         run: |
           nix build .#darwinConfigurations.${{ matrix.configuration }}.config.system.build.toplevel \
