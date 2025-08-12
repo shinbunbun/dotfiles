@@ -327,7 +327,7 @@ in
             # ネットワークインターフェースダウン
             {
               alert = "NetworkInterfaceDown";
-              expr = "node_network_up{device!~\"lo|docker.*|veth.*|br.*|tap.*|tun.*|wlp1s0\"} == 0";
+              expr = "node_network_up{device!~\"lo|docker.*|veth.*|br.*|tap.*|tun.*|wlp1s0|wg.*\"} == 0";
               for = "2m";
               labels = {
                 severity = "critical";

@@ -803,7 +803,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "node_network_up{instance=\"nixos.shinbunbun.com\",device!~\"lo|docker.*|veth.*|br.*|tap.*|tun.*|wlp1s0\"}",
+          "expr": "node_network_up{instance=\"nixos.shinbunbun.com\",device!~\"lo|docker.*|veth.*|br.*|tap.*|tun.*|wlp1s0|wg.*\"}",
           "refId": "A",
           "legendFormat": "{{device}}"
         }

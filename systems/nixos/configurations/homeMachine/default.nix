@@ -33,6 +33,7 @@ in
     ../../modules/kubernetes.nix
 
     # サービスモジュール
+    ../../modules/services/services.nix
     ../../modules/services/monitoring.nix
     ../../modules/services/alertmanager.nix
     ../../modules/services/authentik.nix
