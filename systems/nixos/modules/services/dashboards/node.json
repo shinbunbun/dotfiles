@@ -497,12 +497,12 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "rate(node_network_receive_bytes_total{instance=\"nixos.shinbunbun.com\",device!~\"lo|veth.*|br.*|docker.*|virbr.*|wlp1s0\"}[5m]) * 8",
+          "expr": "rate(node_network_receive_bytes_total{instance=\"nixos.shinbunbun.com\",device!~\"lo|veth.*|br.*|docker.*|virbr.*|wlp[12]s0\"}[5m]) * 8",
           "refId": "A",
           "legendFormat": "受信 {{device}}"
         },
         {
-          "expr": "-rate(node_network_transmit_bytes_total{instance=\"nixos.shinbunbun.com\",device!~\"lo|veth.*|br.*|docker.*|virbr.*|wlp1s0\"}[5m]) * 8",
+          "expr": "-rate(node_network_transmit_bytes_total{instance=\"nixos.shinbunbun.com\",device!~\"lo|veth.*|br.*|docker.*|virbr.*|wlp[12]s0\"}[5m]) * 8",
           "refId": "B",
           "legendFormat": "送信 {{device}}"
         }
@@ -803,7 +803,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "node_network_up{instance=\"nixos.shinbunbun.com\",device!~\"lo|docker.*|veth.*|br.*|tap.*|tun.*|wlp1s0|wg.*\"}",
+          "expr": "node_network_up{instance=\"nixos.shinbunbun.com\",device!~\"lo|docker.*|veth.*|br.*|tap.*|tun.*|wlp[12]s0|wg.*\"}",
           "refId": "A",
           "legendFormat": "{{device}}"
         }
@@ -1216,12 +1216,12 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "rate(node_network_receive_errs_total{instance=\"nixos.shinbunbun.com\",device!~\"lo|veth.*|br.*|docker.*|virbr.*|wlp1s0\"}[5m])",
+          "expr": "rate(node_network_receive_errs_total{instance=\"nixos.shinbunbun.com\",device!~\"lo|veth.*|br.*|docker.*|virbr.*|wlp[12]s0\"}[5m])",
           "refId": "A",
           "legendFormat": "受信エラー {{device}}"
         },
         {
-          "expr": "rate(node_network_transmit_errs_total{instance=\"nixos.shinbunbun.com\",device!~\"lo|veth.*|br.*|docker.*|virbr.*|wlp1s0\"}[5m])",
+          "expr": "rate(node_network_transmit_errs_total{instance=\"nixos.shinbunbun.com\",device!~\"lo|veth.*|br.*|docker.*|virbr.*|wlp[12]s0\"}[5m])",
           "refId": "B",
           "legendFormat": "送信エラー {{device}}"
         }
