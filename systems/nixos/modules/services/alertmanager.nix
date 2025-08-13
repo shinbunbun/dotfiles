@@ -389,10 +389,10 @@ in
                 description = "The systemd service {{ $labels.name }} is in failed state.";
               };
             }
-            # サービス再起動頻度
+            # サービス再起動頻度（NetworkManager-dispatcherを除外）
             {
               alert = "SystemdServiceFlapping";
-              expr = "changes(node_systemd_unit_state{state=\"active\"}[15m]) > 3";
+              expr = "changes(node_systemd_unit_state{state=\"active\",name!=\"NetworkManager-dispatcher.service\"}[15m]) > 3";
               for = "5m";
               labels = {
                 severity = "warning";
