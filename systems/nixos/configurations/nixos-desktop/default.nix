@@ -72,6 +72,23 @@ in
     enable = true;
     port = cfg.monitoring.nodeExporter.port;
     openFirewall = true; # homeMachineからアクセス可能にする
+    enabledCollectors = [
+      "cpu"
+      "diskstats"
+      "filesystem"
+      "loadavg"
+      "meminfo"
+      "netdev"
+      "stat"
+      "time"
+      "vmstat"
+      "systemd"
+      "processes"
+    ];
+    extraFlags = [
+      "--collector.filesystem.mount-points-exclude=^/(dev|proc|sys|run/user/.+)($|/)"
+      "--collector.netdev.device-exclude=^(veth.*|br.*|docker.*|virbr.*|lo|wlp[12]s0)$"
+    ];
   };
 
   # Home Manager設定

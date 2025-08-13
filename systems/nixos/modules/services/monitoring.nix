@@ -113,7 +113,7 @@ in
     ];
     extraFlags = [
       "--collector.filesystem.mount-points-exclude=^/(dev|proc|sys|run/user/.+)($|/)"
-      "--collector.netdev.device-exclude=^(veth.*|br.*|docker.*|virbr.*|lo|wlp1s0)$"
+      "--collector.netdev.device-exclude=^(veth.*|br.*|docker.*|virbr.*|lo|wlp[12]s0)$"
     ];
   };
 
