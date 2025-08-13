@@ -1,9 +1,11 @@
 keys:
   - &admin_user age1p057v4es63p6fef8usy67tkza7dj4xg326w5gm3c7rdthcd3xqlqps38z9
   - &home_machine_user age1tuyn9u7qca3mpk082a94mnwpwgue7wlux2c7mruyxg7fz9y45qrqnqw3yx
+  - &nixos_desktop_user age124zeln7fujjzwpaeq2lmg00r93t4kp7tea684yr85prk0zh9jvfqj247af
 creation_rules:
   - path_regex: secrets/.*
     key_groups:
     - age:
       - age1p057v4es63p6fef8usy67tkza7dj4xg326w5gm3c7rdthcd3xqlqps38z9 # あなたのage公開鍵
       - age1tuyn9u7qca3mpk082a94mnwpwgue7wlux2c7mruyxg7fz9y45qrqnqw3yx
+      - age124zeln7fujjzwpaeq2lmg00r93t4kp7tea684yr85prk0zh9jvfqj247af
