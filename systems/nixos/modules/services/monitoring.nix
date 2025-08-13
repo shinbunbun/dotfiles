@@ -46,6 +46,12 @@ in
               instance = "${cfg.networking.hosts.nixos.hostname}.${cfg.networking.hosts.nixos.domain}";
             };
           }
+          {
+            targets = [ "${cfg.networking.hosts.nixosDesktop.ip}:${toString cfg.monitoring.nodeExporter.port}" ];
+            labels = {
+              instance = cfg.networking.hosts.nixosDesktop.hostname;
+            };
+          }
         ];
       }
       {
