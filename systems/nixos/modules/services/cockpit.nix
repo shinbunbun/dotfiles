@@ -24,6 +24,7 @@ let
   enable = cfg.management.cockpit.enable;
   port = cfg.management.cockpit.port;
   domain = cfg.management.cockpit.domain;
+  desktopDomain = cfg.cloudflare.desktop.cockpit.domain or "";
   allowedNetworks = cfg.networking.allowedNetworks;
 in
 {
@@ -36,8 +37,13 @@ in
 
       settings = {
         WebService = {
-          # Origins設定でCORSを制御
-          Origins = lib.mkForce "https://${domain} wss://${domain}";
+          # Origins設定でCORSを制御 - 複数ドメインをサポート
+          Origins = lib.mkForce (
+            if desktopDomain != "" then
+              "https://${domain} wss://${domain} https://${desktopDomain} wss://${desktopDomain}"
+            else
+              "https://${domain} wss://${domain}"
+          );
           # プロトコルヘッダーを信頼（リバースプロキシ使用時）
           ProtocolHeader = "X-Forwarded-Proto";
           # ログインページのブランディング
