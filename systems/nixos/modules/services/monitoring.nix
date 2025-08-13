@@ -46,6 +46,14 @@ in
               instance = "${cfg.networking.hosts.nixos.hostname}.${cfg.networking.hosts.nixos.domain}";
             };
           }
+          {
+            targets = [
+              "${cfg.networking.hosts.nixosDesktop.ip}:${toString cfg.monitoring.nodeExporter.port}"
+            ];
+            labels = {
+              instance = cfg.networking.hosts.nixosDesktop.hostname;
+            };
+          }
         ];
       }
       {
@@ -105,7 +113,7 @@ in
     ];
     extraFlags = [
       "--collector.filesystem.mount-points-exclude=^/(dev|proc|sys|run/user/.+)($|/)"
-      "--collector.netdev.device-exclude=^(veth.*|br.*|docker.*|virbr.*|lo|wlp1s0)$"
+      "--collector.netdev.device-exclude=^(veth.*|br.*|docker.*|virbr.*|lo|wlp[12]s0)$"
     ];
   };
 

@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        configuration: [homeMachine]
+        configuration: [homeMachine, nixos-desktop]
     steps:
       - uses: actions/checkout@v4
       - name: Install Nix with flakes enabled

@@ -327,7 +327,7 @@ in
             # ネットワークインターフェースダウン
             {
               alert = "NetworkInterfaceDown";
-              expr = "node_network_up{device!~\"lo|docker.*|veth.*|br.*|tap.*|tun.*|wlp1s0|wg.*\"} == 0";
+              expr = "node_network_up{device!~\"lo|docker.*|veth.*|br.*|tap.*|tun.*|wlp[12]s0|wg.*\"} == 0";
               for = "2m";
               labels = {
                 severity = "critical";
@@ -389,10 +389,10 @@ in
                 description = "The systemd service {{ $labels.name }} is in failed state.";
               };
             }
-            # サービス再起動頻度
+            # サービス再起動頻度（NetworkManager-dispatcherを除外）
             {
               alert = "SystemdServiceFlapping";
-              expr = "changes(node_systemd_unit_state{state=\"active\"}[15m]) > 3";
+              expr = "changes(node_systemd_unit_state{state=\"active\",name!=\"NetworkManager-dispatcher.service\"}[15m]) > 3";
               for = "5m";
               labels = {
                 severity = "warning";
@@ -467,10 +467,10 @@ in
                 description = "System is not synchronized with NTP servers for more than 10 minutes.";
               };
             }
-            # RouterOSバックアップ失敗
+            # RouterOSバックアップ失敗（homeMachineのみ）
             {
               alert = "RouterOSBackupFailed";
-              expr = "node_systemd_unit_state{name=\"routeros-backup.service\",state=\"failed\"} == 1";
+              expr = "node_systemd_unit_state{name=\"routeros-backup.service\",state=\"failed\",instance=\"nixos.shinbunbun.com\"} == 1";
               for = "5m";
               labels = {
                 severity = "critical";
@@ -480,10 +480,10 @@ in
                 description = "RouterOS backup service has been in failed state for more than 5 minutes. Check logs: journalctl -u routeros-backup.service";
               };
             }
-            # RouterOSバックアップ長時間未実行
+            # RouterOSバックアップ長時間未実行（homeMachineのみ）
             {
               alert = "RouterOSBackupStale";
-              expr = "time() - node_systemd_timer_last_trigger_seconds{name=\"routeros-backup.timer\"} > 90000";
+              expr = "time() - node_systemd_timer_last_trigger_seconds{name=\"routeros-backup.timer\",instance=\"nixos.shinbunbun.com\"} > 90000";
               for = "1h";
               labels = {
                 severity = "warning";

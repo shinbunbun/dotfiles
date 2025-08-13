@@ -95,6 +95,14 @@
             ./systems/nixos/configurations/homeMachine/default.nix
           ];
         };
+
+        nixos-desktop = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          specialArgs = { inherit inputs; };
+          modules = [
+            ./systems/nixos/configurations/nixos-desktop/default.nix
+          ];
+        };
       };
 
       # Darwin設定
