@@ -42,6 +42,17 @@ in
   networking.useDHCP = false;
   networking.enableIPv6 = true;
 
+  # SSH設定
+  services.openssh = {
+    enable = true;
+    ports = [ cfg.ssh.port ];
+    settings = {
+      PermitRootLogin = "no";
+      PasswordAuthentication = false;
+      X11Forwarding = true;
+    };
+  };
+
   # ファイアウォール設定
   networking.firewall.allowedTCPPorts = [
     cfg.ssh.port # SSH
