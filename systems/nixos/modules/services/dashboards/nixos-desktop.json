@@ -68,7 +68,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "node_time_seconds{instance=\"nixos.shinbunbun.com\"} - node_boot_time_seconds{instance=\"nixos.shinbunbun.com\"}",
+          "expr": "node_time_seconds{instance=\"nixos-desktop\"} - node_boot_time_seconds{instance=\"nixos-desktop\"}",
           "refId": "A"
         }
       ],
@@ -131,7 +131,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "(1 - avg(rate(node_cpu_seconds_total{mode=\"idle\",instance=\"nixos.shinbunbun.com\"}[1m]))) * 100",
+          "expr": "(1 - avg(rate(node_cpu_seconds_total{mode=\"idle\",instance=\"nixos-desktop\"}[1m]))) * 100",
           "refId": "A"
         }
       ],
@@ -194,7 +194,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "(1 - (node_memory_MemAvailable_bytes{instance=\"nixos.shinbunbun.com\"} / node_memory_MemTotal_bytes{instance=\"nixos.shinbunbun.com\"})) * 100",
+          "expr": "(1 - (node_memory_MemAvailable_bytes{instance=\"nixos-desktop\"} / node_memory_MemTotal_bytes{instance=\"nixos-desktop\"})) * 100",
           "refId": "A"
         }
       ],
@@ -257,7 +257,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "(node_filesystem_size_bytes{instance=\"nixos.shinbunbun.com\",mountpoint=\"/\"} - node_filesystem_free_bytes{instance=\"nixos.shinbunbun.com\",mountpoint=\"/\"}) / node_filesystem_size_bytes{instance=\"nixos.shinbunbun.com\",mountpoint=\"/\"} * 100",
+          "expr": "(node_filesystem_size_bytes{instance=\"nixos-desktop\",mountpoint=\"/\"} - node_filesystem_free_bytes{instance=\"nixos-desktop\",mountpoint=\"/\"}) / node_filesystem_size_bytes{instance=\"nixos-desktop\",mountpoint=\"/\"} * 100",
           "refId": "A"
         }
       ],
@@ -333,7 +333,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "(1 - avg(rate(node_cpu_seconds_total{mode=\"idle\",instance=\"nixos.shinbunbun.com\"}[1m])) by (instance)) * 100",
+          "expr": "(1 - avg(rate(node_cpu_seconds_total{mode=\"idle\",instance=\"nixos-desktop\"}[1m])) by (instance)) * 100",
           "refId": "A",
           "legendFormat": "CPU使用率"
         }
@@ -410,17 +410,17 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "node_memory_MemTotal_bytes{instance=\"nixos.shinbunbun.com\"}",
+          "expr": "node_memory_MemTotal_bytes{instance=\"nixos-desktop\"}",
           "refId": "A",
           "legendFormat": "総メモリ"
         },
         {
-          "expr": "node_memory_MemTotal_bytes{instance=\"nixos.shinbunbun.com\"} - node_memory_MemAvailable_bytes{instance=\"nixos.shinbunbun.com\"}",
+          "expr": "node_memory_MemTotal_bytes{instance=\"nixos-desktop\"} - node_memory_MemAvailable_bytes{instance=\"nixos-desktop\"}",
           "refId": "B",
           "legendFormat": "使用中"
         },
         {
-          "expr": "node_memory_MemAvailable_bytes{instance=\"nixos.shinbunbun.com\"}",
+          "expr": "node_memory_MemAvailable_bytes{instance=\"nixos-desktop\"}",
           "refId": "C",
           "legendFormat": "利用可能"
         }
@@ -497,12 +497,12 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "rate(node_network_receive_bytes_total{instance=\"nixos.shinbunbun.com\",device!~\"lo|veth.*|br.*|docker.*|virbr.*|wlp[12]s0\"}[5m]) * 8",
+          "expr": "rate(node_network_receive_bytes_total{instance=\"nixos-desktop\",device!~\"lo|veth.*|br.*|docker.*|virbr.*|wlp[12]s0\"}[5m]) * 8",
           "refId": "A",
           "legendFormat": "受信 {{device}}"
         },
         {
-          "expr": "-rate(node_network_transmit_bytes_total{instance=\"nixos.shinbunbun.com\",device!~\"lo|veth.*|br.*|docker.*|virbr.*|wlp[12]s0\"}[5m]) * 8",
+          "expr": "-rate(node_network_transmit_bytes_total{instance=\"nixos-desktop\",device!~\"lo|veth.*|br.*|docker.*|virbr.*|wlp[12]s0\"}[5m]) * 8",
           "refId": "B",
           "legendFormat": "送信 {{device}}"
         }
@@ -563,7 +563,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "(node_filesystem_size_bytes{instance=\"nixos.shinbunbun.com\",fstype!~\"tmpfs|fuse.lxcfs\"} - node_filesystem_free_bytes{instance=\"nixos.shinbunbun.com\",fstype!~\"tmpfs|fuse.lxcfs\"}) / node_filesystem_size_bytes{instance=\"nixos.shinbunbun.com\",fstype!~\"tmpfs|fuse.lxcfs\"} * 100",
+          "expr": "(node_filesystem_size_bytes{instance=\"nixos-desktop\",fstype!~\"tmpfs|fuse.lxcfs\"} - node_filesystem_free_bytes{instance=\"nixos-desktop\",fstype!~\"tmpfs|fuse.lxcfs\"}) / node_filesystem_size_bytes{instance=\"nixos-desktop\",fstype!~\"tmpfs|fuse.lxcfs\"} * 100",
           "refId": "A",
           "legendFormat": "{{mountpoint}}"
         }
@@ -640,17 +640,17 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "node_load1{instance=\"nixos.shinbunbun.com\"}",
+          "expr": "node_load1{instance=\"nixos-desktop\"}",
           "refId": "A",
           "legendFormat": "1分平均"
         },
         {
-          "expr": "node_load5{instance=\"nixos.shinbunbun.com\"}",
+          "expr": "node_load5{instance=\"nixos-desktop\"}",
           "refId": "B",
           "legendFormat": "5分平均"
         },
         {
-          "expr": "node_load15{instance=\"nixos.shinbunbun.com\"}",
+          "expr": "node_load15{instance=\"nixos-desktop\"}",
           "refId": "C",
           "legendFormat": "15分平均"
         }
@@ -727,12 +727,12 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "rate(node_disk_reads_completed_total{instance=\"nixos.shinbunbun.com\",device!~\"loop.*|dm.*\"}[5m])",
+          "expr": "rate(node_disk_reads_completed_total{instance=\"nixos-desktop\",device!~\"loop.*|dm.*\"}[5m])",
           "refId": "A",
           "legendFormat": "読み込み {{device}}"
         },
         {
-          "expr": "-rate(node_disk_writes_completed_total{instance=\"nixos.shinbunbun.com\",device!~\"loop.*|dm.*\"}[5m])",
+          "expr": "-rate(node_disk_writes_completed_total{instance=\"nixos-desktop\",device!~\"loop.*|dm.*\"}[5m])",
           "refId": "B",
           "legendFormat": "書き込み {{device}}"
         }
@@ -803,7 +803,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "node_network_up{instance=\"nixos.shinbunbun.com\",device!~\"lo|docker.*|veth.*|br.*|tap.*|tun.*|wlp[12]s0|wg.*\"}",
+          "expr": "node_network_up{instance=\"nixos-desktop\",device!~\"lo|docker.*|veth.*|br.*|tap.*|tun.*|wlp[12]s0|wg.*\"}",
           "refId": "A",
           "legendFormat": "{{device}}"
         }
@@ -880,7 +880,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "rate(node_disk_io_time_seconds_total{instance=\"nixos.shinbunbun.com\",device!~\"loop.*|dm.*\"}[5m]) * 100",
+          "expr": "rate(node_disk_io_time_seconds_total{instance=\"nixos-desktop\",device!~\"loop.*|dm.*\"}[5m]) * 100",
           "refId": "A",
           "legendFormat": "{{device}} I/O使用率"
         }
@@ -1016,13 +1016,13 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "node_systemd_unit_state{instance=\"nixos.shinbunbun.com\",state=\"active\"}",
+          "expr": "node_systemd_unit_state{instance=\"nixos-desktop\",state=\"active\"}",
           "format": "table",
           "instant": true,
           "refId": "A"
         },
         {
-          "expr": "node_systemd_unit_state{instance=\"nixos.shinbunbun.com\",state=\"failed\"}",
+          "expr": "node_systemd_unit_state{instance=\"nixos-desktop\",state=\"failed\"}",
           "format": "table",
           "instant": true,
           "refId": "B"
@@ -1139,7 +1139,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "(1 - (node_filesystem_files_free{instance=\"nixos.shinbunbun.com\",fstype!~\"tmpfs|fuse.lxcfs\"} / node_filesystem_files{instance=\"nixos.shinbunbun.com\",fstype!~\"tmpfs|fuse.lxcfs\"})) * 100",
+          "expr": "(1 - (node_filesystem_files_free{instance=\"nixos-desktop\",fstype!~\"tmpfs|fuse.lxcfs\"} / node_filesystem_files{instance=\"nixos-desktop\",fstype!~\"tmpfs|fuse.lxcfs\"})) * 100",
           "refId": "A",
           "legendFormat": "{{mountpoint}}"
         }
@@ -1216,12 +1216,12 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "rate(node_network_receive_errs_total{instance=\"nixos.shinbunbun.com\",device!~\"lo|veth.*|br.*|docker.*|virbr.*|wlp[12]s0\"}[5m])",
+          "expr": "rate(node_network_receive_errs_total{instance=\"nixos-desktop\",device!~\"lo|veth.*|br.*|docker.*|virbr.*|wlp[12]s0\"}[5m])",
           "refId": "A",
           "legendFormat": "受信エラー {{device}}"
         },
         {
-          "expr": "rate(node_network_transmit_errs_total{instance=\"nixos.shinbunbun.com\",device!~\"lo|veth.*|br.*|docker.*|virbr.*|wlp[12]s0\"}[5m])",
+          "expr": "rate(node_network_transmit_errs_total{instance=\"nixos-desktop\",device!~\"lo|veth.*|br.*|docker.*|virbr.*|wlp[12]s0\"}[5m])",
           "refId": "B",
           "legendFormat": "送信エラー {{device}}"
         }
@@ -1294,7 +1294,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "node_timex_sync_status{instance=\"nixos.shinbunbun.com\"}",
+          "expr": "node_timex_sync_status{instance=\"nixos-desktop\"}",
           "refId": "A"
         }
       ],
@@ -1355,7 +1355,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "abs(node_timex_offset_seconds{instance=\"nixos.shinbunbun.com\"})",
+          "expr": "abs(node_timex_offset_seconds{instance=\"nixos-desktop\"})",
           "refId": "A"
         }
       ],
@@ -1431,222 +1431,12 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "node_timex_offset_seconds{instance=\"nixos.shinbunbun.com\"}",
+          "expr": "node_timex_offset_seconds{instance=\"nixos-desktop\"}",
           "refId": "A",
           "legendFormat": "時刻オフセット"
         }
       ],
       "title": "NTP時刻オフセットの推移",
-      "type": "timeseries"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [
-            {
-              "options": {
-                "0": {
-                  "color": "green",
-                  "index": 0,
-                  "text": "正常"
-                },
-                "1": {
-                  "color": "red",
-                  "index": 1,
-                  "text": "失敗"
-                }
-              },
-              "type": "value"
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 1
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 0,
-        "y": 60
-      },
-      "id": 19,
-      "options": {
-        "colorMode": "background",
-        "graphMode": "none",
-        "justifyMode": "center",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "text": {},
-        "textMode": "auto"
-      },
-      "pluginVersion": "8.0.0",
-      "targets": [
-        {
-          "expr": "node_systemd_unit_state{name=\"routeros-backup.service\",state=\"failed\",instance=\"nixos.shinbunbun.com\"}",
-          "refId": "A"
-        }
-      ],
-      "title": "RouterOSバックアップ状態",
-      "type": "stat"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 43200
-              },
-              {
-                "color": "red",
-                "value": 86400
-              }
-            ]
-          },
-          "unit": "s"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 6,
-        "y": 60
-      },
-      "id": 20,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "text": {},
-        "textMode": "auto"
-      },
-      "pluginVersion": "8.0.0",
-      "targets": [
-        {
-          "expr": "time() - node_systemd_timer_last_trigger_seconds{name=\"routeros-backup.timer\",instance=\"nixos.shinbunbun.com\"}",
-          "refId": "A"
-        }
-      ],
-      "title": "最終バックアップからの経過時間",
-      "type": "stat"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 12,
-        "x": 12,
-        "y": 60
-      },
-      "id": 21,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "single"
-        }
-      },
-      "pluginVersion": "8.0.0",
-      "targets": [
-        {
-          "expr": "node_systemd_unit_state{name=\"routeros-backup.service\",instance=\"nixos.shinbunbun.com\"}",
-          "refId": "A",
-          "legendFormat": "{{state}}"
-        }
-      ],
-      "title": "RouterOSバックアップサービス状態推移",
       "type": "timeseries"
     },
     {
@@ -1684,7 +1474,7 @@
         "h": 4,
         "w": 6,
         "x": 0,
-        "y": 64
+        "y": 60
       },
       "id": 22,
       "options": {
@@ -1705,7 +1495,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "(1 - (node_memory_SwapFree_bytes{instance=\"nixos.shinbunbun.com\"} / node_memory_SwapTotal_bytes{instance=\"nixos.shinbunbun.com\"})) * 100",
+          "expr": "(1 - (node_memory_SwapFree_bytes{instance=\"nixos-desktop\"} / node_memory_SwapTotal_bytes{instance=\"nixos-desktop\"})) * 100",
           "refId": "A"
         }
       ],
@@ -1776,7 +1566,7 @@
         "h": 8,
         "w": 12,
         "x": 6,
-        "y": 64
+        "y": 60
       },
       "id": 23,
       "options": {
@@ -1792,7 +1582,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "(1 - (node_memory_SwapFree_bytes{instance=\"nixos.shinbunbun.com\"} / node_memory_SwapTotal_bytes{instance=\"nixos.shinbunbun.com\"})) * 100",
+          "expr": "(1 - (node_memory_SwapFree_bytes{instance=\"nixos-desktop\"} / node_memory_SwapTotal_bytes{instance=\"nixos-desktop\"})) * 100",
           "refId": "A",
           "legendFormat": "Swap使用率"
         }
@@ -1814,8 +1604,8 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Node Exporter ダッシュボード",
+  "title": "NixOS Desktop ダッシュボード",
   "description": "システムメトリクスの監視ダッシュボード",
-  "uid": "node-system",
+  "uid": "nixos-desktop",
   "version": 0
 }
