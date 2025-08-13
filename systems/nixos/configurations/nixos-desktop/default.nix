@@ -29,6 +29,11 @@ in
     ../../modules/system-tools.nix
     ../../modules/desktop.nix
 
+    # 管理インターフェース
+    ../../modules/services/cockpit.nix
+    ../../modules/services/ttyd.nix
+    ../../modules/services/desktop-cloudflare-tunnel.nix
+
     # 外部モジュール
     inputs.home-manager.nixosModules.home-manager
     inputs.sops-nix.nixosModules.sops
