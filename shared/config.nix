@@ -353,6 +353,23 @@ let
           "Must be a string";
     };
 
+    # Cloudflare Tunnel設定
+    cloudflare = {
+      # nixos-desktop用トンネル設定
+      desktop = {
+        cockpit = {
+          domain =
+            assertType "cloudflare.desktop.cockpit.domain" "desktop-cockpit.shinbunbun.com" builtins.isString
+              "Must be a string";
+        };
+        ttyd = {
+          domain =
+            assertType "cloudflare.desktop.ttyd.domain" "desktop-terminal.shinbunbun.com" builtins.isString
+              "Must be a string";
+        };
+      };
+    };
+
     # 管理インターフェース設定
     management = {
       # Cockpit設定
