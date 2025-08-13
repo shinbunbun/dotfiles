@@ -27,7 +27,6 @@ in
     ../../modules/optimise.nix
     ../../modules/security.nix
     ../../modules/system-tools.nix
-    ../../modules/wireguard.nix
     ../../modules/desktop.nix
 
     # 外部モジュール
