@@ -131,7 +131,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "(1 - avg(rate(node_cpu_seconds_total{mode=\"idle\",instance=\"nixos.shinbunbun.com\"}[5m]))) * 100",
+          "expr": "(1 - avg(rate(node_cpu_seconds_total{mode=\"idle\",instance=\"nixos.shinbunbun.com\"}[1m]))) * 100",
           "refId": "A"
         }
       ],
@@ -333,7 +333,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "(1 - avg(rate(node_cpu_seconds_total{mode=\"idle\",instance=\"nixos.shinbunbun.com\"}[5m])) by (instance)) * 100",
+          "expr": "(1 - avg(rate(node_cpu_seconds_total{mode=\"idle\",instance=\"nixos.shinbunbun.com\"}[1m])) by (instance)) * 100",
           "refId": "A",
           "legendFormat": "CPU使用率"
         }
