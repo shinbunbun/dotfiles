@@ -37,6 +37,10 @@ in
     # ログ収集
     ../../modules/services/promtail.nix
 
+    # ログ分析基盤（Phase 2）
+    ../../modules/services/clickhouse.nix
+    ../../modules/services/anomaly-detection.nix
+
     # 外部モジュール
     inputs.home-manager.nixosModules.home-manager
     inputs.sops-nix.nixosModules.sops
