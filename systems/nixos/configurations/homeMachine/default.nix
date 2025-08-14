@@ -36,6 +36,8 @@ in
     ../../modules/services/services.nix
     ../../modules/services/monitoring.nix
     ../../modules/services/alertmanager.nix
+    ../../modules/services/loki.nix
+    ../../modules/services/promtail.nix
     ../../modules/services/authentik.nix
     ../../modules/services/cockpit.nix
     ../../modules/services/ttyd.nix

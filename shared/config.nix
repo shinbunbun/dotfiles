@@ -324,6 +324,36 @@ let
           assertType "monitoring.snmpExporter.communityString" "prometheus" builtins.isString
             "Must be a string";
       };
+
+      # Loki設定
+      loki = {
+        port = assertType "monitoring.loki.port" 3100 isValidPort "Must be a valid port number (1-65535)";
+        retentionDays = assertType "monitoring.loki.retentionDays" 30 (
+          n: builtins.isInt n && n > 0
+        ) "Must be a positive integer (days to retain logs)";
+        ingestionRateLimit = assertType "monitoring.loki.ingestionRateLimit" 52428800 (
+          n: builtins.isInt n && n > 0
+        ) "Must be a positive integer (bytes per second)";  # 50MB/s
+        ingestionBurstSize = assertType "monitoring.loki.ingestionBurstSize" 104857600 (
+          n: builtins.isInt n && n > 0
+        ) "Must be a positive integer (bytes)";  # 100MB
+        chunkTargetSize = assertType "monitoring.loki.chunkTargetSize" 1572864 (
+          n: builtins.isInt n && n > 0
+        ) "Must be a positive integer (bytes)";
+        dataDir =
+          assertType "monitoring.loki.dataDir" "/var/lib/loki" isValidPath
+            "Must be an absolute path";
+      };
+
+      # Promtail設定
+      promtail = {
+        port =
+          assertType "monitoring.promtail.port" 9080 isValidPort
+            "Must be a valid port number (1-65535)";
+        positionsFile =
+          assertType "monitoring.promtail.positionsFile" "/var/lib/promtail/positions.yaml" isValidPath
+            "Must be an absolute path";
+      };
     };
 
     # CouchDB設定
