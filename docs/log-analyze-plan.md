@@ -141,8 +141,15 @@
 - 異常検知ジョブタイマー設定済み（5分ごと実行）
 - GrafanaにClickHouseデータソース追加済み
 
-### 残タスク
-- homeMachineでのGrafana設定反映（`sudo nixos-rebuild switch`）
-- 異常ウォールダッシュボードの動作確認
-- 初回異常検知実行の確認（01:30頃）
+### Phase 1 & Phase 2 完了後の状況（2025-01-15）
+
+**全タスク完了✅**
+- homeMachineでGrafana設定反映済み
+- 異常ウォールダッシュボード動作確認済み
+- 異常検知は5分ごとに正常実行中（420件/時間検出）
+- ダッシュボードのクエリエラー修正済み
+
+### 今後の改善計画
+- [Issue #145](https://github.com/shinbunbun/dotfiles/issues/145): 異常検知の具体的な情報追加
+- [Issue #146](https://github.com/shinbunbun/dotfiles/issues/146): RouterOSログ収集機能の実装
 

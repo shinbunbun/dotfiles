@@ -92,14 +92,21 @@ NixOSとmacOS (Darwin)用の個人dotfiles。標準的なNix flakeを使用し�
 - `system-tools` - システムツール（polkit、wireguard-tools）
 - `wireguard` - WireGuard VPN設定
 - **services/** - サービス設定
-  - `monitoring` - Prometheus、Grafana、Node Exporter監視スタック
-  - `alertmanager` - アラート管理とDiscord通知
-  - `obsidian-livesync` - Obsidian LiveSync設定
-  - `routeros-backup` - RouterOS設定の自動バックアップ
-  - `cockpit` - Webベースのシステム管理ツール
-  - `ttyd` - Webベースのターミナルエミュレータ
-  - `authentik` - IdP（Identity Provider）
-  - `unified-cloudflare-tunnel` - Cloudflare Tunnel統合設定
+  - **監視・ログ分析スタック:**
+    - `monitoring` - Prometheus、Grafana、Node Exporter監視スタック
+    - `alertmanager` - アラート管理とDiscord通知
+    - `loki` - ログ集約システム
+    - `promtail` - ログ収集エージェント（全ホスト）
+    - `clickhouse` - 高速分析データベース
+    - `anomaly-detection` - Isolation Forestによる異常検知
+  - **バックアップ・同期:**
+    - `obsidian-livesync` - Obsidian LiveSync設定
+    - `routeros-backup` - RouterOS設定の自動バックアップ
+  - **管理・アクセス系:**
+    - `cockpit` - Webベースのシステム管理ツール
+    - `ttyd` - Webベースのターミナルエミュレータ
+    - `authentik` - IdP（Identity Provider）
+    - `unified-cloudflare-tunnel` - Cloudflare Tunnel統合設定
 
 ### Darwinモジュール (systems/darwin/modules/)
 - `base` - macOS基本設定とHomebrew
@@ -120,6 +127,28 @@ NixOSとmacOS (Darwin)用の個人dotfiles。標準的なNix flakeを使用し�
 
 #### security/
 - `security-tools` - セキュリティツール（age、sops）
+
+## 監視・ログ分析基盤
+
+このプロジェクトには、包括的な監視とログ分析のインフラが含まれています：
+
+### アーキテクチャ
+
+```
+各ホスト → Promtail → Loki(homeMachine) → ClickHouse(nixos-desktop)
+                      ↓
+                  Grafana(homeMachine) ← ClickHouse(nixos-desktop)
+```
+
+### コンポーネント
+
+- **Loki** (homeMachine): ログの集約と短期保存（14-30日）
+- **Promtail** (全ホスト): systemd-journaldからのログ収集
+- **ClickHouse** (nixos-desktop): 長期保存と高速分析（30-180日）
+- **異常検知** (nixos-desktop): 5分ごとのIsolation Forest実行
+- **Grafana** (homeMachine): 統合ダッシュボードと可視化
+
+詳細は[ログ分析基盤設計書](docs/log-analyze-plan.md)を参照してください。
 
 ## 設定のカスタマイズ
 
