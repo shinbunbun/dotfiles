@@ -214,16 +214,14 @@ in
           name = "ClickHouse";
           type = "grafana-clickhouse-datasource";
           access = "proxy";
-          url = "http://${cfg.networking.hosts.nixosDesktop.hostname}:${toString cfg.monitoring.clickhouse.port}";
+          url = "http://${cfg.networking.hosts.nixosDesktop.ip}:${toString cfg.monitoring.clickhouse.port}";
           jsonData = {
             defaultDatabase = "logs";
+            protocol = "http";
             port = cfg.monitoring.clickhouse.port;
-            server = cfg.networking.hosts.nixosDesktop.hostname;
-            username = "grafana";
+            server = cfg.networking.hosts.nixosDesktop.ip;
+            username = "default";
             tlsSkipVerify = true;
-          };
-          secureJsonData = {
-            password = "$__env{CLICKHOUSE_GRAFANA_PASSWORD}";
           };
         }
       ];

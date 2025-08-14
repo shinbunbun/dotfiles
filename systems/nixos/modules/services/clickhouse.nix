@@ -30,16 +30,13 @@ in
     package = pkgs.clickhouse;
   };
 
-  # ClickHouseの設定をsystemdの環境変数で管理
-  systemd.services.clickhouse.environment = {
-    CLICKHOUSE_HTTP_PORT = toString cfg.monitoring.clickhouse.port;
-    CLICKHOUSE_TCP_PORT = toString cfg.monitoring.clickhouse.nativePort;
-    CLICKHOUSE_INTERSERVER_HTTP_PORT = toString cfg.monitoring.clickhouse.interserverPort;
-    CLICKHOUSE_MAX_MEMORY_USAGE = toString cfg.monitoring.clickhouse.maxMemoryUsage;
-    CLICKHOUSE_PATH = cfg.monitoring.clickhouse.dataDir;
-    CLICKHOUSE_TMP_PATH = "${cfg.monitoring.clickhouse.dataDir}/tmp";
-    CLICKHOUSE_USER_FILES_PATH = "${cfg.monitoring.clickhouse.dataDir}/user_files";
-    CLICKHOUSE_LISTEN_HOST = "0.0.0.0";
+  # ClickHouseの設定ファイルを作成（外部アクセス可能にする）
+  environment.etc."clickhouse-server/config.d/listen.xml" = {
+    text = ''
+      <clickhouse>
+        <listen_host>0.0.0.0</listen_host>
+      </clickhouse>
+    '';
   };
 
   # 起動時にテーブルとマテリアライズドビューを作成
