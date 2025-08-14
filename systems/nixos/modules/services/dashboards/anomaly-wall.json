@@ -391,7 +391,7 @@
             "uid": "${datasource}"
           },
           "format": 1,
-          "rawSql": "SELECT \n  host,\n  service,\n  unit,\n  avg(error_rate) * 100 as avg_error_rate,\n  avg(server_error_rate) * 100 as avg_5xx_rate,\n  avg(p95_latency) as avg_p95_latency,\n  max(max_latency) as max_latency\nFROM logs.app_logs_1min\nWHERE minute >= now() - INTERVAL 1 HOUR\nGROUP BY host, service, unit\nORDER BY avg_error_rate DESC\nLIMIT 20",
+          "rawSql": "SELECT \n  host,\n  service,\n  unit,\n  avg(err / cnt) * 100 as avg_error_rate,\n  avg(s5xx / cnt) * 100 as avg_5xx_rate,\n  avg(p95_latency) as avg_p95_latency,\n  max(max_latency) as max_latency\nFROM logs.app_logs_1min\nWHERE minute >= now() - INTERVAL 1 HOUR\n  AND cnt > 0\nGROUP BY host, service, unit\nORDER BY avg_error_rate DESC\nLIMIT 20",
           "refId": "A"
         }
       ],
