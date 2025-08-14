@@ -600,6 +600,67 @@ in
             }
           ];
         }
+        # ログベースのアラートグループ（メトリクスベース）
+        # 注: LogQLクエリはLokiのルーラーで実行する必要があるため、
+        # ここではPromtailが公開するメトリクスを使用
+        {
+          name = "logs";
+          interval = "30s";
+          rules = [
+            # Promtailのログ取り込み遅延
+            {
+              alert = "LogIngestionLag";
+              expr = ''(time() - max(promtail_stream_lag_seconds)) > 60'';
+              for = "5m";
+              labels = {
+                severity = "warning";
+              };
+              annotations = {
+                summary = "Log ingestion lag detected";
+                description = "Promtail is {{ $value }} seconds behind in processing logs";
+              };
+            }
+            # Promtailのログドロップ検知
+            {
+              alert = "PromtailDroppedLogs";
+              expr = ''rate(promtail_dropped_entries_total[5m]) > 0'';
+              for = "5m";
+              labels = {
+                severity = "warning";
+              };
+              annotations = {
+                summary = "Promtail is dropping logs";
+                description = "Promtail dropped {{ $value }} logs/sec in the last 5 minutes";
+              };
+            }
+            # Lokiのインジェスト失敗
+            {
+              alert = "LokiIngestionErrors";
+              expr = ''rate(loki_ingester_chunks_flushed_total{success="false"}[5m]) > 0'';
+              for = "5m";
+              labels = {
+                severity = "warning";
+              };
+              annotations = {
+                summary = "Loki ingestion errors detected";
+                description = "Loki failed to flush {{ $value }} chunks/sec";
+              };
+            }
+            # Lokiクエリ遅延
+            {
+              alert = "LokiQueryLatency";
+              expr = ''histogram_quantile(0.95, rate(loki_request_duration_seconds_bucket{route=~"loki_api_v1_query|loki_api_v1_query_range"}[5m])) > 10'';
+              for = "5m";
+              labels = {
+                severity = "warning";
+              };
+              annotations = {
+                summary = "High Loki query latency";
+                description = "95th percentile query latency is {{ $value }} seconds";
+              };
+            }
+          ];
+        }
       ];
     })
   ];
