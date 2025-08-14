@@ -86,18 +86,18 @@
 
 ## ロールアウト（段階導入）
 
-1. **Phase 1（横断）@homeMachine**：
-   - Loki導入（homeMachineにデプロイ）
-   - Vector/Promtailで全ホスト集約
-   - 既存Grafanaにデータソース登録
-   - 二段アラート設定（既存Alertmanager活用）
+1. **Phase 1（横断）@homeMachine**：✅ **完了 (2025-01-14)**
+   - Loki導入（homeMachineにデプロイ）✅
+   - Vector/Promtailで全ホスト集約 ✅
+   - 既存Grafanaにデータソース登録 ✅
+   - 二段アラート設定（既存Alertmanager活用）✅
 
-2. **Phase 2（分析）@nixos-desktop**：
-   - ClickHouse追加（nixos-desktopにデプロイ）
-   - 1分集計MV構築
-   - 異常検知ジョブ実装（Python環境構築）
-   - Grafanaから両ホストのデータソース参照
-   - "異常ウォール"可視化
+2. **Phase 2（分析）@nixos-desktop**：✅ **完了 (2025-01-15)**
+   - ClickHouse追加（nixos-desktopにデプロイ）✅
+   - 1分集計MV構築 ✅
+   - 異常検知ジョブ実装（Python環境構築）✅
+   - Grafanaから両ホストのデータソース参照 ✅
+   - "異常ウォール"可視化 ✅
 
 3. **Phase 3（必要時）**：
    - OpenSearch併用（監査/全文）- デプロイ先は要検討
@@ -111,5 +111,38 @@
 * “異常ウォール”で上位スコア事象を確認→**数クリックで原因候補**に到達。
 * 1か月運用後、**無駄ログ削減**や復旧時間短縮が指標で確認できる。
 
-必要なら、この方針に沿った **Nixモジュール化（Loki/Vector/CH）＋GrafanaダッシュボードJSON＋異常検知ジョブ** を一式でお渡しします。
+## 実装状況（2025-01-15時点）
+
+### Phase 1 ✅ 完了
+**実装ファイル:**
+- `systems/nixos/modules/services/loki.nix` - Lokiサービス設定
+- `systems/nixos/modules/services/promtail.nix` - ログ収集エージェント
+- `systems/nixos/modules/services/loki-rules.yaml` - アラートルール
+
+**動作確認済み:**
+- homeMachineでLoki稼働中（ポート3100）
+- 全ホストからPromtail経由でログ収集
+- 30日間のログ保持
+- Grafanaでクエリ可能
+
+### Phase 2 ✅ 完了  
+**実装ファイル:**
+- `systems/nixos/modules/services/clickhouse.nix` - ClickHouseデータベース
+- `systems/nixos/modules/services/anomaly-detection.nix` - 異常検知サービス
+- `systems/nixos/modules/services/anomaly-detection.py` - Isolation Forest実装
+- `systems/nixos/modules/services/loki-to-clickhouse.py` - データ転送スクリプト
+- `systems/nixos/modules/services/dashboards/anomaly-wall.json` - 異常ウォールダッシュボード
+
+**動作確認済み:**
+- nixos-desktopでClickHouse稼働中（ポート8123）
+- 918件のログをClickHouseに保存済み
+- 1分集計マテリアライズドビュー動作中（27件の集計データ）
+- 5分ごとのLoki→ClickHouse転送動作中
+- 異常検知ジョブタイマー設定済み（5分ごと実行）
+- GrafanaにClickHouseデータソース追加済み
+
+### 残タスク
+- homeMachineでのGrafana設定反映（`sudo nixos-rebuild switch`）
+- 異常ウォールダッシュボードの動作確認
+- 初回異常検知実行の確認（01:30頃）
 

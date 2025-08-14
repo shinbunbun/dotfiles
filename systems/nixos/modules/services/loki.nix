@@ -118,7 +118,6 @@ in
         allow_structured_metadata = false;
       };
 
-
       # テーブルマネージャー設定
       table_manager = {
         retention_deletes_enabled = true;

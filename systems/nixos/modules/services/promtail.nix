@@ -170,7 +170,8 @@ in
             }
           ];
         }
-      ] ++ lib.optionals (config.services.nginx.enable or false) [
+      ]
+      ++ lib.optionals (config.services.nginx.enable or false) [
         # Nginxアクセスログの収集（nginxが有効な場合のみ）
         {
           job_name = "nginx_access";
@@ -250,7 +251,8 @@ in
             }
           ];
         }
-      ] ++ [
+      ]
+      ++ [
         # アプリケーションログの収集（JSON形式）
         {
           job_name = "application";
@@ -316,8 +318,10 @@ in
   systemd.services.promtail = {
     serviceConfig = {
       # 権限設定（nginxが有効な場合のみnginxグループを追加）
-      SupplementaryGroups = [ "systemd-journal" ] 
-        ++ lib.optional (config.services.nginx.enable or false) "nginx";
+      SupplementaryGroups = [
+        "systemd-journal"
+      ]
+      ++ lib.optional (config.services.nginx.enable or false) "nginx";
       # メモリ制限
       MemoryMax = "256M";
       MemoryHigh = "128M";
