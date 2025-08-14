@@ -186,6 +186,24 @@ in
           };
           isDefault = true;
         }
+        {
+          name = "Loki";
+          type = "loki";
+          access = "proxy";
+          url = "http://localhost:${toString cfg.monitoring.loki.port}";
+          jsonData = {
+            maxLines = 1000;
+            derivedFields = [
+              {
+                # trace_idフィールドからトレースリンクを生成
+                datasourceName = "Jaeger";
+                matcherRegex = "trace_id=(\\w+)";
+                name = "TraceID";
+                url = "$${__value.raw}";
+              }
+            ];
+          };
+        }
       ];
 
       # 基本ダッシュボードの設定
