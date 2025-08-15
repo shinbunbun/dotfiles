@@ -110,6 +110,8 @@ in
       "vmstat"
       "systemd"
       "processes"
+      "hwmon" # ハードウェアモニタリング（電圧、ファン、温度）
+      "thermal_zone" # サーマルゾーン（CPU温度）
     ];
     extraFlags = [
       "--collector.filesystem.mount-points-exclude=^/(dev|proc|sys|run/user/.+)($|/)"
