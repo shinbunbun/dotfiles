@@ -3,12 +3,18 @@
 
   このモジュールは開発に必要なツールを提供します：
   - cocoapods: iOS/macOSアプリ開発用のパッケージマネージャー
+  - terraform: インフラストラクチャを code として管理するツール
 
-  モバイルアプリ開発やその他の開発用ツールが含まれます。
+  モバイルアプリ開発やインフラ管理のツールが含まれます。
 */
 { pkgs, ... }:
 {
-  home.packages = pkgs.lib.optionals pkgs.stdenv.isDarwin [
-    pkgs.cocoapods
-  ];
+  home.packages =
+    with pkgs;
+    [
+      terraform
+    ]
+    ++ lib.optionals stdenv.isDarwin [
+      cocoapods
+    ];
 }
