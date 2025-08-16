@@ -25,53 +25,59 @@ in
   environment.systemPackages = [ pkgs.wireguard-tools ];
 
   # Home-Manager内でSOPSテンプレートを設定
-  home-manager.users.${username} = { config, ... }: {
-    imports = [ inputs.sops-nix.homeManagerModules.sops ];
+  home-manager.users.${username} =
+    { config, ... }:
+    {
+      imports = [ inputs.sops-nix.homeManagerModules.sops ];
 
-    sops = {
-      defaultSopsFile = "${inputs.self}/secrets/wireguard.yaml";
-      age.keyFile = cfg.sops.keyFile;
-      
-      # 個別のシークレット定義
-      secrets = {
-        "wireguard/home/macClientPrivKey" = { };
-        "wireguard/home/publicKey" = { };
-        "wireguard/home/endpoint" = { };
+      sops = {
+        defaultSopsFile = "${inputs.self}/secrets/wireguard.yaml";
+        age.keyFile = cfg.sops.keyFile;
+
+        # 個別のシークレット定義
+        secrets = {
+          "wireguard/home/macClientPrivKey" = { };
+          "wireguard/home/publicKey" = { };
+          "wireguard/home/endpoint" = { };
+        };
+
+        # WireGuard設定テンプレート
+        templates."wireguard-config" = {
+          content = ''
+            [Interface]
+            PrivateKey = ${config.sops.placeholder."wireguard/home/macClientPrivKey"}
+            Address = ${cfg.wireguard.darwin.clientIp}/32
+
+            [Peer]
+            PublicKey = ${config.sops.placeholder."wireguard/home/publicKey"}
+            Endpoint = ${config.sops.placeholder."wireguard/home/endpoint"}
+            AllowedIPs = ${
+              lib.concatStringsSep ", " (
+                cfg.wireguard.darwin.allowedNetworks ++ [ "${cfg.wireguard.network.serverIp}/32" ]
+              )
+            }
+            PersistentKeepalive = ${toString cfg.wireguard.persistentKeepalive}
+          '';
+          path = wireguardConfigPath;
+          mode = "0600";
+        };
       };
 
-      # WireGuard設定テンプレート
-      templates."wireguard-config" = {
-        content = ''
-          [Interface]
-          PrivateKey = ${config.sops.placeholder."wireguard/home/macClientPrivKey"}
-          Address = ${cfg.wireguard.darwin.clientIp}/32
-
-          [Peer]
-          PublicKey = ${config.sops.placeholder."wireguard/home/publicKey"}
-          Endpoint = ${config.sops.placeholder."wireguard/home/endpoint"}
-          AllowedIPs = ${lib.concatStringsSep ", " (cfg.wireguard.darwin.allowedNetworks ++ [ "${cfg.wireguard.network.serverIp}/32" ])}
-          PersistentKeepalive = ${toString cfg.wireguard.persistentKeepalive}
-        '';
-        path = wireguardConfigPath;
-        mode = "0600";
+      # WireGuard管理用のエイリアス
+      programs.zsh.shellAliases = {
+        wg-up = "sudo wg-quick up ${interfaceName}";
+        wg-down = "sudo wg-quick down ${interfaceName}";
+        wg-status = "sudo wg show ${interfaceName}";
       };
     };
-
-    # WireGuard管理用のエイリアス
-    programs.zsh.shellAliases = {
-      wg-up = "sudo wg-quick up ${interfaceName}";
-      wg-down = "sudo wg-quick down ${interfaceName}";
-      wg-status = "sudo wg show ${interfaceName}";
-    };
-  };
 
   # システムレベルでWireGuard設定をセットアップ
   system.activationScripts.postActivation.text = lib.mkAfter ''
     echo "Setting up WireGuard configuration..." >&2
-    
+
     # 設定ディレクトリ作成
     mkdir -p /usr/local/etc/wireguard
-    
+
     # Home-Managerが生成した設定ファイルが存在するか確認
     if [ -f "${wireguardConfigPath}" ]; then
       # システムレベルにコピー
