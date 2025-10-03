@@ -50,6 +50,11 @@ in
   networking.hostName = cfg.networking.hosts.nixosDesktop.hostname;
   system.stateVersion = cfg.system.nixosStateVersion;
 
+  # Lokiサーバーへの名前解決設定
+  networking.extraHosts = ''
+    192.168.1.3 nixos.shinbunbun.com nixos
+  '';
+
   # ネットワーク設定（デスクトップ用）
   networking.useDHCP = false;
   networking.enableIPv6 = true;
