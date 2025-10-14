@@ -34,14 +34,7 @@ in
     ../../modules/services/ttyd.nix
     ../../modules/services/desktop-cloudflare-tunnel.nix
 
-    # ログ収集
-    ../../modules/services/promtail.nix
-
-    # ログ分析基盤（Phase 2）
-    ../../modules/services/clickhouse.nix
-    ../../modules/services/anomaly-detection.nix
-
-    # ログ検索基盤（Phase 3: OpenSearch）
+    # ログ検索基盤（OpenSearch）
     ../../modules/services/opensearch.nix
     ../../modules/services/opensearch-dashboards.nix # Docker版
     ../../modules/services/fluent-bit.nix
