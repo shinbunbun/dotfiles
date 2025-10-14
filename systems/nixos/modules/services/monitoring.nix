@@ -130,11 +130,6 @@ in
   services.grafana = {
     enable = true;
 
-    # ClickHouseプラグインのインストール
-    declarativePlugins = with pkgs.grafanaPlugins; [
-      grafana-clickhouse-datasource
-    ];
-
     settings = {
       server = {
         http_addr = "127.0.0.1";
@@ -210,20 +205,6 @@ in
                 url = "$${__value.raw}";
               }
             ];
-          };
-        }
-        {
-          name = "ClickHouse";
-          type = "grafana-clickhouse-datasource";
-          access = "proxy";
-          url = "http://${cfg.networking.hosts.nixosDesktop.ip}:${toString cfg.monitoring.clickhouse.port}";
-          jsonData = {
-            defaultDatabase = "logs";
-            protocol = "http";
-            port = cfg.monitoring.clickhouse.port;
-            server = cfg.networking.hosts.nixosDesktop.ip;
-            username = "default";
-            tlsSkipVerify = true;
           };
         }
       ];
