@@ -415,7 +415,7 @@
         "enableLogDetails": true,
         "prettifyLogMessage": false,
         "showCommonLabels": false,
-        "showLabels": false,
+        "showLabels": true,
         "showTime": true,
         "sortOrder": "Descending",
         "wrapLogMessage": false
@@ -426,7 +426,7 @@
             "type": "loki",
             "uid": "${loki_datasource}"
           },
-          "expr": "{level=~\"error|ERROR|critical|CRITICAL\"}",
+          "expr": "{host=~\"$host\", level=~\"error|ERROR|critical|CRITICAL\"}",
           "refId": "A"
         }
       ],
@@ -477,6 +477,38 @@
         "regex": "",
         "skipUrlSync": false,
         "type": "datasource"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "$__all"
+        },
+        "hide": 0,
+        "includeAll": true,
+        "multi": false,
+        "name": "host",
+        "options": [
+          {
+            "selected": true,
+            "text": "All",
+            "value": "$__all"
+          },
+          {
+            "selected": false,
+            "text": "nixos",
+            "value": "nixos"
+          },
+          {
+            "selected": false,
+            "text": "nixos-desktop",
+            "value": "nixos-desktop"
+          }
+        ],
+        "query": "nixos,nixos-desktop",
+        "skipUrlSync": false,
+        "type": "custom",
+        "allValue": ".*"
       }
     ]
   },
