@@ -4,8 +4,8 @@
   このモジュールは以下の機能を提供します：
   - OpenSearch: Elasticsearch互換の高速ログ検索エンジン
   - 単一ノード構成（レプリカなし）
-  - JVMヒープ: 32GB（システムRAM 96GBの1/3）
-  - データ保持期間: 30日（ILMポリシー）
+  - JVMヒープ: 8GB（現在のログ量に最適化）
+  - データ保持期間: 無制限
   - インデックステンプレート: logs-*パターン
   - セキュリティ: 内部ネットワークのみアクセス許可
 
@@ -82,42 +82,6 @@ let
             };
             trace_id = {
               type = "keyword";
-            };
-          };
-        };
-      };
-    }
-  );
-
-  # ILMポリシー定義
-  ilmPolicy = pkgs.writeText "logs-ilm-policy.json" (
-    builtins.toJSON {
-      policy = {
-        phases = {
-          hot = {
-            min_age = "0ms";
-            actions = {
-              rollover = {
-                max_age = "1d";
-                max_size = "50gb";
-              };
-            };
-          };
-          warm = {
-            min_age = "7d";
-            actions = {
-              forcemerge = {
-                max_num_segments = 1;
-              };
-              shrink = {
-                number_of_shards = 1;
-              };
-            };
-          };
-          delete = {
-            min_age = "${toString cfg.opensearch.retentionDays}d";
-            actions = {
-              delete = { };
             };
           };
         };
@@ -206,11 +170,6 @@ in
       ${pkgs.curl}/bin/curl -X PUT "http://localhost:${toString cfg.opensearch.port}/_index_template/logs-template" \
         -H "Content-Type: application/json" \
         -d @${indexTemplate} || true
-
-      # ILMポリシーの登録（ISMポリシーとして）
-      ${pkgs.curl}/bin/curl -X PUT "http://localhost:${toString cfg.opensearch.port}/_plugins/_ism/policies/logs-policy" \
-        -H "Content-Type: application/json" \
-        -d @${ilmPolicy} || true
 
       echo "OpenSearch initialization completed"
     '';

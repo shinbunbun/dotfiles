@@ -483,11 +483,11 @@ let
         assertType "opensearch.dataDir" "/var/lib/opensearch" isValidPath
           "Must be an absolute path";
 
-      # メモリ設定（96GBの1/3 = 32GB）
-      heapSize = assertType "opensearch.heapSize" "32g" builtins.isString "Must be a string";
-      maxMemory = assertType "opensearch.maxMemory" 34359738368 (
+      # メモリ設定（現在のログ量に最適化: 8GB）
+      heapSize = assertType "opensearch.heapSize" "8g" builtins.isString "Must be a string";
+      maxMemory = assertType "opensearch.maxMemory" 10737418240 (
         n: builtins.isInt n && n > 0
-      ) "Must be a positive integer (bytes)"; # 32GB + 2GB（システム用）
+      ) "Must be a positive integer (bytes)"; # 8GB + 2GB（システム用）= 10GB
 
       # クラスター設定
       clusterName =
@@ -496,9 +496,6 @@ let
       nodeName = assertType "opensearch.nodeName" "nixos-desktop" builtins.isString "Must be a string";
 
       # インデックス設定
-      retentionDays = assertType "opensearch.retentionDays" 30 (
-        n: builtins.isInt n && n > 0
-      ) "Must be a positive integer (days to retain logs)";
       numberOfShards = assertType "opensearch.numberOfShards" 1 (
         n: builtins.isInt n && n > 0
       ) "Must be a positive integer"; # 単一ノードのため
