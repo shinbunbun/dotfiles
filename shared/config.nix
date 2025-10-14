@@ -345,43 +345,6 @@ let
             "Must be an absolute path";
       };
 
-      # Promtail設定
-      promtail = {
-        port =
-          assertType "monitoring.promtail.port" 9080 isValidPort
-            "Must be a valid port number (1-65535)";
-        positionsFile =
-          assertType "monitoring.promtail.positionsFile" "/var/lib/promtail/positions.yaml" isValidPath
-            "Must be an absolute path";
-      };
-
-      # ClickHouse設定
-      clickhouse = {
-        port =
-          assertType "monitoring.clickhouse.port" 8123 isValidPort
-            "Must be a valid port number (1-65535)";
-        nativePort =
-          assertType "monitoring.clickhouse.nativePort" 9000 isValidPort
-            "Must be a valid port number (1-65535)";
-        interserverPort =
-          assertType "monitoring.clickhouse.interserverPort" 9009 isValidPort
-            "Must be a valid port number (1-65535)";
-        retentionDays = assertType "monitoring.clickhouse.retentionDays" 180 (
-          n: builtins.isInt n && n > 0
-        ) "Must be a positive integer (days to retain logs)";
-        dataDir =
-          assertType "monitoring.clickhouse.dataDir" "/var/lib/clickhouse" isValidPath
-            "Must be an absolute path";
-        logsTableName =
-          assertType "monitoring.clickhouse.logsTableName" "app_logs" builtins.isString
-            "Must be a string";
-        anomaliesTableName =
-          assertType "monitoring.clickhouse.anomaliesTableName" "anomalies" builtins.isString
-            "Must be a string";
-        maxMemoryUsage = assertType "monitoring.clickhouse.maxMemoryUsage" 8589934592 (
-          n: builtins.isInt n && n > 0
-        ) "Must be a positive integer (bytes)"; # 8GB
-      };
     };
 
     # CouchDB設定
