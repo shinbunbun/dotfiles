@@ -108,9 +108,9 @@ let
         Host               ${cfg.networking.hosts.nixos.hostname}.${cfg.networking.hosts.nixos.domain}
         Port               ${toString cfg.monitoring.loki.port}
         Labels             job=systemd-journal,host=${hostname}
+        label_keys         $service,$unit
         Line_format        json
         Auto_kubernetes_labels Off
-        Remove_keys        level,service,unit
   '';
 
   # パーサー設定ファイル
