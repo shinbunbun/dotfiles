@@ -471,6 +471,72 @@ let
             "Must be a string";
       };
     };
+
+    # OpenSearch設定
+    opensearch = {
+      # サーバー設定
+      port = assertType "opensearch.port" 9200 isValidPort "Must be a valid port number (1-65535)";
+      transportPort =
+        assertType "opensearch.transportPort" 9300 isValidPort
+          "Must be a valid port number (1-65535)";
+      dataDir =
+        assertType "opensearch.dataDir" "/var/lib/opensearch" isValidPath
+          "Must be an absolute path";
+
+      # メモリ設定（現在のログ量に最適化: 8GB）
+      heapSize = assertType "opensearch.heapSize" "8g" builtins.isString "Must be a string";
+      maxMemory = assertType "opensearch.maxMemory" 10737418240 (
+        n: builtins.isInt n && n > 0
+      ) "Must be a positive integer (bytes)"; # 8GB + 2GB（システム用）= 10GB
+
+      # クラスター設定
+      clusterName =
+        assertType "opensearch.clusterName" "shinbunbun-logs" builtins.isString
+          "Must be a string";
+      nodeName = assertType "opensearch.nodeName" "nixos-desktop" builtins.isString "Must be a string";
+
+      # インデックス設定
+      numberOfShards = assertType "opensearch.numberOfShards" 1 (
+        n: builtins.isInt n && n > 0
+      ) "Must be a positive integer"; # 単一ノードのため
+      numberOfReplicas = assertType "opensearch.numberOfReplicas" 0 (
+        n: builtins.isInt n && n >= 0
+      ) "Must be a non-negative integer"; # レプリカ不要
+
+      # セキュリティ設定
+      enableSecurity = assertType "opensearch.enableSecurity" true builtins.isBool "Must be a boolean";
+      allowedNetworks =
+        map (cidr: assertType "opensearch.allowedNetworks" cidr isValidCIDR "Must be a valid CIDR notation")
+          [
+            "192.168.1.0/24"
+            "192.168.11.0/24"
+            "10.100.0.0/24" # WireGuard
+          ];
+    };
+
+    # OpenSearch Dashboards設定
+    opensearchDashboards = {
+      port =
+        assertType "opensearchDashboards.port" 5601 isValidPort
+          "Must be a valid port number (1-65535)";
+      domain =
+        assertType "opensearchDashboards.domain" "opensearch.shinbunbun.com" builtins.isString
+          "Must be a string";
+      opensearchUrl =
+        assertType "opensearchDashboards.opensearchUrl" "http://192.168.1.4:9200" builtins.isString
+          "Must be a string";
+    };
+
+    # Fluent Bit設定
+    fluentBit = {
+      port = assertType "fluentBit.port" 2020 isValidPort "Must be a valid port number (1-65535)";
+      opensearchHost =
+        assertType "fluentBit.opensearchHost" "192.168.1.4" isValidIP
+          "Must be a valid IP address";
+      opensearchPort =
+        assertType "fluentBit.opensearchPort" 9200 isValidPort
+          "Must be a valid port number (1-65535)";
+    };
   };
 
   # 追加のアサーション
