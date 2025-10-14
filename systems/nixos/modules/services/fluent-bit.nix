@@ -4,13 +4,13 @@
   このモジュールは以下の機能を提供します：
   - Fluent Bit: 軽量高速なログ収集・転送エージェント
   - systemd-journalからのログ収集
-  - OpenSearchへの送信
-  - Promtailと並行稼働（移行期間用）
+  - OpenSearchへの送信（長期保存・詳細分析用）
+  - Lokiへの送信（短期・リアルタイム監視用）
 
   使用方法:
   - nixos-desktopまたはnixosにインポートして使用
   - systemd-journalから自動的にログを収集
-  - OpenSearchへバルク送信
+  - OpenSearchとLokiへ並行送信
 
   注意: Nginxがインストールされていない環境ではsystemd-journalのみを収集
 */
@@ -100,6 +100,17 @@ let
         tls                Off
         tls.verify         Off
         Suppress_Type_Name On
+
+    # Lokiへの出力
+    [OUTPUT]
+        Name               loki
+        Match              journal.*
+        Host               ${cfg.networking.hosts.nixos.hostname}.${cfg.networking.hosts.nixos.domain}
+        Port               ${toString cfg.monitoring.loki.port}
+        Labels             job=systemd-journal,host=${hostname}
+        label_keys         $service,$unit
+        Line_format        json
+        Auto_kubernetes_labels Off
   '';
 
   # パーサー設定ファイル
