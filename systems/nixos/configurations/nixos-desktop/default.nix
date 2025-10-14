@@ -41,6 +41,11 @@ in
     ../../modules/services/clickhouse.nix
     ../../modules/services/anomaly-detection.nix
 
+    # ログ検索基盤（Phase 3: OpenSearch）
+    ../../modules/services/opensearch.nix
+    ../../modules/services/opensearch-dashboards.nix # Docker版
+    ../../modules/services/fluent-bit.nix
+
     # 外部モジュール
     inputs.home-manager.nixosModules.home-manager
     inputs.sops-nix.nixosModules.sops
