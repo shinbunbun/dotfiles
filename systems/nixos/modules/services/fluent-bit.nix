@@ -53,7 +53,7 @@ let
         Add                 host ${hostname}
         Add                 log_type systemd
 
-    # ログレベルの正規化
+    # ログレベルの正規化（フィールド名変更）
     [FILTER]
         Name                modify
         Match               journal.*
@@ -61,6 +61,55 @@ let
         Rename              MESSAGE message
         Rename              SYSLOG_IDENTIFIER service
         Rename              _SYSTEMD_UNIT unit
+
+    # ログレベルの数値→文字列変換（systemd PRIORITYは0-7の数値）
+    [FILTER]
+        Name                modify
+        Match               journal.*
+        Condition           Key_Value_Equals level 0
+        Set                 level emergency
+
+    [FILTER]
+        Name                modify
+        Match               journal.*
+        Condition           Key_Value_Equals level 1
+        Set                 level alert
+
+    [FILTER]
+        Name                modify
+        Match               journal.*
+        Condition           Key_Value_Equals level 2
+        Set                 level critical
+
+    [FILTER]
+        Name                modify
+        Match               journal.*
+        Condition           Key_Value_Equals level 3
+        Set                 level error
+
+    [FILTER]
+        Name                modify
+        Match               journal.*
+        Condition           Key_Value_Equals level 4
+        Set                 level warning
+
+    [FILTER]
+        Name                modify
+        Match               journal.*
+        Condition           Key_Value_Equals level 5
+        Set                 level notice
+
+    [FILTER]
+        Name                modify
+        Match               journal.*
+        Condition           Key_Value_Equals level 6
+        Set                 level info
+
+    [FILTER]
+        Name                modify
+        Match               journal.*
+        Condition           Key_Value_Equals level 7
+        Set                 level debug
 
     # 不要なフィールドの削除
     [FILTER]
