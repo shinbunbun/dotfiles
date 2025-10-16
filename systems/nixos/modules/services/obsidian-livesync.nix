@@ -139,8 +139,8 @@
   # CouchDBデータディレクトリの作成
   systemd.tmpfiles.rules = [
     "d /var/lib/couchdb 0755 root root -"
-    "d /var/lib/couchdb/data 0755 999 999 -"
-    "d /var/lib/couchdb/config 0755 999 999 -"
+    "d /var/lib/couchdb/data 0755 5984 5984 -"
+    "d /var/lib/couchdb/config 0755 5984 5984 -"
   ];
 
   # CouchDB OCI Container
@@ -219,6 +219,13 @@
         ${pkgs.curl}/bin/curl -f --netrc-file "$NETRC_FILE" \
           -X PUT http://localhost:5984/$DATABASE_NAME 2>/dev/null || {
           echo "Database $DATABASE_NAME already exists or creation failed"
+        }
+
+        # Create _users system database to silence auth cache warnings
+        echo "Creating _users system database..."
+        ${pkgs.curl}/bin/curl -f --netrc-file "$NETRC_FILE" \
+          -X PUT http://localhost:5984/_users 2>/dev/null || {
+          echo "Database _users already exists or creation failed"
         }
 
         # Configure CORS settings via CouchDB API
