@@ -3,7 +3,7 @@
 
   機能:
   - nixos-desktop専用のトンネル設定
-  - CockpitとttydをCloudflare経由で公開
+  - Cockpit、ttyd、OpenSearch DashboardsをCloudflare経由で公開
   - SOPS統合による認証情報管理
 
   注意:
@@ -50,6 +50,16 @@ in
               # WebSocket対応
               httpHostHeader = "${tunnelConfig.ttyd.domain}";
               originServerName = "${tunnelConfig.ttyd.domain}";
+            };
+          };
+
+          # OpenSearch Dashboards - Zero Trust Accessで認証必要
+          "${cfg.opensearchDashboards.domain}" = {
+            service = "http://localhost:${toString cfg.opensearchDashboards.port}";
+            originRequest = {
+              noTLSVerify = true;
+              httpHostHeader = "${cfg.opensearchDashboards.domain}";
+              originServerName = "${cfg.opensearchDashboards.domain}";
             };
           };
         };
