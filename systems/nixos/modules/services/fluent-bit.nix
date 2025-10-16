@@ -54,62 +54,89 @@ let
         Add                 log_type systemd
 
     # ログレベルの正規化（フィールド名変更）
+    # PRIORITYは一時的にpriority_fallbackに保存（JSON内のlevelが優先）
     [FILTER]
         Name                modify
         Match               journal.*
-        Rename              PRIORITY level
+        Rename              PRIORITY priority_fallback
         Rename              MESSAGE message
         Rename              SYSLOG_IDENTIFIER service
         Rename              _SYSTEMD_UNIT unit
 
-    # ログレベルの数値→文字列変換（systemd PRIORITYは0-7の数値）
+    # priority_fallbackの数値→文字列変換（systemd PRIORITYは0-7の数値）
     [FILTER]
         Name                modify
         Match               journal.*
-        Condition           Key_Value_Equals level 0
-        Set                 level emergency
+        Condition           Key_Value_Equals priority_fallback 0
+        Set                 priority_fallback emergency
 
     [FILTER]
         Name                modify
         Match               journal.*
-        Condition           Key_Value_Equals level 1
-        Set                 level alert
+        Condition           Key_Value_Equals priority_fallback 1
+        Set                 priority_fallback alert
 
     [FILTER]
         Name                modify
         Match               journal.*
-        Condition           Key_Value_Equals level 2
-        Set                 level critical
+        Condition           Key_Value_Equals priority_fallback 2
+        Set                 priority_fallback critical
 
     [FILTER]
         Name                modify
         Match               journal.*
-        Condition           Key_Value_Equals level 3
-        Set                 level error
+        Condition           Key_Value_Equals priority_fallback 3
+        Set                 priority_fallback error
 
     [FILTER]
         Name                modify
         Match               journal.*
-        Condition           Key_Value_Equals level 4
-        Set                 level warning
+        Condition           Key_Value_Equals priority_fallback 4
+        Set                 priority_fallback warning
 
     [FILTER]
         Name                modify
         Match               journal.*
-        Condition           Key_Value_Equals level 5
-        Set                 level notice
+        Condition           Key_Value_Equals priority_fallback 5
+        Set                 priority_fallback notice
 
     [FILTER]
         Name                modify
         Match               journal.*
-        Condition           Key_Value_Equals level 6
-        Set                 level info
+        Condition           Key_Value_Equals priority_fallback 6
+        Set                 priority_fallback info
 
     [FILTER]
         Name                modify
         Match               journal.*
-        Condition           Key_Value_Equals level 7
-        Set                 level debug
+        Condition           Key_Value_Equals priority_fallback 7
+        Set                 priority_fallback debug
+
+    # JSONメッセージのパース（Dockerコンテナログ用）
+    # Authentikなど、JSON形式でログを出力するDockerサービスの場合、
+    # MESSAGEフィールド内のJSON構造をパースし、その中のlevelフィールドを抽出する。
+    # パースに成功した場合、JSON内のlevelフィールドがログレベルとして使用される。
+    [FILTER]
+        Name                parser
+        Match               journal.*
+        Key_Name            message
+        Parser              json
+        Reserve_Data        On
+        Preserve_Key        On
+
+    # フォールバック処理：JSON内にlevelが無い場合のみpriority_fallbackを使用
+    # これにより、非JSON形式のログ（CouchDBなど）は従来通りsystemd-journalのPRIORITYを使用
+    [FILTER]
+        Name                modify
+        Match               journal.*
+        Condition           Key_Does_Not_Exist level
+        Copy                priority_fallback level
+
+    # priority_fallbackフィールドの削除（不要になったため）
+    [FILTER]
+        Name                record_modifier
+        Match               journal.*
+        Remove_key          priority_fallback
 
     # 不要なフィールドの削除
     [FILTER]
