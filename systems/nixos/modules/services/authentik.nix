@@ -127,6 +127,7 @@ in
       authentik-postgresql = {
         image = "postgres:16-alpine";
         autoStart = true;
+        log-driver = "json-file";
         volumes = [
           "/var/lib/authentik/postgresql:/var/lib/postgresql/data"
         ];
@@ -151,6 +152,7 @@ in
       authentik-redis = {
         image = "redis:7-alpine";
         autoStart = true;
+        log-driver = "json-file";
         volumes = [
           "/var/lib/authentik/redis:/data"
           "/run/secrets/rendered/authentik/env:/tmp/env:ro"
@@ -176,6 +178,7 @@ in
       authentik-server = {
         image = "ghcr.io/goauthentik/server:2024.10";
         autoStart = true;
+        log-driver = "json-file";
         dependsOn = [
           "authentik-postgresql"
           "authentik-redis"
@@ -205,6 +208,7 @@ in
       authentik-worker = {
         image = "ghcr.io/goauthentik/server:2024.10";
         autoStart = true;
+        log-driver = "json-file";
         dependsOn = [
           "authentik-postgresql"
           "authentik-redis"
