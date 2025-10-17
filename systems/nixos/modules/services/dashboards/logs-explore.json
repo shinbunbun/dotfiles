@@ -229,7 +229,8 @@
         "showLabels": true,
         "showTime": true,
         "sortOrder": "Descending",
-        "wrapLogMessage": true
+        "wrapLogMessage": true,
+        "showCommonLabels": true
       },
       "pluginVersion": "8.0.0",
       "targets": [
