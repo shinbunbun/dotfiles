@@ -155,17 +155,17 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "sum(count_over_time({job=\"systemd-journal\"} |~ \"(?i)error\" [1h]))",
+          "expr": "sum(count_over_time({job=\"systemd-journal\", service!~\"loki|grafana-start|docker-opensearch-dashboards-start\", level=\"error\"} [1h]))",
           "refId": "A",
           "legendFormat": "ERROR"
         },
         {
-          "expr": "sum(count_over_time({job=\"systemd-journal\"} |~ \"(?i)warning\" [1h]))",
+          "expr": "sum(count_over_time({job=\"systemd-journal\", service!~\"loki|grafana-start|docker-opensearch-dashboards-start\", level=\"warning\"} [1h]))",
           "refId": "B",
           "legendFormat": "WARNING"
         },
         {
-          "expr": "sum(count_over_time({job=\"systemd-journal\"} [1h])) - sum(count_over_time({job=\"systemd-journal\"} |~ \"(?i)(error|warning)\" [1h]))",
+          "expr": "sum(count_over_time({job=\"systemd-journal\", service!~\"loki|grafana-start|docker-opensearch-dashboards-start\", level!~\"error|warning\"} [1h]))",
           "refId": "C",
           "legendFormat": "INFO"
         }
