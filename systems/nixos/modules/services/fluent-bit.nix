@@ -124,8 +124,33 @@ let
         Reserve_Data        On
         Preserve_Key        On
 
-    # フォールバック処理：JSON内にlevelが無い場合のみpriority_fallbackを使用
-    # これにより、非JSON形式のログ（CouchDBなど）は従来通りsystemd-journalのPRIORITYを使用
+    # CouchDBログレベル抽出（CouchDBサービスのみ対象）
+    # CouchDBのログメッセージから [error], [warning], [notice] などのログレベルを抽出
+    [FILTER]
+        Name                parser
+        Match               journal.*
+        Key_Name            message
+        Parser              couchdb_level
+        Reserve_Data        On
+        Preserve_Key        On
+        Condition           Key_Value_Equals service docker-couchdb-obsidian-start
+
+    # 抽出したログレベルをlevelフィールドにコピー（CouchDBのみ）
+    [FILTER]
+        Name                modify
+        Match               journal.*
+        Condition           Key_Value_Equals service docker-couchdb-obsidian-start
+        Condition           Key_Exists extracted_level
+        Copy                extracted_level level
+
+    # extracted_levelフィールドの削除（不要になったため）
+    [FILTER]
+        Name                record_modifier
+        Match               journal.*
+        Remove_key          extracted_level
+
+    # フォールバック処理：levelが無い場合のみpriority_fallbackを使用
+    # これにより、非JSON形式のログ（ログレベル抽出に失敗したCouchDBログなど）はsystemd-journalのPRIORITYを使用
     [FILTER]
         Name                modify
         Match               journal.*
@@ -210,6 +235,12 @@ let
         Format      json
         Time_Key    time
         Time_Format %Y-%m-%dT%H:%M:%S.%L
+        Time_Keep   On
+
+    [PARSER]
+        Name        couchdb_level
+        Format      regex
+        Regex       ^\[(?<extracted_level>[a-z]+)\]
         Time_Keep   On
 
     [PARSER]
