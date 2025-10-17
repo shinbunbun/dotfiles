@@ -163,8 +163,14 @@ let
     [FILTER]
         Name                modify
         Match               syslog*
-        Add                 host ${hostname}
         Add                 log_type routeros
+
+    # RouterOSログのhost名を実際の送信元（syslog_host）に設定
+    [FILTER]
+        Name                modify
+        Match               syslog*
+        Condition           Key_Exists syslog_host
+        Copy                syslog_host host
 
     # RouterOSログトピック抽出（例: "system,info,account" から topic=system を抽出）
     [FILTER]
