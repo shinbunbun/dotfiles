@@ -116,12 +116,12 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "sum(rate({job=\"systemd-journal\", service!=\"loki\"} |~ \"(?i)error\" [5m]))",
+          "expr": "sum(rate({job=\"systemd-journal\", service!~\"loki|grafana-start|docker-opensearch-dashboards-start\", level=\"error\"} [5m]))",
           "refId": "A",
           "legendFormat": "5分窓"
         },
         {
-          "expr": "sum(rate({job=\"systemd-journal\", service!=\"loki\"} |~ \"(?i)error\" [30m]))",
+          "expr": "sum(rate({job=\"systemd-journal\", service!~\"loki|grafana-start|docker-opensearch-dashboards-start\", level=\"error\"} [30m]))",
           "refId": "B",
           "legendFormat": "30分窓"
         }
@@ -198,7 +198,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "sum by (host) (rate({job=\"systemd-journal\", service!=\"loki\"} |~ \"(?i)error\" [5m]))",
+          "expr": "sum by (host) (rate({job=\"systemd-journal\", service!~\"loki|grafana-start|docker-opensearch-dashboards-start\", level=\"error\"} [5m]))",
           "refId": "A"
         }
       ],
@@ -286,7 +286,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "topk(10, sum by (service) (count_over_time({job=\"systemd-journal\", service!=\"loki\"} |~ \"(?i)error\" [5m])))",
+          "expr": "topk(10, sum by (service) (count_over_time({job=\"systemd-journal\", service!~\"loki|grafana-start|docker-opensearch-dashboards-start\", level=\"error\"} [5m])))",
           "refId": "A",
           "instant": true,
           "format": "table"
@@ -350,7 +350,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "{job=\"systemd-journal\", service!=\"loki\"} |~ \"(?i)error\"",
+          "expr": "{job=\"systemd-journal\", service!~\"loki|grafana-start|docker-opensearch-dashboards-start\", level=\"error\"}",
           "refId": "A",
           "maxLines": 100
         }
@@ -421,7 +421,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "sum(count_over_time({job=\"systemd-journal\"} != \"loki\" |= \"Out of memory\" |= \"Kill process\" [10m]))",
+          "expr": "sum(count_over_time({job=\"systemd-journal\", service!~\"loki|grafana-start|docker-opensearch-dashboards-start\"} |= \"Out of memory\" |= \"Kill process\" [10m]))",
           "refId": "A",
           "instant": true
         }
@@ -483,7 +483,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "sum(count_over_time({job=\"systemd-journal\", service!=\"loki\"} |~ \"authentication failure|Failed password|pam_unix.*authentication failure\" [10m]))",
+          "expr": "sum(count_over_time({job=\"systemd-journal\", service!~\"loki|grafana-start|docker-opensearch-dashboards-start\"} |~ \"authentication failure|Failed password|pam_unix.*authentication failure\" [10m]))",
           "refId": "A",
           "instant": true
         }
@@ -541,7 +541,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "sum(count_over_time({job=\"systemd-journal\"} != \"loki\" |~ \"I/O error|Input/output error\" [5m]))",
+          "expr": "sum(count_over_time({job=\"systemd-journal\", service!~\"loki|grafana-start|docker-opensearch-dashboards-start\"} |~ \"I/O error|Input/output error\" [5m]))",
           "refId": "A",
           "instant": true
         }
@@ -617,7 +617,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "sum by (unit) (count_over_time({job=\"systemd-journal\", unit=~\".+\\\\.service\", service!=\"loki\"} |= \"Started\" |= \"systemd\" [5m]))",
+          "expr": "sum by (unit) (count_over_time({job=\"systemd-journal\", unit=~\".+\\\\.service\", service!~\"loki|grafana-start|docker-opensearch-dashboards-start\"} |= \"Started\" |= \"systemd\" [5m]))",
           "refId": "A",
           "instant": true,
           "format": "table"
@@ -681,7 +681,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "{job=\"systemd-journal\"} |~ \"(?i)(out of memory|kill process|authentication failure|failed password|i/o error|input/output error|kernel panic|kernel bug|oops)\"",
+          "expr": "{job=\"systemd-journal\", service!~\"loki|grafana-start|docker-opensearch-dashboards-start\"} |~ \"(?i)(out of memory|kill process|authentication failure|failed password|i/o error|input/output error|kernel panic|kernel bug|\\boops\\b)\"",
           "refId": "A",
           "maxLines": 50
         }

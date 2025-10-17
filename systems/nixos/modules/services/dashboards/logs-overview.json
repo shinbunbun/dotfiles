@@ -383,7 +383,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "{job=\"systemd-journal\"} |~ \"(?i)error\"",
+          "expr": "{job=\"systemd-journal\", service!~\"loki|grafana-start|docker-opensearch-dashboards-start\", level=\"error\"}",
           "refId": "A",
           "maxLines": 20
         }
