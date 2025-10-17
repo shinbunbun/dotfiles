@@ -493,6 +493,9 @@ let
     # Fluent Bit設定
     fluentBit = {
       port = assertType "fluentBit.port" 2020 isValidPort "Must be a valid port number (1-65535)";
+      syslogPort =
+        assertType "fluentBit.syslogPort" 514 isValidPort
+          "Must be a valid port number (1-65535)";
       opensearchHost =
         assertType "fluentBit.opensearchHost" "192.168.1.4" isValidIP
           "Must be a valid IP address";
