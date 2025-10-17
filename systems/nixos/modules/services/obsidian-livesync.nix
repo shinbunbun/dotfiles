@@ -150,6 +150,7 @@
       couchdb-obsidian = {
         image = "couchdb:3.5.0";
         autoStart = true;
+        log-driver = "json-file";
         user = "couchdb:couchdb";
         ports = [ "127.0.0.1:5984:5984" ];
         volumes = [
