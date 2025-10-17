@@ -42,6 +42,7 @@ in
       opensearch-dashboards = {
         image = "opensearchproject/opensearch-dashboards:2.19.2";
         autoStart = true;
+        log-driver = "json-file";
 
         # ポート設定
         ports = [
