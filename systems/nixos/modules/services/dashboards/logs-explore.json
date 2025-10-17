@@ -109,7 +109,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "sum(rate({job=\"systemd-journal\", host=~\"$host\", service=~\"$service\"} |~ \"$level\" |~ \"$keyword\" [5m]))",
+          "expr": "sum(rate({job=\"systemd-journal\", host=~\"$host\", service=~\"$service\", level=~\"$level\"} |~ \"$keyword\" [5m]))",
           "refId": "A",
           "legendFormat": "ログレート"
         }
@@ -186,7 +186,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "sum by (service) (rate({job=\"systemd-journal\", host=~\"$host\", service=~\"$service\"} |~ \"$level\" |~ \"$keyword\" [5m]))",
+          "expr": "sum by (service) (rate({job=\"systemd-journal\", host=~\"$host\", service=~\"$service\", level=~\"$level\"} |~ \"$keyword\" [5m]))",
           "refId": "A"
         }
       ],
@@ -234,7 +234,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "{job=\"systemd-journal\", host=~\"$host\", service=~\"$service\"} |~ \"$level\" |~ \"$keyword\"",
+          "expr": "{job=\"systemd-journal\", host=~\"$host\", service=~\"$service\", level=~\"$level\"} |~ \"$keyword\"",
           "refId": "A"
         }
       ],
@@ -296,39 +296,26 @@
         "type": "query"
       },
       {
+        "allValue": ".*",
         "current": {
-          "selected": false,
-          "text": ".*",
-          "value": ".*"
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
         },
+        "datasource": "Loki",
+        "definition": "label_values({job=\"systemd-journal\", host=~\"$host\", service=~\"$service\"}, level)",
         "hide": 0,
+        "includeAll": true,
         "label": "ログレベル",
+        "multi": true,
         "name": "level",
-        "options": [
-          {
-            "selected": true,
-            "text": "All",
-            "value": ".*"
-          },
-          {
-            "selected": false,
-            "text": "ERROR",
-            "value": "(?i)error"
-          },
-          {
-            "selected": false,
-            "text": "WARNING",
-            "value": "(?i)warning"
-          },
-          {
-            "selected": false,
-            "text": "INFO",
-            "value": "(?i)info"
-          }
-        ],
-        "query": "All : .*, ERROR : (?i)error, WARNING : (?i)warning, INFO : (?i)info",
+        "options": [],
+        "query": "label_values({job=\"systemd-journal\", host=~\"$host\", service=~\"$service\"}, level)",
+        "refresh": 1,
+        "regex": "",
         "skipUrlSync": false,
-        "type": "custom"
+        "sort": 0,
+        "type": "query"
       },
       {
         "current": {
