@@ -175,13 +175,14 @@ let
         Reserve_Data        On
         Preserve_Key        On
 
-    # RouterOSログからfacility/severity情報を保持（syslogパーサーから取得）
-    # syslogパーサーは"pri"フィールドを抽出するので、それをlevelにコピー
+    # RouterOSログレベルマッピング（syslog PRIからseverity値を計算して文字列化）
+    # PRI = Facility × 8 + Severity のため、Severity = PRI % 8 で抽出
+    # RFC3164標準マッピング: 0=emergency, 1=alert, 2=critical, 3=error, 4=warning, 5=notice, 6=info, 7=debug
     [FILTER]
-        Name                modify
-        Match               syslog*
-        Condition           Key_Does_Not_Exist level
-        Copy                pri level
+        Name    lua
+        Match   syslog*
+        script  ${luaScript}
+        call    map_routeros_severity
 
     # フォールバック処理：levelが無い場合のみpriority_fallbackを使用
     # これにより、非JSON形式のログ（ログレベル抽出に失敗したCouchDBログなど）はsystemd-journalのPRIORITYを使用
@@ -256,6 +257,29 @@ let
         Labels             job=routeros,host=${hostname}
         Line_format        json
         Auto_kubernetes_labels Off
+  '';
+
+  # RouterOSログレベルマッピング用Luaスクリプト
+  # syslog PRIフィールドから severity = pri % 8 を計算し、文字列にマッピング
+  luaScript = pkgs.writeText "routeros-severity.lua" ''
+    function map_routeros_severity(tag, timestamp, record)
+      if record["pri"] then
+        local severity = tonumber(record["pri"]) % 8
+        local severity_map = {
+          [0] = "emergency",
+          [1] = "alert",
+          [2] = "critical",
+          [3] = "error",
+          [4] = "warning",
+          [5] = "notice",
+          [6] = "info",
+          [7] = "debug"
+        }
+        record["level"] = severity_map[severity]
+        return 1, timestamp, record
+      end
+      return 0, timestamp, record
+    end
   '';
 
   # パーサー設定ファイル
