@@ -2484,12 +2484,12 @@
       },
       "targets": [
         {
-          "expr": "sum(rate({job=\"routeros\", severity=~\"error|critical\"}[5m])) by (severity)",
+          "expr": "sum(rate({job=\"routeros\", level=~\"error|critical\"}[5m])) by (level)",
           "refId": "A",
-          "legendFormat": "{{severity}}"
+          "legendFormat": "{{level}}"
         },
         {
-          "expr": "sum(rate({job=\"routeros\", severity=\"warning\"}[5m])) by (severity)",
+          "expr": "sum(rate({job=\"routeros\", level=\"warning\"}[5m])) by (level)",
           "refId": "B",
           "legendFormat": "warning"
         }
@@ -2566,13 +2566,13 @@
       },
       "targets": [
         {
-          "expr": "sum(count_over_time({job=\"routeros\"}[5m])) by (topic)",
+          "expr": "sum(count_over_time({job=\"routeros\"}[5m])) by (ident)",
           "refId": "A",
-          "legendFormat": "{{topic}}"
+          "legendFormat": "{{ident}}"
         }
       ],
       "title": "トピック別ログ分布",
-      "description": "RouterOSログのトピック別集計",
+      "description": "RouterOSログのトピック別集計（identフィールド使用）",
       "type": "timeseries"
     }
   ],

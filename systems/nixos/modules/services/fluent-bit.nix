@@ -173,13 +173,15 @@ let
         Copy                syslog_host host
 
     # RouterOSログトピック抽出（例: "system,info,account" から topic=system を抽出）
-    [FILTER]
-        Name                parser
-        Match               syslog*
-        Key_Name            message
-        Parser              routeros_topic
-        Reserve_Data        On
-        Preserve_Key        On
+    # 注: 現在のRouterOSログフォーマットにはトピック情報が含まれていないため、コメントアウト
+    # identフィールドがトピックの代わりとして使用可能
+    #[FILTER]
+    #    Name                parser
+    #    Match               syslog*
+    #    Key_Name            message
+    #    Parser              routeros_topic
+    #    Reserve_Data        On
+    #    Preserve_Key        On
 
     # RouterOSログレベルマッピング（syslog PRIからseverity値を計算して文字列化）
     # PRI = Facility × 8 + Severity のため、Severity = PRI % 8 で抽出
@@ -260,7 +262,8 @@ let
         Match              syslog*
         Host               ${cfg.networking.hosts.nixos.hostname}.${cfg.networking.hosts.nixos.domain}
         Port               ${toString cfg.monitoring.loki.port}
-        Labels             job=routeros,host=${hostname}
+        Labels             job=routeros
+        label_keys         $level,$ident,$host
         Line_format        json
         Auto_kubernetes_labels Off
   '';
@@ -329,11 +332,12 @@ let
         Format      regex
         Regex       ^\<(?<pri>[0-9]+)\>(?<syslog_time>[^ ]* {1,2}[^ ]* [^ ]*) (?<syslog_host>[^ ]*) (?<ident>[a-zA-Z0-9_\/\.\-]*)(?:\[(?<pid>[0-9]+)\])?(?:[^\:]*\:)? *(?<message>.*)$
 
-    [PARSER]
-        Name        routeros_topic
-        Format      regex
-        Regex       ^(?<topic>[^,]+),(?<severity>[^,]+),(?<facility>[^:]+):
-        Time_Keep   On
+    # RouterOSトピックパーサー（現在のログフォーマットでは使用しない）
+    #[PARSER]
+    #    Name        routeros_topic
+    #    Format      regex
+    #    Regex       ^(?<topic>[^,]+),(?<severity>[^,]+),(?<facility>[^:]+):
+    #    Time_Keep   On
   '';
 in
 {
