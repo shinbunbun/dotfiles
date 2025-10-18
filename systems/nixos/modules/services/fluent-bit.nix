@@ -46,6 +46,16 @@ let
         Read_From_Tail    On
         Strip_Underscores On
 
+    # RouterOS syslogからの入力
+    [INPUT]
+        Name              syslog
+        Tag               syslog
+        Mode              udp
+        Listen            0.0.0.0
+        Port              ${toString cfg.fluentBit.syslogPort}
+        Parser            syslog-rfc3164-notime
+        Buffer_Chunk_Size 65535
+
     # systemd-journalログの処理
     [FILTER]
         Name                modify
@@ -149,6 +159,39 @@ let
         Match               journal.*
         Remove_key          extracted_level
 
+    # RouterOSログの処理
+    [FILTER]
+        Name                modify
+        Match               syslog*
+        Add                 log_type routeros
+
+    # RouterOSログのhost名を実際の送信元（syslog_host）に設定
+    [FILTER]
+        Name                modify
+        Match               syslog*
+        Condition           Key_Exists syslog_host
+        Copy                syslog_host host
+
+    # RouterOSログトピック抽出（例: "system,info,account" から topic=system を抽出）
+    # 注: 現在のRouterOSログフォーマットにはトピック情報が含まれていないため、コメントアウト
+    # identフィールドがトピックの代わりとして使用可能
+    #[FILTER]
+    #    Name                parser
+    #    Match               syslog*
+    #    Key_Name            message
+    #    Parser              routeros_topic
+    #    Reserve_Data        On
+    #    Preserve_Key        On
+
+    # RouterOSログレベルマッピング（syslog PRIからseverity値を計算して文字列化）
+    # PRI = Facility × 8 + Severity のため、Severity = PRI % 8 で抽出
+    # RFC3164標準マッピング: 0=emergency, 1=alert, 2=critical, 3=error, 4=warning, 5=notice, 6=info, 7=debug
+    [FILTER]
+        Name    lua
+        Match   syslog*
+        script  ${luaScript}
+        call    map_routeros_severity
+
     # フォールバック処理：levelが無い場合のみpriority_fallbackを使用
     # これにより、非JSON形式のログ（ログレベル抽出に失敗したCouchDBログなど）はsystemd-journalのPRIORITYを使用
     [FILTER]
@@ -202,7 +245,7 @@ let
         tls.verify         Off
         Suppress_Type_Name On
 
-    # Lokiへの出力
+    # Lokiへの出力（systemd-journal）
     [OUTPUT]
         Name               loki
         Match              journal.*
@@ -212,6 +255,40 @@ let
         label_keys         $service,$unit,$level
         Line_format        json
         Auto_kubernetes_labels Off
+
+    # Lokiへの出力（RouterOS）
+    [OUTPUT]
+        Name               loki
+        Match              syslog*
+        Host               ${cfg.networking.hosts.nixos.hostname}.${cfg.networking.hosts.nixos.domain}
+        Port               ${toString cfg.monitoring.loki.port}
+        Labels             job=routeros
+        label_keys         $level,$ident,$host
+        Line_format        json
+        Auto_kubernetes_labels Off
+  '';
+
+  # RouterOSログレベルマッピング用Luaスクリプト
+  # syslog PRIフィールドから severity = pri % 8 を計算し、文字列にマッピング
+  luaScript = pkgs.writeText "routeros-severity.lua" ''
+    function map_routeros_severity(tag, timestamp, record)
+      if record["pri"] then
+        local severity = tonumber(record["pri"]) % 8
+        local severity_map = {
+          [0] = "emergency",
+          [1] = "alert",
+          [2] = "critical",
+          [3] = "error",
+          [4] = "warning",
+          [5] = "notice",
+          [6] = "info",
+          [7] = "debug"
+        }
+        record["level"] = severity_map[severity]
+        return 1, timestamp, record
+      end
+      return 0, timestamp, record
+    end
   '';
 
   # パーサー設定ファイル
@@ -244,11 +321,23 @@ let
         Time_Keep   On
 
     [PARSER]
-        Name        syslog
+        Name        syslog-rfc3164
         Format      regex
         Regex       ^\<(?<pri>[0-9]+)\>(?<time>[^ ]* {1,2}[^ ]* [^ ]*) (?<host>[^ ]*) (?<ident>[a-zA-Z0-9_\/\.\-]*)(?:\[(?<pid>[0-9]+)\])?(?:[^\:]*\:)? *(?<message>.*)$
         Time_Key    time
         Time_Format %b %d %H:%M:%S
+
+    [PARSER]
+        Name        syslog-rfc3164-notime
+        Format      regex
+        Regex       ^\<(?<pri>[0-9]+)\>(?<syslog_time>[^ ]* {1,2}[^ ]* [^ ]*) (?<syslog_host>[^ ]*) (?<ident>[a-zA-Z0-9_\/\.\-]*)(?:\[(?<pid>[0-9]+)\])?(?:[^\:]*\:)? *(?<message>.*)$
+
+    # RouterOSトピックパーサー（現在のログフォーマットでは使用しない）
+    #[PARSER]
+    #    Name        routeros_topic
+    #    Format      regex
+    #    Regex       ^(?<topic>[^,]+),(?<severity>[^,]+),(?<facility>[^:]+):
+    #    Time_Keep   On
   '';
 in
 {
@@ -281,6 +370,8 @@ in
 
       # 必要な権限
       SupplementaryGroups = [ "systemd-journal" ];
+      # syslogポート514（特権ポート）へのバインドを許可
+      AmbientCapabilities = [ "CAP_NET_BIND_SERVICE" ];
 
       # データディレクトリの作成
       StateDirectory = "fluent-bit";
@@ -304,9 +395,13 @@ in
 
   users.groups.fluent-bit = { };
 
-  # ファイアウォール設定（メトリクスポート）
+  # ファイアウォール設定（メトリクスポートとsyslogポート）
   networking.firewall.allowedTCPPorts = [
     cfg.fluentBit.port # HTTP API（メトリクス）
+  ];
+
+  networking.firewall.allowedUDPPorts = [
+    cfg.fluentBit.syslogPort # RouterOS syslog受信
   ];
 
   # 必要なパッケージ
