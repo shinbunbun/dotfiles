@@ -81,6 +81,16 @@ let
       networking.wg-quick.interfaces.${interfaceName} = {
         configFile = configPath;
       };
+
+      # wg-quickサービスの再起動時に既存のインターフェースを適切に処理
+      systemd.services."wg-quick-${interfaceName}" = {
+        preStart = lib.mkBefore ''
+          # 既存のインターフェースが存在する場合は削除
+          if ${pkgs.iproute2}/bin/ip link show ${interfaceName} >/dev/null 2>&1; then
+            ${pkgs.iproute2}/bin/ip link delete ${interfaceName} || true
+          fi
+        '';
+      };
     });
 in
 {
