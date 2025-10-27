@@ -112,6 +112,9 @@ in
       "processes"
       "hwmon" # ハードウェアモニタリング（電圧、ファン、温度）
       "thermal_zone" # サーマルゾーン（CPU温度）
+      "interrupts" # IRQ詳細統計
+      "powersupplyclass" # 電源供給統計
+      "tcpstat" # TCP接続状態統計
     ];
     extraFlags = [
       "--collector.filesystem.mount-points-exclude=^/(dev|proc|sys|run/user/.+)($|/)"
