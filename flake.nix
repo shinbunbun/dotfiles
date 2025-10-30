@@ -44,6 +44,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    vscode-server = {
+      url = "github:nix-community/nixos-vscode-server";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     flake-utils = {
       url = "github:numtide/flake-utils";
     };
@@ -57,6 +62,7 @@
       home-manager,
       devshell,
       sops-nix,
+      vscode-server,
       flake-utils,
       ...
     }@inputs:
