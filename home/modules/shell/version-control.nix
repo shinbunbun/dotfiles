@@ -18,10 +18,11 @@ in
   programs.git = {
     enable = true;
 
-    userName = configValues.git.userName;
-    userEmail = configValues.git.userEmail;
-
-    extraConfig = {
+    settings = {
+      user = {
+        name = configValues.git.userName;
+        email = configValues.git.userEmail;
+      };
       core.editor = configValues.git.coreEditor;
     };
   };
