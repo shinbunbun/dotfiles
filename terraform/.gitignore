@@ -1,0 +1,30 @@
+# Terraform state files
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+
+# Terraform variable files (機密情報を含む可能性があるため)
+terraform.tfvars
+*.auto.tfvars
+*.auto.tfvars.json
+
+# Terraform directory
+.terraform/
+.terraform.lock.hcl
+
+# Crash log files
+crash.log
+crash.*.log
+
+# Override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# CLI configuration files
+.terraformrc
+terraform.rc
+
+# Mac
+.DS_Store
