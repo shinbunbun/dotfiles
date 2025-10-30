@@ -48,6 +48,7 @@ in
     # 外部モジュール
     inputs.home-manager.nixosModules.home-manager
     inputs.sops-nix.nixosModules.sops
+    inputs.vscode-server.nixosModules.default
   ];
 
   # システム設定
@@ -62,6 +63,9 @@ in
     enable = true;
     gitRepo = "git@github.com:shinbunbun/routeros-backups.git";
   };
+
+  # VS Code Server設定
+  services.vscode-server.enable = true;
 
   # Home Manager設定
   home-manager = {

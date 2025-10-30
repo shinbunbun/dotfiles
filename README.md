@@ -35,6 +35,8 @@ NixOSとmacOS (Darwin)用の個人dotfiles。標準的なNix flakeを使用し�
 ├── devshell/            # 開発環境
 │   └── default.nix      # Nix開発シェル
 ├── secrets/             # SOPS暗号化シークレット
+├── terraform/           # Terraform設定
+│   └── README.md        # Cloudflare Infrastructure as Code
 ├── docs/                # ドキュメント
 └── flake.nix           # Flakeエントリーポイント
 ```
@@ -59,6 +61,12 @@ NixOSとmacOS (Darwin)用の個人dotfiles。標準的なNix flakeを使用し�
    nix develop
    ```
 
+   開発環境では以下のツールが利用可能です:
+   - **Nix開発ツール**: nix, nixpkgs-fmt, alejandra
+   - **SOPS関連**: age, sops, ssh-to-age
+   - **Terraform関連**: terraform, terraform-ls, cf-terraforming
+   - **Cloudflare環境変数**: SOPSから自動読み込み
+
 3. NixOS設定を適用:
    ```bash
    sudo nixos-rebuild switch --flake .#homeMachine
@@ -76,6 +84,11 @@ NixOSとmacOS (Darwin)用の個人dotfiles。標準的なNix flakeを使用し�
    nix develop
    ```
 
+   開発環境では以下のツールが利用可能です:
+   - **Nix開発ツール**: nix, nixpkgs-fmt, alejandra
+   - **SOPS関連**: age, sops, ssh-to-age
+   - **Terraform関連**: terraform, terraform-ls, cf-terraforming
+
 3. Darwin設定を適用:
    ```bash
    darwin-rebuild switch --flake .#macbook
@@ -91,6 +104,7 @@ NixOSとmacOS (Darwin)用の個人dotfiles。標準的なNix flakeを使用し�
 - `nfs` - NFSサーバー設定
 - `system-tools` - システムツール（polkit、wireguard-tools）
 - `wireguard` - WireGuard VPN設定
+- `vscode-server` - VS Code Server設定（リモート開発環境）
 - **services/** - サービス設定
   - **監視・ログ分析スタック:**
     - `monitoring` - Prometheus、Grafana、Node Exporter監視スタック
@@ -149,6 +163,36 @@ NixOSとmacOS (Darwin)用の個人dotfiles。標準的なNix flakeを使用し�
 - **Grafana** (homeMachine): 統合ダッシュボードと可視化
 
 詳細は[ログ分析基盤設計書](docs/log-analyze-plan.md)を参照してください。
+
+## Infrastructure as Code (Terraform)
+
+このプロジェクトでは、CloudflareのインフラをTerraformで管理しています。
+
+### 管理対象
+
+- **DNS Records**: Cloudflare Tunnel向けCNAMEレコード
+- **Access Applications**: Cloudflare Access アプリケーション登録
+
+詳細は[Terraform README](terraform/README.md)を参照してください。
+
+### 使用方法
+
+```bash
+# 開発シェルに入る（Cloudflare環境変数が自動読み込みされます）
+nix develop
+
+# Terraformディレクトリに移動
+cd terraform
+
+# 初期化
+terraform init
+
+# 変更内容を確認
+terraform plan
+
+# 変更を適用
+terraform apply
+```
 
 ## 設定のカスタマイズ
 
