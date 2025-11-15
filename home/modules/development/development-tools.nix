@@ -13,6 +13,7 @@
     with pkgs;
     [
       terraform
+      pnpm
     ]
     ++ lib.optionals stdenv.isDarwin [
       cocoapods
