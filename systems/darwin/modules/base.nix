@@ -22,7 +22,9 @@ in
   system.primaryUser = cfg.users.darwin.username;
 
   nix.settings = {
-    sandbox = true;
+    # macOS推奨: Fixed-output derivations（npm依存関係など）をサンドボックスから除外
+    # これによりDNS解決とネットワークアクセスが正常に動作する
+    sandbox = "relaxed";
     trusted-users = [ "@admin" ];
     allowed-users = [ "@admin" ];
   };
