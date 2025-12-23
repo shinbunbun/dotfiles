@@ -5,6 +5,8 @@
 
 NixOSとmacOS (Darwin)用の個人dotfiles。標準的なNix flakeを使用して構成されています。
 
+> **Note**: Magic Nix Cacheを使用してCIビルドを高速化しています。
+
 ## プロジェクト構造
 
 ```
