@@ -74,6 +74,7 @@ in
       # ユーティリティ
       "vnc-viewer" # VNCクライアント
       "1password"
+      "vlc"
     ];
     masApps = {
       # Apple製アプリ
