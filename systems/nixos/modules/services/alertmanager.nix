@@ -516,7 +516,7 @@ in
             # RouterOSインターフェースエラー率
             {
               alert = "RouterOSInterfaceErrors";
-              expr = "(rate(ifInErrors{job=\"routeros\",ifIndex!=\"12\"}[5m]) > 0.01 or rate(ifOutErrors{job=\"routeros\",ifIndex!=\"12\"}[5m]) > 0.01) or (rate(ifInErrors{job=\"routeros\",ifIndex=\"12\"}[5m]) > 0.1 or rate(ifOutErrors{job=\"routeros\",ifIndex=\"12\"}[5m]) > 0.1)";
+              expr = "(rate(ifInErrors{job=\"routeros\",ifIndex!~\"9|12\"}[5m]) > 0.01 or rate(ifOutErrors{job=\"routeros\",ifIndex!~\"9|12\"}[5m]) > 0.01) or (rate(ifInErrors{job=\"routeros\",ifIndex=\"12\"}[5m]) > 0.1 or rate(ifOutErrors{job=\"routeros\",ifIndex=\"12\"}[5m]) > 0.1)";
               for = "5m";
               labels = {
                 severity = "warning";
