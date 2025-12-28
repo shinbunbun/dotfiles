@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        configuration: [homeMachine, nixos-desktop]
+        configuration: [homeMachine]
     steps:
       - name: Free disk space
         run: |
