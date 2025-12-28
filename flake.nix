@@ -101,14 +101,6 @@
             ./systems/nixos/configurations/homeMachine/default.nix
           ];
         };
-
-        nixos-desktop = nixpkgs.lib.nixosSystem {
-          system = "x86_64-linux";
-          specialArgs = { inherit inputs; };
-          modules = [
-            ./systems/nixos/configurations/nixos-desktop/default.nix
-          ];
-        };
       };
 
       # Darwin設定
@@ -147,5 +139,42 @@
 
       # アプリケーション（将来の拡張用）
       apps = forAllSystems (system: { });
+
+      # NixOS モジュールを export（dotfiles-private から利用可能）
+      nixosModules = {
+        # Base modules
+        base = ./systems/nixos/modules/base.nix;
+        desktop = ./systems/nixos/modules/desktop.nix;
+        security = ./systems/nixos/modules/security.nix;
+        optimise = ./systems/nixos/modules/optimise.nix;
+        system-tools = ./systems/nixos/modules/system-tools.nix;
+        networking = ./systems/nixos/modules/networking.nix;
+        wireguard = ./systems/nixos/modules/wireguard.nix;
+        nfs = ./systems/nixos/modules/nfs.nix;
+        kubernetes = ./systems/nixos/modules/kubernetes.nix;
+        vm = ./systems/nixos/modules/vm.nix;
+
+        # Service modules
+        services = {
+          monitoring = ./systems/nixos/modules/services/monitoring.nix;
+          loki = ./systems/nixos/modules/services/loki.nix;
+          cockpit = ./systems/nixos/modules/services/cockpit.nix;
+          ttyd = ./systems/nixos/modules/services/ttyd.nix;
+          opensearch = ./systems/nixos/modules/services/opensearch.nix;
+          opensearch-dashboards = ./systems/nixos/modules/services/opensearch-dashboards.nix;
+          fluent-bit = ./systems/nixos/modules/services/fluent-bit.nix;
+          authentik = ./systems/nixos/modules/services/authentik.nix;
+          obsidian-livesync = ./systems/nixos/modules/services/obsidian-livesync.nix;
+          routeros-backup = ./systems/nixos/modules/services/routeros-backup.nix;
+          unified-cloudflare-tunnel = ./systems/nixos/modules/services/unified-cloudflare-tunnel.nix;
+          desktop-cloudflare-tunnel = ./systems/nixos/modules/services/desktop-cloudflare-tunnel.nix;
+          alertmanager = ./systems/nixos/modules/services/alertmanager.nix;
+        };
+      };
+
+      # 共通設定も export（オプション）
+      lib = {
+        config = import ./shared/config.nix;
+      };
     };
 }
