@@ -610,7 +610,7 @@ in
             # Promtailのログ取り込み遅延
             {
               alert = "LogIngestionLag";
-              expr = ''(time() - max(promtail_stream_lag_seconds)) > 60'';
+              expr = "(time() - max(promtail_stream_lag_seconds)) > 60";
               for = "5m";
               labels = {
                 severity = "warning";
@@ -623,7 +623,7 @@ in
             # Promtailのログドロップ検知
             {
               alert = "PromtailDroppedLogs";
-              expr = ''rate(promtail_dropped_entries_total[5m]) > 0'';
+              expr = "rate(promtail_dropped_entries_total[5m]) > 0";
               for = "5m";
               labels = {
                 severity = "warning";
