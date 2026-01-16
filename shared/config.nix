@@ -43,7 +43,7 @@ let
   isValidPath = path: builtins.isString path && builtins.substring 0 1 path == "/";
 
   # メールアドレスの簡易検証
-  isValidEmail = email: builtins.match ''^[^@]+@[^@]+'' email != null;
+  isValidEmail = email: builtins.match "^[^@]+@[^@]+" email != null;
 
   # 設定値の定義
   config = {
