@@ -86,6 +86,19 @@ in
       prometheusUrl = "localhost:${toString cfg.monitoring.alertmanager.port}";
     };
 
+    # Loki設定
+    loki = {
+      enable = true;
+      port = cfg.monitoring.loki.port;
+      dataDir = cfg.monitoring.loki.dataDir;
+      retentionDays = cfg.monitoring.loki.retentionDays;
+      ingestionRateLimit = cfg.monitoring.loki.ingestionRateLimit;
+      ingestionBurstSize = cfg.monitoring.loki.ingestionBurstSize;
+      chunkTargetSize = cfg.monitoring.loki.chunkTargetSize;
+      alertmanagerUrl = "http://localhost:${toString cfg.monitoring.alertmanager.port}";
+      rulesFile = inputs.nixos-observability.assets.lokiRules;
+    };
+
     # Monitoring設定
     monitoring = {
       enable = true;
