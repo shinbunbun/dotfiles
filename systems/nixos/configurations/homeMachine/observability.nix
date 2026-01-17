@@ -6,14 +6,25 @@
   - Grafana: 可視化とダッシュボード
   - Node Exporter: システムメトリクス
   - SNMP Exporter: RouterOS 監視
+  - Loki: ログ集約
+  - Alertmanager: アラート管理
+  - Fluent Bit: ログ収集
 */
 {
   config,
   inputs,
+  pkgs,
   ...
 }:
 let
   cfg = import ../../../../shared/config.nix;
+
+  # Fluent Bit設定ファイル生成
+  fluentBitConfigs = import ../../../../observability-config/fluent-bit/generator.nix {
+    inherit pkgs;
+    inherit cfg;
+    hostname = config.networking.hostName;
+  };
 in
 {
   # SOPS設定
@@ -84,6 +95,15 @@ in
       alertRules = import ../../../../observability-config/alert-rules.nix;
 
       prometheusUrl = "localhost:${toString cfg.monitoring.alertmanager.port}";
+    };
+
+    # Fluent Bit設定
+    fluentBit = {
+      enable = true;
+      port = cfg.fluentBit.port;
+      configFile = fluentBitConfigs.main;
+      firewallPorts = [ cfg.fluentBit.syslogPort ]; # syslog UDP port
+      openFirewall = true;
     };
 
     # Loki設定
