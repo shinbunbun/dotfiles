@@ -38,9 +38,9 @@ in
     # サービスモジュール
     ../../modules/services/services.nix
     # ../../modules/services/monitoring.nix          # nixos-observability に移行
-    ../../modules/services/alertmanager.nix
-    ../../modules/services/loki.nix
-    ../../modules/services/fluent-bit.nix
+    # ../../modules/services/alertmanager.nix        # nixos-observability に移行
+    # ../../modules/services/loki.nix                # nixos-observability に移行
+    # ../../modules/services/fluent-bit.nix          # nixos-observability に移行
     ../../modules/services/authentik.nix
     ../../modules/services/cockpit.nix
     ../../modules/services/ttyd.nix
@@ -53,6 +53,9 @@ in
     inputs.sops-nix.nixosModules.sops
     inputs.vscode-server.nixosModules.default
     inputs.nixos-observability.nixosModules.monitoring
+    inputs.nixos-observability.nixosModules.alertmanager
+    inputs.nixos-observability.nixosModules.loki
+    inputs.nixos-observability.nixosModules.fluentBit
   ];
 
   # システム設定
