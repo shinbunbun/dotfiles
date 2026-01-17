@@ -22,6 +22,9 @@ in
     # ハードウェア設定
     (if isVM then ../../modules/vm.nix else ./hardware.nix)
 
+    # ホスト固有の設定
+    ./observability.nix
+
     # 基本モジュール
     ../../modules/base.nix
     ../../modules/optimise.nix
@@ -34,7 +37,7 @@ in
 
     # サービスモジュール
     ../../modules/services/services.nix
-    ../../modules/services/monitoring.nix
+    # ../../modules/services/monitoring.nix          # nixos-observability に移行
     ../../modules/services/alertmanager.nix
     ../../modules/services/loki.nix
     ../../modules/services/fluent-bit.nix
@@ -49,6 +52,7 @@ in
     inputs.home-manager.nixosModules.home-manager
     inputs.sops-nix.nixosModules.sops
     inputs.vscode-server.nixosModules.default
+    inputs.nixos-observability.nixosModules.monitoring
   ];
 
   # システム設定

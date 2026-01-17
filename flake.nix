@@ -52,6 +52,12 @@
     flake-utils = {
       url = "github:numtide/flake-utils";
     };
+
+    # nixos-observability
+    nixos-observability = {
+      url = "github:shinbunbun/nixos-observability";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -64,6 +70,7 @@
       sops-nix,
       vscode-server,
       flake-utils,
+      nixos-observability,
       ...
     }@inputs:
     let
