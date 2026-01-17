@@ -1,33 +1,18 @@
-/*
-  Fluent Bitログ収集エージェント設定モジュール
+# Fluent Bit 設定ファイル生成関数
+#
+# この関数は Fluent Bit の設定ファイルを生成します。
+# 引数:
+#   pkgs: nixpkgs
+#   cfg: config.nix から読み込んだ設定
+#   hostname: ホスト名
 
-  このモジュールは以下の機能を提供します：
-  - Fluent Bit: 軽量高速なログ収集・転送エージェント
-  - systemd-journalからのログ収集
-  - OpenSearchへの送信（長期保存・詳細分析用）
-  - Lokiへの送信（短期・リアルタイム監視用）
-
-  使用方法:
-  - nixos-desktopまたはnixosにインポートして使用
-  - systemd-journalから自動的にログを収集
-  - OpenSearchとLokiへ並行送信
-
-  注意: Nginxがインストールされていない環境ではsystemd-journalのみを収集
-*/
 {
-  config,
   pkgs,
-  lib,
-  ...
+  cfg,
+  hostname,
 }:
+
 let
-  # config.nixから設定を読み込み
-  cfg = import ../../../../shared/config.nix;
-
-  # ホスト名を取得
-  hostname = config.networking.hostName;
-
-  # Fluent Bit設定ファイル
   fluentBitConfig = pkgs.writeText "fluent-bit.conf" ''
     [SERVICE]
         Flush        5
@@ -341,83 +326,8 @@ let
   '';
 in
 {
-  # Fluent Bitサービスの定義
-  systemd.services.fluent-bit = {
-    description = "Fluent Bit Log Processor";
-    wantedBy = [ "multi-user.target" ];
-    after = [ "network.target" ];
-
-    serviceConfig = {
-      Type = "simple";
-      User = "fluent-bit";
-      Group = "fluent-bit";
-      ExecStart = "${pkgs.fluent-bit}/bin/fluent-bit -c ${fluentBitConfig}";
-      Restart = "on-failure";
-      RestartSec = "10s";
-
-      # メモリ制限
-      MemoryMax = "512M";
-      MemoryHigh = "400M";
-
-      # セキュリティ設定
-      NoNewPrivileges = true;
-      PrivateTmp = true;
-      ProtectSystem = "strict";
-      ProtectHome = true;
-      ReadWritePaths = [
-        "/var/lib/fluent-bit"
-      ];
-
-      # 必要な権限
-      SupplementaryGroups = [ "systemd-journal" ];
-      # syslogポート514（特権ポート）へのバインドを許可
-      AmbientCapabilities = [ "CAP_NET_BIND_SERVICE" ];
-
-      # データディレクトリの作成
-      StateDirectory = "fluent-bit";
-      StateDirectoryMode = "0750";
-    };
-
-    preStart = ''
-      # データディレクトリの確認
-      mkdir -p /var/lib/fluent-bit
-      chown fluent-bit:fluent-bit /var/lib/fluent-bit
-    '';
-  };
-
-  # ユーザーとグループの作成
-  users.users.fluent-bit = {
-    isSystemUser = true;
-    group = "fluent-bit";
-    description = "Fluent Bit service user";
-    extraGroups = [ "systemd-journal" ]; # journalへのアクセス権限
-  };
-
-  users.groups.fluent-bit = { };
-
-  # ファイアウォール設定（メトリクスポートとsyslogポート）
-  networking.firewall.allowedTCPPorts = [
-    cfg.fluentBit.port # HTTP API（メトリクス）
-  ];
-
-  networking.firewall.allowedUDPPorts = [
-    cfg.fluentBit.syslogPort # RouterOS syslog受信
-  ];
-
-  # 必要なパッケージ
-  environment.systemPackages = with pkgs; [
-    fluent-bit
-  ];
-
-  # ログローテーション設定（Fluent Bitのログ用）
-  services.logrotate.settings.fluent-bit = {
-    files = "/var/log/fluent-bit/*.log";
-    rotate = 7;
-    frequency = "daily";
-    compress = true;
-    delaycompress = true;
-    missingok = true;
-    notifempty = true;
-    create = "0640 fluent-bit fluent-bit";
-  };
+  # 設定ファイルのパスを返す
+  main = fluentBitConfig;
+  parsers = parsersConfig;
+  lua = luaScript;
 }
