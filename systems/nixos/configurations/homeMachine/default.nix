@@ -38,7 +38,7 @@ in
     # サービスモジュール
     ../../modules/services/services.nix
     # ../../modules/services/monitoring.nix          # nixos-observability に移行
-    ../../modules/services/alertmanager.nix
+    # ../../modules/services/alertmanager.nix        # nixos-observability に移行
     ../../modules/services/loki.nix
     ../../modules/services/fluent-bit.nix
     ../../modules/services/authentik.nix
@@ -53,6 +53,7 @@ in
     inputs.sops-nix.nixosModules.sops
     inputs.vscode-server.nixosModules.default
     inputs.nixos-observability.nixosModules.monitoring
+    inputs.nixos-observability.nixosModules.alertmanager
   ];
 
   # システム設定
