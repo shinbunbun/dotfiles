@@ -58,6 +58,11 @@
       url = "github:shinbunbun/nixos-observability";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # nixos-observability-config
+    nixos-observability-config = {
+      url = "github:shinbunbun/nixos-observability-config";
+    };
   };
 
   outputs =
@@ -71,6 +76,7 @@
       vscode-server,
       flake-utils,
       nixos-observability,
+      nixos-observability-config,
       ...
     }@inputs:
     let
