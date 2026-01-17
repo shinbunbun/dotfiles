@@ -53,9 +53,9 @@
       url = "github:numtide/flake-utils";
     };
 
-    # nixos-observability（ローカル開発用）
+    # nixos-observability
     nixos-observability = {
-      url = "path:/home/bunbun/nixos-observability";
+      url = "github:shinbunbun/nixos-observability";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
