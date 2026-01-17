@@ -6,7 +6,11 @@
 #   cfg: config.nix から読み込んだ設定
 #   hostname: ホスト名
 
-{ pkgs, cfg, hostname }:
+{
+  pkgs,
+  cfg,
+  hostname,
+}:
 
 let
   fluentBitConfig = pkgs.writeText "fluent-bit.conf" ''
