@@ -122,14 +122,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1768621567,
-        "narHash": "sha256-GEvQ0vpc/DOnjAr7AwkvnoDNIKv18/0cfurqjdNMtbE=",
-        "path": "/home/bunbun/nixos-observability",
-        "type": "path"
+        "lastModified": 1768621786,
+        "narHash": "sha256-D4VGNT9lu53epxALkOclQuOWEFHqxMdVqz12yw7u6rI=",
+        "owner": "shinbunbun",
+        "repo": "nixos-observability",
+        "rev": "6a8c43755d864e7f2e3c5376afb80752d61bc583",
+        "type": "github"
       },
       "original": {
-        "path": "/home/bunbun/nixos-observability",
-        "type": "path"
+        "owner": "shinbunbun",
+        "repo": "nixos-observability",
+        "type": "github"
       }
     },
     "nixpkgs": {
