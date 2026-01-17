@@ -39,7 +39,7 @@ in
     ../../modules/services/services.nix
     # ../../modules/services/monitoring.nix          # nixos-observability に移行
     # ../../modules/services/alertmanager.nix        # nixos-observability に移行
-    ../../modules/services/loki.nix
+    # ../../modules/services/loki.nix                # nixos-observability に移行
     ../../modules/services/fluent-bit.nix
     ../../modules/services/authentik.nix
     ../../modules/services/cockpit.nix
@@ -54,6 +54,7 @@ in
     inputs.vscode-server.nixosModules.default
     inputs.nixos-observability.nixosModules.monitoring
     inputs.nixos-observability.nixosModules.alertmanager
+    inputs.nixos-observability.nixosModules.loki
   ];
 
   # システム設定
