@@ -62,6 +62,16 @@ in
               originServerName = "${cfg.opensearchDashboards.domain}";
             };
           };
+
+          # Google Calendar Bot - Zero Trust Accessで認証必要
+          "${tunnelConfig.calendarBot.domain}" = {
+            service = "http://localhost:8080";
+            originRequest = {
+              noTLSVerify = true;
+              httpHostHeader = "${tunnelConfig.calendarBot.domain}";
+              originServerName = "${tunnelConfig.calendarBot.domain}";
+            };
+          };
         };
       };
     };

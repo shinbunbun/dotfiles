@@ -388,6 +388,11 @@ let
             assertType "cloudflare.desktop.ttyd.domain" "desktop-terminal.shinbunbun.com" builtins.isString
               "Must be a string";
         };
+        calendarBot = {
+          domain =
+            assertType "cloudflare.desktop.calendarBot.domain" "calendar-bot.shinbunbun.com" builtins.isString
+              "Must be a string";
+        };
       };
     };
 
