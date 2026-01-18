@@ -20,7 +20,7 @@ let
   cfg = import ../../../../shared/config.nix;
 
   # Fluent Bit設定ファイル生成
-  fluentBitConfigs = import ../../../../observability-config/fluent-bit/generator.nix {
+  fluentBitConfigs = import inputs.nixos-observability-config.lib.fluentBit.generator {
     inherit pkgs;
     inherit cfg;
     hostname = config.networking.hostName;
@@ -92,7 +92,7 @@ in
       discord.webhookUrlFile = config.sops.templates."alertmanager/env".path;
 
       # アラートルールを読み込み
-      alertRules = import ../../../../observability-config/alert-rules.nix;
+      alertRules = import inputs.nixos-observability-config.assets.alertRules;
 
       prometheusUrl = "localhost:${toString cfg.monitoring.alertmanager.port}";
     };
@@ -116,7 +116,7 @@ in
       ingestionBurstSize = cfg.monitoring.loki.ingestionBurstSize;
       chunkTargetSize = cfg.monitoring.loki.chunkTargetSize;
       alertmanagerUrl = "http://localhost:${toString cfg.monitoring.alertmanager.port}";
-      rulesFile = inputs.nixos-observability.assets.lokiRules;
+      rulesFile = inputs.nixos-observability-config.assets.lokiRules;
     };
 
     # Monitoring設定
@@ -199,7 +199,7 @@ in
       snmpExporter = {
         enable = true;
         port = cfg.monitoring.snmpExporter.port;
-        configFile = inputs.nixos-observability.assets.snmpConfig;
+        configFile = inputs.nixos-observability-config.assets.snmpConfig;
       };
 
       # Grafana設定
@@ -221,7 +221,7 @@ in
 
         dashboards = {
           enable = true;
-          path = inputs.nixos-observability.assets.dashboards;
+          path = inputs.nixos-observability-config.assets.dashboards;
         };
       };
 
