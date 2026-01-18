@@ -93,3 +93,14 @@ resource "cloudflare_dns_record" "opensearch_dashboards" {
   proxied = true
   comment = "Managed by Terraform - OpenSearch Dashboards via desktop-services tunnel"
 }
+
+# Google Calendar Bot
+resource "cloudflare_dns_record" "calendar_bot" {
+  zone_id = var.cloudflare_zone_id
+  name    = "calendar-bot"
+  content = local.desktop_tunnel_endpoint
+  type    = "CNAME"
+  ttl     = 1
+  proxied = true
+  comment = "Managed by Terraform - Google Calendar Bot via desktop-services tunnel"
+}
