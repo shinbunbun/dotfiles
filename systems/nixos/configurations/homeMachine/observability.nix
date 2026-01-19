@@ -95,6 +95,7 @@ in
       alertRules = import inputs.nixos-observability-config.assets.alertRules;
 
       prometheusUrl = "localhost:${toString cfg.monitoring.alertmanager.port}";
+      externalUrl = "https://${cfg.monitoring.grafana.domain}";
     };
 
     # Fluent Bit設定
@@ -117,6 +118,7 @@ in
       chunkTargetSize = cfg.monitoring.loki.chunkTargetSize;
       alertmanagerUrl = "http://localhost:${toString cfg.monitoring.alertmanager.port}";
       rulesFile = inputs.nixos-observability-config.assets.lokiRules;
+      externalUrl = "https://${cfg.monitoring.grafana.domain}";
     };
 
     # Monitoring設定
@@ -130,6 +132,7 @@ in
         retentionDays = cfg.monitoring.prometheus.retentionDays;
         scrapeInterval = cfg.monitoring.prometheus.scrapeInterval;
         evaluationInterval = cfg.monitoring.prometheus.evaluationInterval;
+        externalUrl = "https://${cfg.monitoring.grafana.domain}";
 
         scrapeConfigs = [
           {
