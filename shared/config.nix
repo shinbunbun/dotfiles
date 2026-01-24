@@ -125,9 +125,6 @@ let
         generalPort =
           assertType "networking.firewall.generalPort" 8888 isValidPort
             "Must be a valid port number (1-65535)";
-        kubernetesApiPort =
-          assertType "networking.firewall.kubernetesApiPort" 6443 isValidPort
-            "Must be a valid port number (1-65535)";
         nfsPort =
           assertType "networking.firewall.nfsPort" 2049 isValidPort
             "Must be a valid port number (1-65535)";
@@ -159,11 +156,39 @@ let
           "Must be an absolute path";
     };
 
-    # Kubernetes設定
-    kubernetes = {
-      master = {
-        ip = assertType "kubernetes.master.ip" "192.168.1.3" isValidIP "Must be a valid IP address";
-        hostname = assertType "kubernetes.master.hostname" "api.kube" builtins.isString "Must be a string";
+    # k3s設定
+    k3s = {
+      # デスクトップ用k3s設定
+      desktop = {
+        enable = assertType "k3s.desktop.enable" true builtins.isBool "Must be a boolean";
+        role = assertType "k3s.desktop.role" "server" (
+          role:
+          builtins.elem role [
+            "server"
+            "agent"
+          ]
+        ) "Must be either 'server' or 'agent'";
+
+        # サーバー設定
+        clusterInit = assertType "k3s.desktop.clusterInit" true builtins.isBool "Must be a boolean";
+
+        # 追加フラグ
+        extraFlags = [
+          "--flannel-backend=vxlan"
+          "--write-kubeconfig-mode=0644"
+        ];
+      };
+
+      # 将来のhomeMachine用設定（現時点では無効）
+      homeMachine = {
+        enable = assertType "k3s.homeMachine.enable" false builtins.isBool "Must be a boolean";
+        role = assertType "k3s.homeMachine.role" "agent" (
+          role:
+          builtins.elem role [
+            "server"
+            "agent"
+          ]
+        ) "Must be either 'server' or 'agent'";
       };
     };
 
@@ -513,20 +538,24 @@ let
   # 追加のアサーション
   assertions = [
     {
-      assertion = config.networking.firewall.kubernetesApiPort != config.networking.firewall.generalPort;
-      message = "Kubernetes API port must be different from general port";
-    }
-    {
       assertion = config.ssh.port != 22;
       message = "SSH port should not use the default port 22 for security reasons";
     }
     {
-      assertion = config.networking.firewall.generalPort != config.networking.firewall.nfsPort;
-      message = "General port must be different from NFS port";
+      assertion =
+        config.k3s.desktop.enable
+        -> (config.k3s.desktop.role == "server" || config.k3s.desktop.role == "agent");
+      message = "k3s role must be either 'server' or 'agent'";
     }
     {
-      assertion = config.networking.firewall.kubernetesApiPort != config.networking.firewall.nfsPort;
-      message = "Kubernetes API port must be different from NFS port";
+      assertion =
+        config.k3s.desktop.role == "agent"
+        -> (builtins.hasAttr "serverAddr" config.k3s.desktop && config.k3s.desktop.serverAddr != "");
+      message = "k3s agent mode requires serverAddr to be set";
+    }
+    {
+      assertion = config.networking.firewall.generalPort != config.networking.firewall.nfsPort;
+      message = "General port must be different from NFS port";
     }
     {
       assertion = config.management.cockpit.port != config.management.ttyd.port;
