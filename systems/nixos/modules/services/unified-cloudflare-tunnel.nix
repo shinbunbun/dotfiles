@@ -81,6 +81,9 @@ in
               noTLSVerify = true;
               httpHostHeader = "${cfg.attic.domain}";
               originServerName = "${cfg.attic.domain}";
+              # 大きなファイルのアップロード用にタイムアウトを延長
+              connectTimeout = "5m";
+              noHappyEyeballs = true;
             };
           };
 
