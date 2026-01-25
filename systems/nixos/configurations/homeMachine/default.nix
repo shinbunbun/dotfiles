@@ -33,7 +33,6 @@ in
     ../../modules/system-tools.nix
     ../../modules/wireguard.nix
     ../../modules/nfs.nix
-    ../../modules/kubernetes.nix
 
     # サービスモジュール
     ../../modules/services/services.nix

@@ -178,7 +178,7 @@
         networking = ./systems/nixos/modules/networking.nix;
         wireguard = ./systems/nixos/modules/wireguard.nix;
         nfs = ./systems/nixos/modules/nfs.nix;
-        kubernetes = ./systems/nixos/modules/kubernetes.nix;
+        k3s = ./systems/nixos/modules/k3s.nix;
         vm = ./systems/nixos/modules/vm.nix;
 
         # Service modules
