@@ -78,12 +78,25 @@ jobs:
             --out-link result-${{ matrix.configuration }}
 
       - name: Configure and push to Attic cache
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/fix/deploy') && github.event_name == 'push'
         run: |
-          nix build github:zhaofengli/attic --out-link attic-cli
+          nix build .#attic --out-link attic-cli
           ./attic-cli/bin/attic login ci https://cache.shinbunbun.com ${{ secrets.ATTIC_TOKEN }}
           ./attic-cli/bin/attic cache create main || echo "Cache already exists"
-          ./attic-cli/bin/attic push main result-${{ matrix.configuration }}
+
+          # attic CLI自体をキャッシュにプッシュ（次回CI実行でキャッシュヒット）
+          echo "Pushing attic-cli to cache..."
+          ./attic-cli/bin/attic push main attic-cli || echo "Failed to push attic-cli (non-fatal)"
+
+          # システムビルドをリトライロジック付きでpush（大きなファイルのタイムアウト対策）
+          echo "Pushing system build to cache..."
+          for i in {1..3}; do
+            if ./attic-cli/bin/attic push main result-${{ matrix.configuration }}; then
+              break
+            fi
+            echo "Retry $i/3 after error..."
+            sleep 10
+          done
         continue-on-error: true
 
   build-darwin:
@@ -128,7 +141,30 @@ jobs:
         run: |
           nix build .#darwinConfigurations.${{ matrix.configuration }}.config.system.build.toplevel \
             --print-build-logs \
-            --show-trace
+            --show-trace \
+            --out-link result-${{ matrix.configuration }}
+
+      - name: Configure and push to Attic cache
+        if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/fix/deploy') && github.event_name == 'push'
+        run: |
+          nix build .#attic --out-link attic-cli
+          ./attic-cli/bin/attic login ci https://cache.shinbunbun.com ${{ secrets.ATTIC_TOKEN }}
+          ./attic-cli/bin/attic cache create main || echo "Cache already exists"
+
+          # attic CLI自体をキャッシュにプッシュ（次回CI実行でキャッシュヒット）
+          echo "Pushing attic-cli to cache..."
+          ./attic-cli/bin/attic push main attic-cli || echo "Failed to push attic-cli (non-fatal)"
+
+          # Darwinビルドをリトライロジック付きでpush
+          echo "Pushing Darwin build to cache..."
+          for i in {1..3}; do
+            if ./attic-cli/bin/attic push main result-${{ matrix.configuration }}; then
+              break
+            fi
+            echo "Retry $i/3 after error..."
+            sleep 10
+          done
+        continue-on-error: true
 
   build-devshell:
     needs: format-check
@@ -142,18 +178,57 @@ jobs:
           nix_path: nixpkgs=channel:nixos-unstable
           extra_nix_config: |
             experimental-features = nix-command flakes
+            substituters = https://cache.nixos.org https://cache.shinbunbun.com/main
+            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= main:EMoov6FniyxjYhY24OcZ02dOIWKu4feJH7uGRjgwwUc=
+            fallback = true
+            connect-timeout = 5
+
+      - name: Setup Attic authentication
+        run: |
+          mkdir -p ~/.config/nix
+          cat > ~/.config/nix/nix.conf << EOF
+          netrc-file = $HOME/.netrc
+          EOF
+          cat > ~/.netrc << EOF
+          machine cache.shinbunbun.com
+          password ${{ secrets.ATTIC_READ_TOKEN }}
+          EOF
+          chmod 600 ~/.netrc
 
       - name: Build development shell
         run: |
           nix build .#devShells.x86_64-linux.default \
             --print-build-logs \
-            --show-trace
+            --show-trace \
+            --out-link result-devshell
+
+      - name: Configure and push to Attic cache
+        if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/fix/deploy') && github.event_name == 'push'
+        run: |
+          nix build .#attic --out-link attic-cli
+          ./attic-cli/bin/attic login ci https://cache.shinbunbun.com ${{ secrets.ATTIC_TOKEN }}
+          ./attic-cli/bin/attic cache create main || echo "Cache already exists"
+
+          # attic CLI自体をキャッシュにプッシュ（次回CI実行でキャッシュヒット）
+          echo "Pushing attic-cli to cache..."
+          ./attic-cli/bin/attic push main attic-cli || echo "Failed to push attic-cli (non-fatal)"
+
+          # devshellビルドをリトライロジック付きでpush
+          echo "Pushing devshell build to cache..."
+          for i in {1..3}; do
+            if ./attic-cli/bin/attic push main result-devshell; then
+              break
+            fi
+            echo "Retry $i/3 after error..."
+            sleep 10
+          done
+        continue-on-error: true
 
   notify-build-complete:
     name: Notify build completion
     needs: build-nixos
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && !inputs.skip_deploy
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/fix/deploy') && github.event_name == 'push' && !inputs.skip_deploy
 
     steps:
       - name: Send Discord notification
@@ -168,7 +243,7 @@ jobs:
     name: Deploy to NixOS
     needs: [build-nixos, notify-build-complete]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && !inputs.skip_deploy
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/fix/deploy') && github.event_name == 'push' && !inputs.skip_deploy
     environment: production
 
     steps:
