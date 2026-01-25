@@ -73,6 +73,21 @@ in
               originServerName = "terminal.${domain}";
             };
           };
+
+          # Attic Binary Cache
+          "${cfg.attic.domain}" = {
+            service = "http://localhost:${toString cfg.attic.port}";
+            originRequest = {
+              noTLSVerify = true;
+              httpHostHeader = "${cfg.attic.domain}";
+              originServerName = "${cfg.attic.domain}";
+            };
+          };
+
+          # SSH for CI/CD deployment (Cloudflare Tunnel経由)
+          "${cfg.deploy.sshDomain}" = {
+            service = "ssh://localhost:${toString cfg.ssh.port}";
+          };
         };
       };
     };

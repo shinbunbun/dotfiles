@@ -1,4 +1,4 @@
-# cells/core/config.nix
+# shared/config.nix
 /*
   中央設定モジュール
 
@@ -533,6 +533,55 @@ let
         assertType "fluentBit.opensearchPort" 9200 isValidPort
           "Must be a valid port number (1-65535)";
     };
+
+    # Atticバイナリキャッシュ設定
+    attic = {
+      port = assertType "attic.port" 8080 isValidPort "Must be a valid port number (1-65535)";
+      domain = assertType "attic.domain" "cache.shinbunbun.com" builtins.isString "Must be a string";
+
+      # ストレージ設定
+      storagePath =
+        assertType "attic.storagePath" "/var/lib/atticd/storage" isValidPath
+          "Must be an absolute path";
+
+      # データベース設定
+      database = {
+        name = assertType "attic.database.name" "attic" builtins.isString "Must be a string";
+        user = assertType "attic.database.user" "attic" builtins.isString "Must be a string";
+      };
+
+      # ガベージコレクション設定
+      garbageCollection = {
+        interval =
+          assertType "attic.garbageCollection.interval" "12 hours" builtins.isString
+            "Must be a string";
+        retentionPeriod =
+          assertType "attic.garbageCollection.retentionPeriod" "30 days" builtins.isString
+            "Must be a string";
+      };
+
+      # チャンク設定
+      chunking = {
+        narSizeThreshold = assertType "attic.chunking.narSizeThreshold" 65536 (
+          n: builtins.isInt n && n > 0
+        ) "Must be a positive integer (bytes)"; # 64 KiB
+        minSize = assertType "attic.chunking.minSize" 16384 (
+          n: builtins.isInt n && n > 0
+        ) "Must be a positive integer (bytes)"; # 16 KiB
+        avgSize = assertType "attic.chunking.avgSize" 65536 (
+          n: builtins.isInt n && n > 0
+        ) "Must be a positive integer (bytes)"; # 64 KiB
+        maxSize = assertType "attic.chunking.maxSize" 262144 (
+          n: builtins.isInt n && n > 0
+        ) "Must be a positive integer (bytes)"; # 256 KiB
+      };
+    };
+
+    # デプロイ設定
+    deploy = {
+      sshDomain = assertType "deploy.sshDomain" "ssh.shinbunbun.com" builtins.isString "Must be a string";
+      user = assertType "deploy.user" "deploy" builtins.isString "Must be a string";
+    };
   };
 
   # 追加のアサーション
@@ -568,6 +617,18 @@ let
     {
       assertion = config.management.ttyd.port != config.monitoring.grafana.port;
       message = "ttyd port must be different from Grafana port";
+    }
+    {
+      assertion = config.attic.port != config.monitoring.prometheus.port;
+      message = "Attic port must be different from Prometheus port";
+    }
+    {
+      assertion = config.attic.port != config.management.cockpit.port;
+      message = "Attic port must be different from Cockpit port";
+    }
+    {
+      assertion = config.attic.port != config.monitoring.grafana.port;
+      message = "Attic port must be different from Grafana port";
     }
   ];
 

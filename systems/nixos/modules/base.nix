@@ -30,6 +30,22 @@ in
     experimental-features = nix-command flakes
   '';
 
+  # Attic バイナリキャッシュ設定（プライベート）
+  nix.settings = {
+    substituters = [
+      "https://cache.nixos.org"
+      "https://${configValues.attic.domain}/main"
+    ];
+
+    trusted-public-keys = [
+      "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+      "main:EMoov6FniyxjYhY24OcZ02dOIWKu4feJH7uGRjgwwUc="
+    ];
+
+    # プライベートキャッシュの認証用netrc
+    netrc-file = "/run/secrets/nix-netrc";
+  };
+
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
