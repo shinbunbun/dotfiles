@@ -169,8 +169,8 @@
           pkgs = pkgsFor system;
         in
         {
-          # Attic binary cache CLI (Linux only)
-          attic = if pkgs.stdenv.isLinux then attic.packages.${system}.default else null;
+          # Attic binary cache CLI
+          attic = attic.packages.${system}.default;
         }
       );
 
@@ -180,8 +180,8 @@
         let
           pkgs = pkgsFor system;
         in
-        nixpkgs.lib.optionalAttrs pkgs.stdenv.isLinux {
-          # Attic CLI (Linux only)
+        {
+          # Attic CLI
           attic = {
             type = "app";
             program = "${attic.packages.${system}.default}/bin/attic";
