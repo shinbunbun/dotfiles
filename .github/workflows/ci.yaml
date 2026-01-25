@@ -78,7 +78,7 @@ jobs:
             --out-link result-${{ matrix.configuration }}
 
       - name: Configure and push to Attic cache
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/fix/deploy') && github.event_name == 'push'
         run: |
           nix build github:zhaofengli/attic --out-link attic-cli
           ./attic-cli/bin/attic login ci https://cache.shinbunbun.com ${{ secrets.ATTIC_TOKEN }}
@@ -153,7 +153,7 @@ jobs:
     name: Notify build completion
     needs: build-nixos
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && !inputs.skip_deploy
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/fix/deploy') && github.event_name == 'push' && !inputs.skip_deploy
 
     steps:
       - name: Send Discord notification
@@ -168,7 +168,7 @@ jobs:
     name: Deploy to NixOS
     needs: [build-nixos, notify-build-complete]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && !inputs.skip_deploy
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/fix/deploy') && github.event_name == 'push' && !inputs.skip_deploy
     environment: production
 
     steps:
