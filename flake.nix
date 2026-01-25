@@ -63,6 +63,18 @@
     nixos-observability-config = {
       url = "github:shinbunbun/nixos-observability-config";
     };
+
+    # deploy-rs
+    deploy-rs = {
+      url = "github:serokell/deploy-rs";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # Attic binary cache
+    attic = {
+      url = "github:zhaofengli/attic";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -77,6 +89,8 @@
       flake-utils,
       nixos-observability,
       nixos-observability-config,
+      deploy-rs,
+      attic,
       ...
     }@inputs:
     let
@@ -182,6 +196,8 @@
           unified-cloudflare-tunnel = ./systems/nixos/modules/services/unified-cloudflare-tunnel.nix;
           desktop-cloudflare-tunnel = ./systems/nixos/modules/services/desktop-cloudflare-tunnel.nix;
           alertmanager = ./systems/nixos/modules/services/alertmanager.nix;
+          attic = ./systems/nixos/modules/services/attic.nix;
+          deploy-user = ./systems/nixos/modules/services/deploy-user.nix;
         };
       };
 
@@ -189,5 +205,23 @@
       lib = {
         config = import ./shared/config.nix;
       };
+
+      # deploy-rs設定
+      deploy.nodes = {
+        homeMachine = {
+          hostname = "homemachine"; # SSH config の Host名（Cloudflare Tunnel経由）
+          fastConnection = false; # Tunnel経由なのでfalse
+          interactiveSudo = false;
+
+          profiles.system = {
+            sshUser = "deploy"; # デプロイ専用ユーザー
+            path = deploy-rs.lib.x86_64-linux.activate.nixos self.nixosConfigurations.homeMachine;
+            user = "root";
+          };
+        };
+      };
+
+      # deploy-rs checks
+      checks = builtins.mapAttrs (system: deployLib: deployLib.deployChecks self.deploy) deploy-rs.lib;
     };
 }

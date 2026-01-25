@@ -40,5 +40,12 @@ in
       mode = "0444";
       neededForUsers = true;
     };
+
+    # Atticプライベートキャッシュ用のnetrc
+    secrets."nix_netrc" = {
+      sopsFile = "${inputs.self}/secrets/nix.yaml";
+      path = "/run/secrets/nix-netrc";
+      mode = "0444";
+    };
   };
 }
