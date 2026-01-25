@@ -57,6 +57,28 @@ resource "cloudflare_dns_record" "home_ttyd" {
   comment = "Managed by Terraform - Terminal (Home) via home-services tunnel"
 }
 
+# Attic Binary Cache
+resource "cloudflare_dns_record" "attic" {
+  zone_id = var.cloudflare_zone_id
+  name    = "cache"
+  content = local.home_tunnel_endpoint
+  type    = "CNAME"
+  ttl     = 1
+  proxied = true
+  comment = "Managed by Terraform - Attic Binary Cache via home-services tunnel"
+}
+
+# SSH for CI/CD deployment
+resource "cloudflare_dns_record" "deploy_ssh" {
+  zone_id = var.cloudflare_zone_id
+  name    = "ssh"
+  content = local.home_tunnel_endpoint
+  type    = "CNAME"
+  ttl     = 1
+  proxied = true
+  comment = "Managed by Terraform - SSH for deploy-rs via home-services tunnel"
+}
+
 # ========================================
 # desktop-services (nixos-desktop) DNSレコード
 # ========================================
