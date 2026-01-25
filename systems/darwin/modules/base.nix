@@ -122,6 +122,7 @@ in
       "Brother iPrint&Scan" = 1193539993;
       "CommentScreen" = 1450950860;
       "RunCat" = 1429033973;
+      "WireGuard" = 1451685025;
     };
   };
 }
