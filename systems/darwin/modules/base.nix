@@ -27,6 +27,21 @@ in
     sandbox = "relaxed";
     trusted-users = [ "@admin" ];
     allowed-users = [ "@admin" ];
+
+    # Attic バイナリキャッシュ設定（プライベート）
+    substituters = [
+      "https://cache.nixos.org"
+      "https://${cfg.attic.domain}/main"
+    ];
+
+    trusted-public-keys = [
+      "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+      "main:EMoov6FniyxjYhY24OcZ02dOIWKu4feJH7uGRjgwwUc="
+    ];
+
+    # プライベートキャッシュの認証用netrc
+    # Darwin: ~/.netrcに手動で設定する必要があります
+    # netrc-file = "/run/secrets/nix-netrc";  # NixOS only
   };
 
   nix.extraOptions = ''
