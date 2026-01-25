@@ -71,9 +71,10 @@
     };
 
     # Attic binary cache
+    # Note: nixpkgs.followsを削除してattic自身のnixpkgsを使用
+    # 理由: 最新のNix 2.31.3との互換性問題を回避するため
     attic = {
       url = "github:zhaofengli/attic";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
@@ -162,10 +163,31 @@
       );
 
       # パッケージ（将来の拡張用）
-      packages = forAllSystems (system: { });
+      packages = forAllSystems (
+        system:
+        let
+          pkgs = pkgsFor system;
+        in
+        {
+          # Attic binary cache CLI (Linux only)
+          attic = if pkgs.stdenv.isLinux then attic.packages.${system}.default else null;
+        }
+      );
 
       # アプリケーション（将来の拡張用）
-      apps = forAllSystems (system: { });
+      apps = forAllSystems (
+        system:
+        let
+          pkgs = pkgsFor system;
+        in
+        nixpkgs.lib.optionalAttrs pkgs.stdenv.isLinux {
+          # Attic CLI (Linux only)
+          attic = {
+            type = "app";
+            program = "${attic.packages.${system}.default}/bin/attic";
+          };
+        }
+      );
 
       # NixOS モジュールを export（dotfiles-private から利用可能）
       nixosModules = {
