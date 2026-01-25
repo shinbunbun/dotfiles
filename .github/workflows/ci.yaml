@@ -77,16 +77,13 @@ jobs:
             --show-trace \
             --out-link result-${{ matrix.configuration }}
 
-      - name: Install Attic CLI
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: nix profile install github:zhaofengli/attic
-
       - name: Configure and push to Attic cache
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
-          attic login ci https://cache.shinbunbun.com ${{ secrets.ATTIC_TOKEN }}
-          attic cache create main || echo "Cache already exists"
-          attic push main result-${{ matrix.configuration }}
+          nix build .#attic.packages.x86_64-linux.default --out-link attic-cli
+          ./attic-cli/bin/attic login ci https://cache.shinbunbun.com ${{ secrets.ATTIC_TOKEN }}
+          ./attic-cli/bin/attic cache create main || echo "Cache already exists"
+          ./attic-cli/bin/attic push main result-${{ matrix.configuration }}
         continue-on-error: true
 
   build-darwin:
@@ -152,14 +149,27 @@ jobs:
             --print-build-logs \
             --show-trace
 
-      - name: Check flake
-        run: nix flake check --print-build-logs
-
-  deploy-nixos:
-    name: Deploy to NixOS
+  notify-build-complete:
+    name: Notify build completion
     needs: build-nixos
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push' && !inputs.skip_deploy
+
+    steps:
+      - name: Send Discord notification
+        run: |
+          curl -X POST "${{ secrets.DISCORD_WEBHOOK_URL }}" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"content\": \"✅ ビルド完了\\n\\n**デプロイ承認待ち**\\nhttps://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\\n\\nデプロイを開始するには、上記リンクから \`Deploy to NixOS\` ジョブを承認してください。\"
+            }"
+
+  deploy-nixos:
+    name: Deploy to NixOS
+    needs: [build-nixos, notify-build-complete]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && !inputs.skip_deploy
+    environment: production
 
     steps:
       - uses: actions/checkout@v4
@@ -204,8 +214,27 @@ jobs:
             .#homeMachine
 
       - name: Post-deployment health check
+        id: health-check
         run: |
           sleep 10
           ssh homemachine 'systemctl is-active atticd && echo "Attic OK" || echo "Warning: Attic not active"'
           ssh homemachine 'systemctl is-active prometheus && echo "Prometheus OK" || echo "Warning: Prometheus not active"'
         continue-on-error: true
+
+      - name: Notify deployment success
+        if: success()
+        run: |
+          curl -X POST "${{ secrets.DISCORD_WEBHOOK_URL }}" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"content\": \"🚀 **デプロイ成功**\\n\\nCommit: \`${{ github.sha }}\`\\nhttps://github.com/${{ github.repository }}/commit/${{ github.sha }}\"
+            }"
+
+      - name: Notify deployment failure
+        if: failure()
+        run: |
+          curl -X POST "${{ secrets.DISCORD_WEBHOOK_URL }}" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"content\": \"❌ **デプロイ失敗**\\n\\nLogs: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\"
+            }"
