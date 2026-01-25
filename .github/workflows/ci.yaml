@@ -80,7 +80,7 @@ jobs:
       - name: Configure and push to Attic cache
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
-          nix build .#attic.packages.x86_64-linux.default --out-link attic-cli
+          nix build github:zhaofengli/attic --out-link attic-cli
           ./attic-cli/bin/attic login ci https://cache.shinbunbun.com ${{ secrets.ATTIC_TOKEN }}
           ./attic-cli/bin/attic cache create main || echo "Cache already exists"
           ./attic-cli/bin/attic push main result-${{ matrix.configuration }}
