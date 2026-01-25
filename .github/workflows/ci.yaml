@@ -80,10 +80,18 @@ jobs:
       - name: Configure and push to Attic cache
         if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/fix/deploy') && github.event_name == 'push'
         run: |
-          nix build github:zhaofengli/attic --out-link attic-cli
+          nix build .#attic --out-link attic-cli
           ./attic-cli/bin/attic login ci https://cache.shinbunbun.com ${{ secrets.ATTIC_TOKEN }}
           ./attic-cli/bin/attic cache create main || echo "Cache already exists"
-          ./attic-cli/bin/attic push main result-${{ matrix.configuration }}
+
+          # リトライロジック付きでpush（大きなファイルのタイムアウト対策）
+          for i in {1..3}; do
+            if ./attic-cli/bin/attic push main result-${{ matrix.configuration }}; then
+              break
+            fi
+            echo "Retry $i/3 after error..."
+            sleep 10
+          done
         continue-on-error: true
 
   build-darwin:
