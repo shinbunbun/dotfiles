@@ -46,9 +46,12 @@ in
     ../../modules/services/ttyd.nix
     ../../modules/services/obsidian-livesync.nix
     ../../modules/services/routeros-backup.nix
+    ../../modules/services/attic.nix
+    ../../modules/services/deploy-user.nix
     ../../modules/services/unified-cloudflare-tunnel.nix
 
     # 外部モジュール
+    inputs.attic.nixosModules.atticd
     inputs.home-manager.nixosModules.home-manager
     inputs.sops-nix.nixosModules.sops
     inputs.vscode-server.nixosModules.default
