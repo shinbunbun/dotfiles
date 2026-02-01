@@ -71,7 +71,7 @@ jobs:
             --out-link result-${{ matrix.configuration }}
 
       - name: Configure and push to Attic cache
-        if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/fix/deploy') && github.event_name == 'push'
+        if: github.event_name == 'push'
         run: |
           nix build .#attic --out-link attic-cli
           ./attic-cli/bin/attic login ci https://cache.shinbunbun.com ${{ secrets.ATTIC_TOKEN }}
@@ -138,7 +138,7 @@ jobs:
             --out-link result-${{ matrix.configuration }}
 
       - name: Configure and push to Attic cache
-        if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/fix/deploy') && github.event_name == 'push'
+        if: github.event_name == 'push'
         run: |
           nix build .#attic --out-link attic-cli
           ./attic-cli/bin/attic login ci https://cache.shinbunbun.com ${{ secrets.ATTIC_TOKEN }}
@@ -196,7 +196,7 @@ jobs:
             --out-link result-devshell
 
       - name: Configure and push to Attic cache
-        if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/fix/deploy') && github.event_name == 'push'
+        if: github.event_name == 'push'
         run: |
           nix build .#attic --out-link attic-cli
           ./attic-cli/bin/attic login ci https://cache.shinbunbun.com ${{ secrets.ATTIC_TOKEN }}
