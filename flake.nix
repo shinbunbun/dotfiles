@@ -234,7 +234,7 @@
           hostname = "homemachine"; # SSH config の Host名（Cloudflare Tunnel経由）
           fastConnection = false; # Tunnel経由なのでfalse
           interactiveSudo = false;
-          remoteBuild = true; # リモートマシンでビルドを実行
+          # remoteBuild = false; (デフォルト: GitHub Actionsでビルド、リモートに転送)
 
           profiles.system = {
             sshUser = "deploy"; # デプロイ専用ユーザー
