@@ -3,6 +3,7 @@
 
   このモジュールはCI/CDからの自動デプロイ用ユーザーを提供します：
   - deploy-rs用の専用ユーザー
+  - wheelグループへの所属（SSH AllowGroups制限を通過するため）
   - 限定的なNOPASSWD sudo権限（switch-to-configurationのみ）
   - SSH公開鍵認証
 
@@ -39,6 +40,7 @@ in
     # SSH公開鍵は上記のSOPS secretで /etc/ssh/authorized_keys.d/deploy に配置
     # SSHdのAuthorizedKeysFileが /etc/ssh/authorized_keys.d/%u なので自動的に読み取られる
     shell = pkgs.bash;
+    extraGroups = [ "wheel" ]; # SSH AllowGroups制限を通過するため
   };
 
   # 限定的なNOPASSWD sudo権限
