@@ -4,13 +4,15 @@
   このモジュールはCI/CDからの自動デプロイ用ユーザーを提供します：
   - deploy-rs用の専用ユーザー
   - wheelグループへの所属（SSH AllowGroups制限を通過するため）
+  - Nix trusted-user権限（Nixストアへのアクセスとクロージャ転送のため）
   - 限定的なNOPASSWD sudo権限（switch-to-configurationのみ）
   - SSH公開鍵認証
 
   セキュリティ:
   - bunbunユーザーとは分離
-  - 最小権限の原則に従う
-  - SSH鍵が漏洩しても影響を限定
+  - SSH公開鍵認証のみ（秘密鍵はGitHub Secretsで管理）
+  - CI/CDからのアクセスのみを想定
+  - trusted-user権限は必要だが、アクセス経路が限定的
 */
 {
   config,
@@ -42,6 +44,9 @@ in
     shell = pkgs.bash;
     extraGroups = [ "wheel" ]; # SSH AllowGroups制限を通過するため
   };
+
+  # Nix trusted-user設定（クロージャ転送のため必要）
+  nix.settings.trusted-users = [ cfg.deploy.user ];
 
   # 限定的なNOPASSWD sudo権限
   security.sudo.extraRules = [
