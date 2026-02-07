@@ -81,7 +81,7 @@ in
     environmentFile = config.sops.templates."attic/env".path;
 
     settings = {
-      listen = "[::1]:${toString port}";
+      listen = "[::]:${toString port}";
       allowed-hosts = [ domain ];
       api-endpoint = "https://${domain}/";
 
@@ -129,4 +129,7 @@ in
     wants = [ "network-online.target" ];
     requires = [ "postgresql.service" ];
   };
+
+  # ファイアウォール設定
+  networking.firewall.allowedTCPPorts = [ port ];
 }
