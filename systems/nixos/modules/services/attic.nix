@@ -129,4 +129,7 @@ in
     wants = [ "network-online.target" ];
     requires = [ "postgresql.service" ];
   };
+
+  # ファイアウォール設定
+  networking.firewall.allowedTCPPorts = [ port ];
 }
