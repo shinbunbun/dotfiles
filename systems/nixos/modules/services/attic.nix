@@ -82,7 +82,10 @@ in
 
     settings = {
       listen = "[::]:${toString port}";
-      allowed-hosts = [ domain ];
+      allowed-hosts = [
+        domain
+        "192.168.1.3:8080"
+      ];
       api-endpoint = "https://${domain}/";
 
       database = {

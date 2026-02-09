@@ -76,6 +76,12 @@
     attic = {
       url = "github:zhaofengli/attic";
     };
+
+    # peer-issuer: WireGuard peer動的発行API
+    peer-issuer = {
+      url = "git+ssh://git@github.com/shinbunbun/peer-issuer";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -92,6 +98,7 @@
       nixos-observability-config,
       deploy-rs,
       attic,
+      peer-issuer,
       ...
     }@inputs:
     let
@@ -219,6 +226,7 @@
           desktop-cloudflare-tunnel = ./systems/nixos/modules/services/desktop-cloudflare-tunnel.nix;
           alertmanager = ./systems/nixos/modules/services/alertmanager.nix;
           attic = ./systems/nixos/modules/services/attic.nix;
+          peer-issuer = ./systems/nixos/modules/services/peer-issuer.nix;
           deploy-user = ./systems/nixos/modules/services/deploy-user.nix;
         };
       };
