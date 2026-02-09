@@ -579,6 +579,9 @@ let
 
     # peer-issuer設定（WireGuard peer動的発行API）
     peerIssuer = {
+      domain =
+        assertType "peerIssuer.domain" "wg-lease.shinbunbun.com" builtins.isString
+          "Must be a string";
       listenAddr =
         assertType "peerIssuer.listenAddr" "127.0.0.1:8088" builtins.isString
           "Must be a string";

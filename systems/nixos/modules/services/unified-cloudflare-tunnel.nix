@@ -87,6 +87,14 @@ in
             };
           };
 
+          # peer-issuer (WireGuard peer動的発行API) - Authentik outpost経由で認証
+          "${cfg.peerIssuer.domain}" = {
+            service = "http://localhost:9000";
+            originRequest = {
+              noTLSVerify = true;
+            };
+          };
+
           # SSH for CI/CD deployment (Cloudflare Tunnel経由)
           "${cfg.deploy.sshDomain}" = {
             service = "ssh://localhost:${toString cfg.ssh.port}";
