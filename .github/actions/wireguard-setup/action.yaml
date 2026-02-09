@@ -92,6 +92,13 @@ runs:
         echo "::add-mask::$OIDC_TOKEN"
         echo "token=$OIDC_TOKEN" >> "$GITHUB_OUTPUT"
 
+        # JWT をデコードして iss と kid を表示（デバッグ用）
+        echo "JWT Header:"
+        echo "$OIDC_TOKEN" | cut -d'.' -f1 | base64 -d 2>/dev/null | jq .
+        echo ""
+        echo "JWT Payload (redacted sensitive fields):"
+        echo "$OIDC_TOKEN" | cut -d'.' -f2 | base64 -d 2>/dev/null | jq '{iss, aud, sub, exp, iat}'
+
     - name: Exchange token via Authentik
       id: authentik
       shell: bash
