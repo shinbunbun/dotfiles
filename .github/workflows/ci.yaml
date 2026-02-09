@@ -42,6 +42,8 @@ jobs:
       - name: Setup WireGuard VPN
         uses: ./.github/actions/wireguard-setup
         id: wireguard
+        with:
+          authentik-client-id: ${{ secrets.AUTHENTIK_CLIENT_ID }}
 
       - name: Install Nix with flakes enabled
         uses: cachix/install-nix-action@v31
@@ -113,6 +115,8 @@ jobs:
       - name: Setup WireGuard VPN
         uses: ./.github/actions/wireguard-setup
         id: wireguard
+        with:
+          authentik-client-id: ${{ secrets.AUTHENTIK_CLIENT_ID }}
 
       - name: Install Nix with flakes enabled
         uses: cachix/install-nix-action@v31
@@ -181,6 +185,8 @@ jobs:
       - name: Setup WireGuard VPN
         uses: ./.github/actions/wireguard-setup
         id: wireguard
+        with:
+          authentik-client-id: ${{ secrets.AUTHENTIK_CLIENT_ID }}
 
       - name: Install Nix with flakes enabled
         uses: cachix/install-nix-action@v31
