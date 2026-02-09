@@ -577,6 +577,44 @@ let
       };
     };
 
+    # peer-issuer設定（WireGuard peer動的発行API）
+    peerIssuer = {
+      listenAddr =
+        assertType "peerIssuer.listenAddr" "127.0.0.1:8088" builtins.isString
+          "Must be a string";
+      listenPort =
+        assertType "peerIssuer.listenPort" 8088 isValidPort
+          "Must be a valid port number (1-65535)";
+      dbPath =
+        assertType "peerIssuer.dbPath" "/var/lib/peer-issuer/leases.db" isValidPath
+          "Must be an absolute path";
+      poolCIDR =
+        assertType "peerIssuer.poolCIDR" "10.66.66.64/26" isValidCIDR
+          "Must be a valid CIDR notation";
+      routerHost =
+        assertType "peerIssuer.routerHost" "192.168.1.1" isValidIP
+          "Must be a valid IP address";
+      routerPort =
+        assertType "peerIssuer.routerPort" 22 isValidPort
+          "Must be a valid port number (1-65535)";
+      routerUser = assertType "peerIssuer.routerUser" "wgissuer" builtins.isString "Must be a string";
+      routerWgInterface =
+        assertType "peerIssuer.routerWgInterface" "wg-home" builtins.isString
+          "Must be a string";
+      wgMTU = assertType "peerIssuer.wgMTU" 1420 (
+        n: builtins.isInt n && n > 0
+      ) "Must be a positive integer";
+      wgKeepalive = assertType "peerIssuer.wgKeepalive" 25 (
+        n: builtins.isInt n && n > 0
+      ) "Must be a positive integer";
+      defaultTTL = assertType "peerIssuer.defaultTTL" 86400 (
+        n: builtins.isInt n && n > 0
+      ) "Must be a positive integer (seconds)";
+      stateDirectory =
+        assertType "peerIssuer.stateDirectory" "/var/lib/peer-issuer" isValidPath
+          "Must be an absolute path";
+    };
+
     # デプロイ設定
     deploy = {
       sshDomain = assertType "deploy.sshDomain" "ssh.shinbunbun.com" builtins.isString "Must be a string";
@@ -629,6 +667,14 @@ let
     {
       assertion = config.attic.port != config.monitoring.grafana.port;
       message = "Attic port must be different from Grafana port";
+    }
+    {
+      assertion = config.peerIssuer.listenPort != config.attic.port;
+      message = "peer-issuer port must be different from Attic port";
+    }
+    {
+      assertion = config.peerIssuer.listenPort != config.monitoring.prometheus.port;
+      message = "peer-issuer port must be different from Prometheus port";
     }
   ];
 
