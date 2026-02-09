@@ -15,8 +15,8 @@ resource "cloudflare_zero_trust_access_application" "grafana" {
   session_duration          = "24h"
   auto_redirect_to_identity = true
   allowed_idps              = [var.identity_provider_id]
-  enable_binding_cookie = false
-  options_preflight_bypass = false
+  enable_binding_cookie     = false
+  options_preflight_bypass  = false
 
   policies = [{
     id         = cloudflare_zero_trust_access_policy.oidc_groups_allow.id
@@ -33,8 +33,8 @@ resource "cloudflare_zero_trust_access_application" "home_cockpit" {
   session_duration          = "24h"
   auto_redirect_to_identity = true
   allowed_idps              = [var.identity_provider_id]
-  enable_binding_cookie = false
-  options_preflight_bypass = false
+  enable_binding_cookie     = false
+  options_preflight_bypass  = false
 
   policies = [{
     id         = cloudflare_zero_trust_access_policy.oidc_groups_allow.id
@@ -51,8 +51,8 @@ resource "cloudflare_zero_trust_access_application" "home_ttyd" {
   session_duration          = "24h"
   auto_redirect_to_identity = true
   allowed_idps              = [var.identity_provider_id]
-  enable_binding_cookie = false
-  options_preflight_bypass = false
+  enable_binding_cookie     = false
+  options_preflight_bypass  = false
 
   policies = [{
     id         = cloudflare_zero_trust_access_policy.oidc_groups_allow.id
@@ -73,8 +73,8 @@ resource "cloudflare_zero_trust_access_application" "desktop_cockpit" {
   session_duration          = "24h"
   auto_redirect_to_identity = true
   allowed_idps              = [var.identity_provider_id]
-  enable_binding_cookie = false
-  options_preflight_bypass = false
+  enable_binding_cookie     = false
+  options_preflight_bypass  = false
 
   policies = [{
     id         = cloudflare_zero_trust_access_policy.oidc_groups_allow.id
@@ -91,8 +91,8 @@ resource "cloudflare_zero_trust_access_application" "desktop_ttyd" {
   session_duration          = "24h"
   auto_redirect_to_identity = true
   allowed_idps              = [var.identity_provider_id]
-  enable_binding_cookie = false
-  options_preflight_bypass = false
+  enable_binding_cookie     = false
+  options_preflight_bypass  = false
 
   policies = [{
     id         = cloudflare_zero_trust_access_policy.oidc_groups_allow.id
@@ -109,8 +109,8 @@ resource "cloudflare_zero_trust_access_application" "opensearch_dashboards" {
   session_duration          = "24h"
   auto_redirect_to_identity = true
   allowed_idps              = [var.identity_provider_id]
-  enable_binding_cookie = false
-  options_preflight_bypass = false
+  enable_binding_cookie     = false
+  options_preflight_bypass  = false
 
   policies = [{
     id         = cloudflare_zero_trust_access_policy.oidc_groups_allow.id

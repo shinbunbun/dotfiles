@@ -68,6 +68,17 @@ resource "cloudflare_dns_record" "attic" {
   comment = "Managed by Terraform - Attic Binary Cache via home-services tunnel"
 }
 
+# peer-issuer (WireGuard peer動的発行API) - Authentik outpost経由で認証
+resource "cloudflare_dns_record" "peer_issuer" {
+  zone_id = var.cloudflare_zone_id
+  name    = "wg-lease"
+  content = local.home_tunnel_endpoint
+  type    = "CNAME"
+  ttl     = 1
+  proxied = true
+  comment = "Managed by Terraform - peer-issuer via home-services tunnel"
+}
+
 # SSH for CI/CD deployment
 resource "cloudflare_dns_record" "deploy_ssh" {
   zone_id = var.cloudflare_zone_id
