@@ -1,0 +1,205 @@
+# WireGuard VPN セットアップ Composite Action
+#
+# peer-issuer API から動的にリースを取得し、WireGuard VPN 接続を確立する。
+# GitHub Actions OIDC トークンで認証を行う。
+#
+# 使用方法:
+#   - uses: ./.github/actions/wireguard-setup
+#     id: wireguard
+#
+# outputs:
+#   lease-id: 取得したリース ID（teardown で使用）
+#   client-ip: 割り当てられたクライアント IP
+
+name: 'WireGuard Setup'
+description: 'Setup WireGuard VPN connection via peer-issuer API'
+
+inputs:
+  peer-issuer-url:
+    description: 'peer-issuer API URL'
+    required: false
+    default: 'https://wg-lease.shinbunbun.com'
+  ttl-seconds:
+    description: 'Lease TTL in seconds'
+    required: false
+    default: '3600'
+  attic-host:
+    description: 'Attic server IP to route through VPN'
+    required: false
+    default: '192.168.1.3'
+
+outputs:
+  lease-id:
+    description: 'The lease ID for teardown'
+    value: ${{ steps.get-lease.outputs.lease-id }}
+  client-ip:
+    description: 'Assigned client IP address'
+    value: ${{ steps.get-lease.outputs.client-ip }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install WireGuard tools
+      shell: bash
+      run: |
+        if [[ "$RUNNER_OS" == "Linux" ]]; then
+          sudo apt-get update
+          sudo apt-get install -y wireguard-tools
+        elif [[ "$RUNNER_OS" == "macOS" ]]; then
+          brew install wireguard-tools wireguard-go
+        else
+          echo "::error::Unsupported OS: $RUNNER_OS"
+          exit 1
+        fi
+
+    - name: Generate ephemeral keypair
+      id: keygen
+      shell: bash
+      run: |
+        PRIVATE_KEY=$(wg genkey)
+        PUBLIC_KEY=$(echo "$PRIVATE_KEY" | wg pubkey)
+
+        # マスクして秘密鍵をログに出さない
+        echo "::add-mask::$PRIVATE_KEY"
+
+        echo "private-key=$PRIVATE_KEY" >> "$GITHUB_OUTPUT"
+        echo "public-key=$PUBLIC_KEY" >> "$GITHUB_OUTPUT"
+
+    - name: Get GitHub OIDC token
+      id: oidc
+      shell: bash
+      run: |
+        if [[ -z "$ACTIONS_ID_TOKEN_REQUEST_TOKEN" ]]; then
+          echo "::error::OIDC token not available. Ensure 'permissions: id-token: write' is set."
+          exit 1
+        fi
+
+        OIDC_TOKEN=$(curl -sS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+          "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${{ inputs.peer-issuer-url }}" | jq -r '.value')
+
+        if [[ -z "$OIDC_TOKEN" || "$OIDC_TOKEN" == "null" ]]; then
+          echo "::error::Failed to get OIDC token"
+          exit 1
+        fi
+
+        echo "::add-mask::$OIDC_TOKEN"
+        echo "token=$OIDC_TOKEN" >> "$GITHUB_OUTPUT"
+
+    - name: Request lease from peer-issuer
+      id: get-lease
+      shell: bash
+      env:
+        OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+        PUBLIC_KEY: ${{ steps.keygen.outputs.public-key }}
+        PEER_ISSUER_URL: ${{ inputs.peer-issuer-url }}
+        TTL_SECONDS: ${{ inputs.ttl-seconds }}
+      run: |
+        RESPONSE=$(curl -sS -X POST "${PEER_ISSUER_URL}/lease" \
+          -H "Authorization: Bearer $OIDC_TOKEN" \
+          -H "Content-Type: application/json" \
+          -d "{\"client_pubkey\": \"$PUBLIC_KEY\", \"ttl_seconds\": $TTL_SECONDS}")
+
+        echo "API Response (redacted keys):"
+        echo "$RESPONSE" | jq 'del(.server_pubkey)'
+
+        # レスポンスを解析
+        LEASE_ID=$(echo "$RESPONSE" | jq -r '.lease_id')
+        CLIENT_IP=$(echo "$RESPONSE" | jq -r '.client_ip')
+        SERVER_PUBKEY=$(echo "$RESPONSE" | jq -r '.server_pubkey')
+        ENDPOINT=$(echo "$RESPONSE" | jq -r '.endpoint')
+        MTU=$(echo "$RESPONSE" | jq -r '.mtu // 1420')
+        KEEPALIVE=$(echo "$RESPONSE" | jq -r '.persistent_keepalive // 25')
+
+        if [[ -z "$LEASE_ID" || "$LEASE_ID" == "null" ]]; then
+          echo "::error::Failed to get lease from peer-issuer"
+          echo "Response: $RESPONSE"
+          exit 1
+        fi
+
+        # サーバー公開鍵をマスク
+        echo "::add-mask::$SERVER_PUBKEY"
+
+        echo "lease-id=$LEASE_ID" >> "$GITHUB_OUTPUT"
+        echo "client-ip=$CLIENT_IP" >> "$GITHUB_OUTPUT"
+        echo "server-pubkey=$SERVER_PUBKEY" >> "$GITHUB_OUTPUT"
+        echo "endpoint=$ENDPOINT" >> "$GITHUB_OUTPUT"
+        echo "mtu=$MTU" >> "$GITHUB_OUTPUT"
+        echo "keepalive=$KEEPALIVE" >> "$GITHUB_OUTPUT"
+
+        echo "Lease acquired: $LEASE_ID"
+        echo "Client IP: $CLIENT_IP"
+
+    - name: Configure WireGuard interface
+      shell: bash
+      env:
+        PRIVATE_KEY: ${{ steps.keygen.outputs.private-key }}
+        CLIENT_IP: ${{ steps.get-lease.outputs.client-ip }}
+        SERVER_PUBKEY: ${{ steps.get-lease.outputs.server-pubkey }}
+        ENDPOINT: ${{ steps.get-lease.outputs.endpoint }}
+        MTU: ${{ steps.get-lease.outputs.mtu }}
+        KEEPALIVE: ${{ steps.get-lease.outputs.keepalive }}
+        ATTIC_HOST: ${{ inputs.attic-host }}
+      run: |
+        if [[ "$RUNNER_OS" == "Linux" ]]; then
+          # Linux: ip コマンドで直接設定
+          sudo ip link add wg-ci type wireguard
+
+          # 一時ファイルに設定を書き込み
+          CONF_FILE=$(mktemp)
+          cat > "$CONF_FILE" << EOF
+        [Interface]
+        PrivateKey = $PRIVATE_KEY
+
+        [Peer]
+        PublicKey = $SERVER_PUBKEY
+        Endpoint = $ENDPOINT
+        AllowedIPs = ${ATTIC_HOST}/32
+        PersistentKeepalive = $KEEPALIVE
+        EOF
+
+          sudo wg setconf wg-ci "$CONF_FILE"
+          rm -f "$CONF_FILE"
+
+          sudo ip addr add "${CLIENT_IP}/32" dev wg-ci
+          sudo ip link set wg-ci mtu "$MTU"
+          sudo ip link set wg-ci up
+          sudo ip route add "${ATTIC_HOST}/32" dev wg-ci
+
+        elif [[ "$RUNNER_OS" == "macOS" ]]; then
+          # macOS: wg-quick 経由
+          sudo mkdir -p /etc/wireguard
+          sudo tee /etc/wireguard/wg-ci.conf > /dev/null << EOF
+        [Interface]
+        PrivateKey = $PRIVATE_KEY
+        Address = ${CLIENT_IP}/32
+        MTU = $MTU
+
+        [Peer]
+        PublicKey = $SERVER_PUBKEY
+        Endpoint = $ENDPOINT
+        AllowedIPs = ${ATTIC_HOST}/32
+        PersistentKeepalive = $KEEPALIVE
+        EOF
+
+          sudo chmod 600 /etc/wireguard/wg-ci.conf
+          sudo wg-quick up wg-ci
+        fi
+
+        echo "WireGuard interface configured"
+
+    - name: Verify connectivity
+      shell: bash
+      env:
+        ATTIC_HOST: ${{ inputs.attic-host }}
+      run: |
+        echo "WireGuard interface status:"
+        sudo wg show wg-ci
+
+        echo ""
+        echo "Testing connectivity to $ATTIC_HOST..."
+        if ping -c 3 "$ATTIC_HOST"; then
+          echo "Connectivity verified"
+        else
+          echo "::error::Cannot reach $ATTIC_HOST via WireGuard"
+          exit 1
+        fi
