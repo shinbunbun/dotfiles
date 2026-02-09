@@ -94,10 +94,30 @@ runs:
         PEER_ISSUER_URL: ${{ inputs.peer-issuer-url }}
         TTL_SECONDS: ${{ inputs.ttl-seconds }}
       run: |
-        RESPONSE=$(curl -sS -X POST "${PEER_ISSUER_URL}/lease" \
+        # HTTP ステータスコードも取得
+        HTTP_RESPONSE=$(curl -sS -w "\n%{http_code}" -X POST "${PEER_ISSUER_URL}/lease" \
           -H "Authorization: Bearer $OIDC_TOKEN" \
           -H "Content-Type: application/json" \
           -d "{\"client_pubkey\": \"$PUBLIC_KEY\", \"ttl_seconds\": $TTL_SECONDS}")
+
+        HTTP_CODE=$(echo "$HTTP_RESPONSE" | tail -n1)
+        RESPONSE=$(echo "$HTTP_RESPONSE" | sed '$d')
+
+        echo "HTTP Status: $HTTP_CODE"
+        echo "Raw Response:"
+        echo "$RESPONSE"
+
+        # HTTP エラーチェック
+        if [[ "$HTTP_CODE" -lt 200 || "$HTTP_CODE" -ge 300 ]]; then
+          echo "::error::peer-issuer API returned HTTP $HTTP_CODE"
+          exit 1
+        fi
+
+        # JSON パースチェック
+        if ! echo "$RESPONSE" | jq -e . >/dev/null 2>&1; then
+          echo "::error::peer-issuer API returned invalid JSON"
+          exit 1
+        fi
 
         echo "API Response (redacted keys):"
         echo "$RESPONSE" | jq 'del(.server_pubkey)'
