@@ -602,7 +602,7 @@ let
       routerWgInterface =
         assertType "peerIssuer.routerWgInterface" "wg-home" builtins.isString
           "Must be a string";
-      wgMTU = assertType "peerIssuer.wgMTU" 1420 (
+      wgMTU = assertType "peerIssuer.wgMTU" 1280 (
         n: builtins.isInt n && n > 0
       ) "Must be a positive integer";
       wgKeepalive = assertType "peerIssuer.wgKeepalive" 25 (
