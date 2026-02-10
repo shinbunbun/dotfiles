@@ -82,9 +82,10 @@ in
 
     settings = {
       listen = "[::]:${toString port}";
-      allowed-hosts = [ domain ];
-      api-endpoint = "https://${domain}/";
-
+      allowed-hosts = [
+        domain
+        "192.168.1.3:8080"
+      ];
       database = {
         # peer認証 + Unix socket + 明示的なユーザー名指定
         url = "postgresql:///${dbName}?host=/run/postgresql&user=${dbUser}";
