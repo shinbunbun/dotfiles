@@ -10,6 +10,11 @@ on:
         type: boolean
         default: false
 
+# GitHub OIDC トークン取得に必要な権限
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   format-check:
     runs-on: ubuntu-latest
@@ -34,14 +39,21 @@ jobs:
 
       - uses: actions/checkout@v4
 
+      - name: Setup WireGuard VPN
+        uses: ./.github/actions/wireguard-setup
+        id: wireguard
+        with:
+          authentik-client-id: ${{ secrets.AUTHENTIK_CLIENT_ID }}
+
       - name: Install Nix with flakes enabled
         uses: cachix/install-nix-action@v31
         with:
           nix_path: nixpkgs=channel:nixos-unstable
           extra_nix_config: |
             experimental-features = nix-command flakes
-            substituters = https://cache.nixos.org https://cache.shinbunbun.com/main
+            substituters = https://cache.nixos.org http://192.168.1.3:8080/main
             trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= main:EMoov6FniyxjYhY24OcZ02dOIWKu4feJH7uGRjgwwUc=
+            netrc-file = /etc/nix/netrc
             fallback = true
             connect-timeout = 5
 
@@ -53,15 +65,8 @@ jobs:
 
       - name: Setup Attic authentication
         run: |
-          mkdir -p ~/.config/nix
-          cat > ~/.config/nix/nix.conf << EOF
-          netrc-file = $HOME/.netrc
-          EOF
-          cat > ~/.netrc << EOF
-          machine cache.shinbunbun.com
-          password ${{ secrets.ATTIC_READ_TOKEN }}
-          EOF
-          chmod 600 ~/.netrc
+          echo "machine 192.168.1.3 password ${{ secrets.ATTIC_READ_TOKEN }}" | sudo tee /etc/nix/netrc > /dev/null
+          sudo chmod 600 /etc/nix/netrc
 
       - name: Build NixOS configuration
         run: |
@@ -74,7 +79,7 @@ jobs:
         if: github.event_name == 'push'
         run: |
           nix build .#attic --out-link attic-cli
-          ./attic-cli/bin/attic login ci https://cache.shinbunbun.com ${{ secrets.ATTIC_TOKEN }}
+          ./attic-cli/bin/attic login ci http://192.168.1.3:8080 ${{ secrets.ATTIC_TOKEN }}
           ./attic-cli/bin/attic cache create main || echo "Cache already exists"
 
           # attic CLI自体をキャッシュにプッシュ（次回CI実行でキャッシュヒット）
@@ -86,6 +91,13 @@ jobs:
           ./attic-cli/bin/attic push main result-${{ matrix.configuration }} || echo "Failed to push system build (non-fatal)"
         continue-on-error: true
 
+      - name: Teardown WireGuard VPN
+        uses: ./.github/actions/wireguard-teardown
+        if: always()
+        with:
+          lease-id: ${{ steps.wireguard.outputs.lease-id }}
+          authentik-client-id: ${{ secrets.AUTHENTIK_CLIENT_ID }}
+
   build-darwin:
     needs: format-check
     runs-on: macos-latest
@@ -95,14 +107,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup WireGuard VPN
+        uses: ./.github/actions/wireguard-setup
+        id: wireguard
+        with:
+          authentik-client-id: ${{ secrets.AUTHENTIK_CLIENT_ID }}
+
       - name: Install Nix with flakes enabled
         uses: cachix/install-nix-action@v31
         with:
           nix_path: nixpkgs=channel:nixos-unstable
           extra_nix_config: |
             experimental-features = nix-command flakes
-            substituters = https://cache.nixos.org https://cache.shinbunbun.com/main
+            substituters = https://cache.nixos.org http://192.168.1.3:8080/main
             trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= main:EMoov6FniyxjYhY24OcZ02dOIWKu4feJH7uGRjgwwUc=
+            netrc-file = /etc/nix/netrc
             fallback = true
             connect-timeout = 5
 
@@ -114,15 +133,8 @@ jobs:
 
       - name: Setup Attic authentication
         run: |
-          mkdir -p ~/.config/nix
-          cat > ~/.config/nix/nix.conf << EOF
-          netrc-file = $HOME/.netrc
-          EOF
-          cat > ~/.netrc << EOF
-          machine cache.shinbunbun.com
-          password ${{ secrets.ATTIC_READ_TOKEN }}
-          EOF
-          chmod 600 ~/.netrc
+          echo "machine 192.168.1.3 password ${{ secrets.ATTIC_READ_TOKEN }}" | sudo tee /etc/nix/netrc > /dev/null
+          sudo chmod 600 /etc/nix/netrc
 
       - name: Build Darwin configuration
         run: |
@@ -135,7 +147,7 @@ jobs:
         if: github.event_name == 'push'
         run: |
           nix build .#attic --out-link attic-cli
-          ./attic-cli/bin/attic login ci https://cache.shinbunbun.com ${{ secrets.ATTIC_TOKEN }}
+          ./attic-cli/bin/attic login ci http://192.168.1.3:8080 ${{ secrets.ATTIC_TOKEN }}
           ./attic-cli/bin/attic cache create main || echo "Cache already exists"
 
           # attic CLI自体をキャッシュにプッシュ（次回CI実行でキャッシュヒット）
@@ -147,11 +159,24 @@ jobs:
           ./attic-cli/bin/attic push main result-${{ matrix.configuration }} || echo "Failed to push Darwin build (non-fatal)"
         continue-on-error: true
 
+      - name: Teardown WireGuard VPN
+        uses: ./.github/actions/wireguard-teardown
+        if: always()
+        with:
+          lease-id: ${{ steps.wireguard.outputs.lease-id }}
+          authentik-client-id: ${{ secrets.AUTHENTIK_CLIENT_ID }}
+
   build-devshell:
     needs: format-check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Setup WireGuard VPN
+        uses: ./.github/actions/wireguard-setup
+        id: wireguard
+        with:
+          authentik-client-id: ${{ secrets.AUTHENTIK_CLIENT_ID }}
 
       - name: Install Nix with flakes enabled
         uses: cachix/install-nix-action@v31
@@ -159,22 +184,16 @@ jobs:
           nix_path: nixpkgs=channel:nixos-unstable
           extra_nix_config: |
             experimental-features = nix-command flakes
-            substituters = https://cache.nixos.org https://cache.shinbunbun.com/main
+            substituters = https://cache.nixos.org http://192.168.1.3:8080/main
             trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= main:EMoov6FniyxjYhY24OcZ02dOIWKu4feJH7uGRjgwwUc=
+            netrc-file = /etc/nix/netrc
             fallback = true
             connect-timeout = 5
 
       - name: Setup Attic authentication
         run: |
-          mkdir -p ~/.config/nix
-          cat > ~/.config/nix/nix.conf << EOF
-          netrc-file = $HOME/.netrc
-          EOF
-          cat > ~/.netrc << EOF
-          machine cache.shinbunbun.com
-          password ${{ secrets.ATTIC_READ_TOKEN }}
-          EOF
-          chmod 600 ~/.netrc
+          echo "machine 192.168.1.3 password ${{ secrets.ATTIC_READ_TOKEN }}" | sudo tee /etc/nix/netrc > /dev/null
+          sudo chmod 600 /etc/nix/netrc
 
       - name: Build development shell
         run: |
@@ -187,7 +206,7 @@ jobs:
         if: github.event_name == 'push'
         run: |
           nix build .#attic --out-link attic-cli
-          ./attic-cli/bin/attic login ci https://cache.shinbunbun.com ${{ secrets.ATTIC_TOKEN }}
+          ./attic-cli/bin/attic login ci http://192.168.1.3:8080 ${{ secrets.ATTIC_TOKEN }}
           ./attic-cli/bin/attic cache create main || echo "Cache already exists"
 
           # attic CLI自体をキャッシュにプッシュ（次回CI実行でキャッシュヒット）
@@ -198,6 +217,13 @@ jobs:
           echo "Pushing devshell build to cache..."
           ./attic-cli/bin/attic push main result-devshell || echo "Failed to push devshell build (non-fatal)"
         continue-on-error: true
+
+      - name: Teardown WireGuard VPN
+        uses: ./.github/actions/wireguard-teardown
+        if: always()
+        with:
+          lease-id: ${{ steps.wireguard.outputs.lease-id }}
+          authentik-client-id: ${{ secrets.AUTHENTIK_CLIENT_ID }}
 
   notify-build-complete:
     name: Notify build completion
@@ -224,18 +250,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup WireGuard VPN
+        uses: ./.github/actions/wireguard-setup
+        id: wireguard
+        with:
+          authentik-client-id: ${{ secrets.AUTHENTIK_CLIENT_ID }}
+
       - name: Install Nix with flakes enabled
         uses: cachix/install-nix-action@v31
         with:
           nix_path: nixpkgs=channel:nixos-unstable
           extra_nix_config: |
             experimental-features = nix-command flakes
-
-      - name: Install cloudflared
-        run: |
-          curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o cloudflared
-          chmod +x cloudflared
-          sudo mv cloudflared /usr/local/bin/
 
       - name: Setup SSH for deployment
         run: |
@@ -245,16 +271,15 @@ jobs:
 
           cat >> ~/.ssh/config << 'EOF'
           Host homemachine
-            HostName ssh.shinbunbun.com
+            HostName 192.168.1.3
             User deploy
             IdentityFile ~/.ssh/deploy_key
-            ProxyCommand cloudflared access ssh --hostname %h
             StrictHostKeyChecking no
           EOF
 
       - name: Test SSH connectivity
         run: |
-          ssh homemachine 'echo "SSH connection via Cloudflare Tunnel OK"'
+          ssh homemachine 'echo "SSH connection via WireGuard OK"'
         timeout-minutes: 2
 
       - name: Deploy to homeMachine
@@ -288,3 +313,10 @@ jobs:
             -d "{
               \"content\": \"❌ **デプロイ失敗**\\n\\nLogs: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\"
             }"
+
+      - name: Teardown WireGuard VPN
+        uses: ./.github/actions/wireguard-teardown
+        if: always()
+        with:
+          lease-id: ${{ steps.wireguard.outputs.lease-id }}
+          authentik-client-id: ${{ secrets.AUTHENTIK_CLIENT_ID }}
