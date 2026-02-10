@@ -82,7 +82,7 @@ runs:
         fi
 
         OIDC_TOKEN=$(curl -sS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-          "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${{ inputs.authentik-client-id }}" | jq -r '.value')
+          "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=wg-lease" | jq -r '.value')
 
         if [[ -z "$OIDC_TOKEN" || "$OIDC_TOKEN" == "null" ]]; then
           echo "::error::Failed to get OIDC token"
