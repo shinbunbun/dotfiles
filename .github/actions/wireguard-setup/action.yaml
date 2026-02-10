@@ -100,10 +100,6 @@ runs:
         AK_URL: ${{ inputs.authentik-url }}
         AK_CLIENT_ID: ${{ inputs.authentik-client-id }}
       run: |
-        echo "Requesting token exchange..."
-        echo "Authentik URL: ${AK_URL}/application/o/token/"
-        echo "Client ID length: ${#AK_CLIENT_ID}"
-
         HTTP_RESPONSE=$(curl -sS -w "\n%{http_code}" -X POST "${AK_URL}/application/o/token/" \
           -H 'Content-Type: application/x-www-form-urlencoded' \
           --data-urlencode grant_type=client_credentials \
@@ -113,8 +109,6 @@ runs:
 
         HTTP_CODE=$(echo "$HTTP_RESPONSE" | tail -n1)
         RESPONSE=$(echo "$HTTP_RESPONSE" | sed '$d')
-
-        echo "Authentik HTTP Status: $HTTP_CODE"
 
         if [[ "$HTTP_CODE" -lt 200 || "$HTTP_CODE" -ge 300 ]]; then
           echo "::error::Authentik token exchange failed (HTTP $HTTP_CODE)"
@@ -256,26 +250,21 @@ runs:
       env:
         ATTIC_HOST: ${{ inputs.attic-host }}
       run: |
-        echo "Physical interface MTU:"
-        ip link show | grep -E "^[0-9]+:|mtu" || true
-
-        echo ""
-        echo "WireGuard interface MTU:"
-        ip link show wg-ci 2>/dev/null || true
-
-        echo ""
-        echo "Testing ICMP connectivity to $ATTIC_HOST..."
+        echo "Testing connectivity to $ATTIC_HOST..."
         if ping -c 3 "$ATTIC_HOST"; then
-          echo "ICMP connectivity verified"
+          echo "Connectivity verified"
         else
-          echo "::error::Cannot reach $ATTIC_HOST via WireGuard (ICMP)"
+          echo "::error::Cannot reach $ATTIC_HOST via WireGuard"
           exit 1
         fi
 
         echo ""
-        echo "Testing TCP connectivity to Attic (port 8080)..."
-        curl -vS --connect-timeout 10 --max-time 15 "http://${ATTIC_HOST}:8080/" 2>&1 || true
-
-        echo ""
-        echo "Testing narinfo download..."
-        curl -vS --connect-timeout 10 --max-time 15 "http://${ATTIC_HOST}:8080/main/nix-cache-info" 2>&1 || true
+        echo "Testing Attic access (port 8080)..."
+        if curl -sS --connect-timeout 10 --max-time 15 -o /dev/null -w "HTTP %{http_code} (%{time_total}s)" "http://${ATTIC_HOST}:8080/"; then
+          echo ""
+          echo "Attic reachable"
+        else
+          echo ""
+          echo "::error::Cannot reach Attic at $ATTIC_HOST:8080 via WireGuard"
+          exit 1
+        fi
