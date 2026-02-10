@@ -379,15 +379,15 @@
       "locked": {
         "lastModified": 1770615695,
         "narHash": "sha256-ht0AO8lmM9wHRA5zzBGPHPNgbFDFsS85JP0dG9mHqTA=",
-        "ref": "refs/heads/main",
+        "owner": "shinbunbun",
+        "repo": "peer-issuer",
         "rev": "d901aa34ef12f46c91c871f0f38d73ed01229f90",
-        "revCount": 1,
-        "type": "git",
-        "url": "ssh://git@github.com/shinbunbun/peer-issuer"
+        "type": "github"
       },
       "original": {
-        "type": "git",
-        "url": "ssh://git@github.com/shinbunbun/peer-issuer"
+        "owner": "shinbunbun",
+        "repo": "peer-issuer",
+        "type": "github"
       }
     },
     "root": {

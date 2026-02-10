@@ -79,7 +79,7 @@
 
     # peer-issuer: WireGuard peer動的発行API
     peer-issuer = {
-      url = "git+ssh://git@github.com/shinbunbun/peer-issuer";
+      url = "github:shinbunbun/peer-issuer";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
