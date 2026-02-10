@@ -51,8 +51,9 @@ in
   # NOPASSWD sudo権限
   # deploy-rs は activation 時に様々なシステムコマンドを sudo で実行するため、
   # 適切な権限が必要。以下のアプローチでバランスを取る：
-  # 1. /nix/store/* 内のコマンドはすべて許可（これらは暗号学的に検証済みで不変）
-  # 2. 必要な特定のシステムコマンド（systemctl等）を許可
+  # /nix/store/* 内のコマンドはすべて許可（これらは暗号学的に検証済みで不変）
+  # /run/current-system/sw/bin/* も /nix/store/* へのシンボリックリンクなので、
+  # この単一のルールで必要なすべてのコマンドをカバーできる。
   # セキュリティは SSH 公開鍵認証とネットワークアクセス制限でさらに担保する。
   security.sudo.extraRules = [
     {
@@ -61,20 +62,6 @@ in
         # Nixストア内のすべてのコマンドを許可（これらは暗号的に検証済みで不変）
         {
           command = "/nix/store/*";
-          options = [ "NOPASSWD" ];
-        }
-        # システム管理コマンド
-        {
-          command = "/run/current-system/sw/bin/systemctl *";
-          options = [ "NOPASSWD" ];
-        }
-        {
-          command = "/run/current-system/sw/bin/nix-env *";
-          options = [ "NOPASSWD" ];
-        }
-        # 追加で必要なシステムコマンド
-        {
-          command = "${pkgs.systemd}/bin/systemctl *";
           options = [ "NOPASSWD" ];
         }
       ];
