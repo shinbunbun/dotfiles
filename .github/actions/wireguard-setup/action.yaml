@@ -256,10 +256,21 @@ runs:
       env:
         ATTIC_HOST: ${{ inputs.attic-host }}
       run: |
-        echo "Testing connectivity to $ATTIC_HOST..."
+        echo "Testing ICMP connectivity to $ATTIC_HOST..."
         if ping -c 3 "$ATTIC_HOST"; then
-          echo "Connectivity verified"
+          echo "ICMP connectivity verified"
         else
-          echo "::error::Cannot reach $ATTIC_HOST via WireGuard"
+          echo "::error::Cannot reach $ATTIC_HOST via WireGuard (ICMP)"
+          exit 1
+        fi
+
+        echo ""
+        echo "Testing TCP connectivity to Attic (port 8080)..."
+        if curl -sS --connect-timeout 10 --max-time 15 -o /dev/null -w "HTTP %{http_code} (%{time_total}s)" "http://${ATTIC_HOST}:8080/"; then
+          echo ""
+          echo "TCP connectivity to Attic verified"
+        else
+          echo ""
+          echo "::error::Cannot reach Attic at $ATTIC_HOST:8080 via WireGuard (TCP)"
           exit 1
         fi
