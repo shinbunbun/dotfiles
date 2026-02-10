@@ -92,22 +92,6 @@ runs:
         echo "::add-mask::$OIDC_TOKEN"
         echo "token=$OIDC_TOKEN" >> "$GITHUB_OUTPUT"
 
-        # デバッグ: JWT の header と payload を表示（Base64URL → Base64 変換）
-        decode_base64url() {
-          local data="$1"
-          local pad=$(( 4 - ${#data} % 4 ))
-          if [[ $pad -ne 4 ]]; then
-            data="${data}$(printf '=%.0s' $(seq 1 $pad))"
-          fi
-          echo "$data" | tr '_-' '/+' | base64 -d
-        }
-        echo "=== JWT Debug ==="
-        echo "Header:"
-        decode_base64url "$(echo "$OIDC_TOKEN" | cut -d'.' -f1)" | jq .
-        echo "Payload (selected fields):"
-        decode_base64url "$(echo "$OIDC_TOKEN" | cut -d'.' -f2)" | jq '{iss, aud, sub, exp, iat}'
-        echo "================"
-
     - name: Exchange token via Authentik
       id: authentik
       shell: bash
@@ -169,8 +153,6 @@ runs:
         RESPONSE=$(echo "$HTTP_RESPONSE" | sed '$d')
 
         echo "HTTP Status: $HTTP_CODE"
-        echo "Raw Response:"
-        echo "$RESPONSE"
 
         # HTTP エラーチェック
         if [[ "$HTTP_CODE" -lt 200 || "$HTTP_CODE" -ge 300 ]]; then
@@ -184,9 +166,6 @@ runs:
           exit 1
         fi
 
-        echo "API Response (redacted keys):"
-        echo "$RESPONSE" | jq 'del(.server_pubkey)'
-
         # レスポンスを解析
         LEASE_ID=$(echo "$RESPONSE" | jq -r '.lease_id')
         CLIENT_IP=$(echo "$RESPONSE" | jq -r '.client_ip')
@@ -195,14 +174,14 @@ runs:
         MTU=$(echo "$RESPONSE" | jq -r '.mtu // 1420')
         KEEPALIVE=$(echo "$RESPONSE" | jq -r '.persistent_keepalive // 25')
 
+        # 機密情報をマスク
+        echo "::add-mask::$SERVER_PUBKEY"
+        echo "::add-mask::$ENDPOINT"
+
         if [[ -z "$LEASE_ID" || "$LEASE_ID" == "null" ]]; then
           echo "::error::Failed to get lease from peer-issuer"
-          echo "Response: $RESPONSE"
           exit 1
         fi
-
-        # サーバー公開鍵をマスク
-        echo "::add-mask::$SERVER_PUBKEY"
 
         echo "lease-id=$LEASE_ID" >> "$GITHUB_OUTPUT"
         echo "client-ip=$CLIENT_IP" >> "$GITHUB_OUTPUT"
@@ -277,10 +256,6 @@ runs:
       env:
         ATTIC_HOST: ${{ inputs.attic-host }}
       run: |
-        echo "WireGuard interface status:"
-        sudo wg show wg-ci
-
-        echo ""
         echo "Testing connectivity to $ATTIC_HOST..."
         if ping -c 3 "$ATTIC_HOST"; then
           echo "Connectivity verified"
