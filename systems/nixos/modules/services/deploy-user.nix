@@ -48,20 +48,13 @@ in
   # Nix trusted-user設定（クロージャ転送のため必要）
   nix.settings.trusted-users = [ cfg.deploy.user ];
 
-  # NOPASSWD sudo権限
-  # deploy-rs は activation 時に様々なシステムコマンドを sudo で実行するため、
-  # 適切な権限が必要。以下のアプローチでバランスを取る：
-  # /nix/store/* 内のコマンドはすべて許可（これらは暗号学的に検証済みで不変）
-  # /run/current-system/sw/bin/* も /nix/store/* へのシンボリックリンクなので、
-  # この単一のルールで必要なすべてのコマンドをカバーできる。
-  # セキュリティは SSH 公開鍵認証とネットワークアクセス制限でさらに担保する。
+  # deploy-rs用のNOPASSWD sudo権限
   security.sudo.extraRules = [
     {
       users = [ cfg.deploy.user ];
       commands = [
-        # Nixストア内のすべてのコマンドを許可（これらは暗号的に検証済みで不変）
         {
-          command = "/nix/store/*";
+          command = "ALL";
           options = [ "NOPASSWD" ];
         }
       ];
