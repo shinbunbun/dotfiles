@@ -102,6 +102,7 @@ jobs:
         if: always()
         with:
           lease-id: ${{ steps.wireguard.outputs.lease-id }}
+          authentik-client-id: ${{ secrets.AUTHENTIK_CLIENT_ID }}
 
   build-darwin:
     needs: format-check
@@ -175,6 +176,7 @@ jobs:
         if: always()
         with:
           lease-id: ${{ steps.wireguard.outputs.lease-id }}
+          authentik-client-id: ${{ secrets.AUTHENTIK_CLIENT_ID }}
 
   build-devshell:
     needs: format-check
@@ -239,6 +241,7 @@ jobs:
         if: always()
         with:
           lease-id: ${{ steps.wireguard.outputs.lease-id }}
+          authentik-client-id: ${{ secrets.AUTHENTIK_CLIENT_ID }}
 
   notify-build-complete:
     name: Notify build completion

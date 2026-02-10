@@ -8,6 +8,7 @@
 #     if: always()
 #     with:
 #       lease-id: ${{ steps.wireguard.outputs.lease-id }}
+#       authentik-client-id: ${{ secrets.AUTHENTIK_CLIENT_ID }}
 
 name: 'WireGuard Teardown'
 description: 'Teardown WireGuard VPN connection and release lease'
@@ -20,6 +21,13 @@ inputs:
     description: 'peer-issuer API URL'
     required: false
     default: 'https://wg-lease.shinbunbun.com'
+  authentik-url:
+    description: 'Authentik base URL'
+    required: false
+    default: 'https://auth.shinbunbun.com'
+  authentik-client-id:
+    description: 'Authentik provider client ID'
+    required: true
 
 runs:
   using: 'composite'
@@ -44,9 +52,12 @@ runs:
           fi
         fi
 
-    - name: Get GitHub OIDC token
-      id: oidc
+    - name: Get GitHub OIDC token and exchange via Authentik
+      id: auth
       shell: bash
+      env:
+        AK_URL: ${{ inputs.authentik-url }}
+        AK_CLIENT_ID: ${{ inputs.authentik-client-id }}
       run: |
         if [[ -z "$ACTIONS_ID_TOKEN_REQUEST_TOKEN" ]]; then
           echo "::warning::OIDC token not available for lease release"
@@ -55,7 +66,7 @@ runs:
         fi
 
         OIDC_TOKEN=$(curl -sS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-          "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${{ inputs.peer-issuer-url }}" | jq -r '.value')
+          "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=wg-lease" | jq -r '.value')
 
         if [[ -z "$OIDC_TOKEN" || "$OIDC_TOKEN" == "null" ]]; then
           echo "::warning::Failed to get OIDC token for lease release"
@@ -64,14 +75,41 @@ runs:
         fi
 
         echo "::add-mask::$OIDC_TOKEN"
-        echo "token=$OIDC_TOKEN" >> "$GITHUB_OUTPUT"
+
+        # Authentik でトークン交換
+        HTTP_RESPONSE=$(curl -sS -w "\n%{http_code}" -X POST "${AK_URL}/application/o/token/" \
+          -H 'Content-Type: application/x-www-form-urlencoded' \
+          --data-urlencode grant_type=client_credentials \
+          --data-urlencode client_id="$AK_CLIENT_ID" \
+          --data-urlencode client_assertion_type='urn:ietf:params:oauth:client-assertion-type:jwt-bearer' \
+          --data-urlencode client_assertion="$OIDC_TOKEN")
+
+        HTTP_CODE=$(echo "$HTTP_RESPONSE" | tail -n1)
+        RESPONSE=$(echo "$HTTP_RESPONSE" | sed '$d')
+
+        if [[ "$HTTP_CODE" -lt 200 || "$HTTP_CODE" -ge 300 ]]; then
+          echo "::warning::Authentik token exchange failed (HTTP $HTTP_CODE) for lease release"
+          echo "available=false" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        ACCESS_TOKEN=$(echo "$RESPONSE" | jq -r '.access_token')
+
+        if [[ -z "$ACCESS_TOKEN" || "$ACCESS_TOKEN" == "null" ]]; then
+          echo "::warning::Failed to get access token for lease release"
+          echo "available=false" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        echo "::add-mask::$ACCESS_TOKEN"
+        echo "token=$ACCESS_TOKEN" >> "$GITHUB_OUTPUT"
         echo "available=true" >> "$GITHUB_OUTPUT"
 
     - name: Release lease
       shell: bash
-      if: steps.oidc.outputs.available == 'true'
+      if: steps.auth.outputs.available == 'true'
       env:
-        OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+        ACCESS_TOKEN: ${{ steps.auth.outputs.token }}
         LEASE_ID: ${{ inputs.lease-id }}
         PEER_ISSUER_URL: ${{ inputs.peer-issuer-url }}
       run: |
@@ -81,7 +119,7 @@ runs:
         fi
 
         RESPONSE=$(curl -sS -w "\n%{http_code}" -X POST "${PEER_ISSUER_URL}/release" \
-          -H "Authorization: Bearer $OIDC_TOKEN" \
+          -H "Authorization: Bearer $ACCESS_TOKEN" \
           -H "Content-Type: application/json" \
           -d "{\"lease_id\": \"$LEASE_ID\"}")
 
@@ -92,6 +130,6 @@ runs:
           echo "Lease released successfully: $LEASE_ID"
         else
           # リリース失敗はワーニングのみ（TTL で自動期限切れするため）
-          echo "::warning::Failed to release lease (HTTP $HTTP_CODE): $BODY"
+          echo "::warning::Failed to release lease (HTTP $HTTP_CODE)"
           echo "Lease will expire automatically via TTL"
         fi
