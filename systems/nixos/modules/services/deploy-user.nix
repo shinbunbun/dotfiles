@@ -5,7 +5,7 @@
   - deploy-rs用の専用ユーザー
   - wheelグループへの所属（SSH AllowGroups制限を通過するため）
   - Nix trusted-user権限（Nixストアへのアクセスとクロージャ転送のため）
-  - 限定的なNOPASSWD sudo権限（switch-to-configurationのみ）
+  - NOPASSWD sudo権限（deploy-rsのactivationに必要）
   - SSH公開鍵認証
 
   セキュリティ:
@@ -48,21 +48,16 @@ in
   # Nix trusted-user設定（クロージャ転送のため必要）
   nix.settings.trusted-users = [ cfg.deploy.user ];
 
-  # 限定的なNOPASSWD sudo権限
+  # NOPASSWD sudo権限
+  # deploy-rs は activation 時に様々なシステムコマンドを sudo で実行するため、
+  # 特定のコマンドのみに制限すると失敗する可能性がある。
+  # セキュリティは SSH 公開鍵認証とネットワークアクセス制限で担保する。
   security.sudo.extraRules = [
     {
       users = [ cfg.deploy.user ];
       commands = [
         {
-          command = "/nix/store/*/bin/switch-to-configuration *";
-          options = [ "NOPASSWD" ];
-        }
-        {
-          command = "/run/current-system/sw/bin/nix-env *";
-          options = [ "NOPASSWD" ];
-        }
-        {
-          command = "/nix/store/*/bin/nix-env *";
+          command = "ALL";
           options = [ "NOPASSWD" ];
         }
       ];
