@@ -27,8 +27,12 @@ inputs:
     description: 'Attic server IP to route through VPN'
     required: false
     default: '192.168.1.3'
+  authentik-url:
+    description: 'Authentik base URL'
+    required: false
+    default: 'https://auth.shinbunbun.com'
   authentik-client-id:
-    description: 'Authentik provider client ID (used as OIDC audience)'
+    description: 'Authentik provider client ID'
     required: true
 
 outputs:
@@ -88,18 +92,68 @@ runs:
         echo "::add-mask::$OIDC_TOKEN"
         echo "token=$OIDC_TOKEN" >> "$GITHUB_OUTPUT"
 
+        # デバッグ: JWT の header と payload を表示
+        echo "=== JWT Debug ==="
+        echo "Header:"
+        echo "$OIDC_TOKEN" | cut -d'.' -f1 | base64 -d 2>/dev/null | jq .
+        echo "Payload (selected fields):"
+        echo "$OIDC_TOKEN" | cut -d'.' -f2 | base64 -d 2>/dev/null | jq '{iss, aud, sub, exp, iat}'
+        echo "================"
+
+    - name: Exchange token via Authentik
+      id: authentik
+      shell: bash
+      env:
+        GH_OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+        AK_URL: ${{ inputs.authentik-url }}
+        AK_CLIENT_ID: ${{ inputs.authentik-client-id }}
+      run: |
+        echo "Requesting token exchange..."
+        echo "Authentik URL: ${AK_URL}/application/o/token/"
+        echo "Client ID length: ${#AK_CLIENT_ID}"
+
+        HTTP_RESPONSE=$(curl -sS -w "\n%{http_code}" -X POST "${AK_URL}/application/o/token/" \
+          -H 'Content-Type: application/x-www-form-urlencoded' \
+          --data-urlencode grant_type=client_credentials \
+          --data-urlencode client_id="$AK_CLIENT_ID" \
+          --data-urlencode client_assertion_type='urn:ietf:params:oauth:client-assertion-type:jwt-bearer' \
+          --data-urlencode client_assertion="$GH_OIDC_TOKEN")
+
+        HTTP_CODE=$(echo "$HTTP_RESPONSE" | tail -n1)
+        RESPONSE=$(echo "$HTTP_RESPONSE" | sed '$d')
+
+        echo "Authentik HTTP Status: $HTTP_CODE"
+
+        if [[ "$HTTP_CODE" -lt 200 || "$HTTP_CODE" -ge 300 ]]; then
+          echo "::error::Authentik token exchange failed (HTTP $HTTP_CODE)"
+          echo "Response: $RESPONSE"
+          exit 1
+        fi
+
+        ACCESS_TOKEN=$(echo "$RESPONSE" | jq -r '.access_token')
+
+        if [[ -z "$ACCESS_TOKEN" || "$ACCESS_TOKEN" == "null" ]]; then
+          echo "::error::Failed to get access token from Authentik"
+          echo "Response: $RESPONSE"
+          exit 1
+        fi
+
+        echo "::add-mask::$ACCESS_TOKEN"
+        echo "token=$ACCESS_TOKEN" >> "$GITHUB_OUTPUT"
+        echo "Token exchange successful"
+
     - name: Request lease from peer-issuer
       id: get-lease
       shell: bash
       env:
-        OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+        ACCESS_TOKEN: ${{ steps.authentik.outputs.token }}
         PUBLIC_KEY: ${{ steps.keygen.outputs.public-key }}
         PEER_ISSUER_URL: ${{ inputs.peer-issuer-url }}
         TTL_SECONDS: ${{ inputs.ttl-seconds }}
       run: |
         # HTTP ステータスコードも取得
         HTTP_RESPONSE=$(curl -sS -w "\n%{http_code}" -X POST "${PEER_ISSUER_URL}/lease" \
-          -H "Authorization: Bearer $OIDC_TOKEN" \
+          -H "Authorization: Bearer $ACCESS_TOKEN" \
           -H "Content-Type: application/json" \
           -d "{\"client_pubkey\": \"$PUBLIC_KEY\", \"ttl_seconds\": $TTL_SECONDS}")
 
