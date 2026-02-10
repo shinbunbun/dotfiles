@@ -582,9 +582,7 @@ let
       domain =
         assertType "peerIssuer.domain" "wg-lease.shinbunbun.com" builtins.isString
           "Must be a string";
-      listenAddr =
-        assertType "peerIssuer.listenAddr" "0.0.0.0:8088" builtins.isString
-          "Must be a string";
+      listenAddr = assertType "peerIssuer.listenAddr" "0.0.0.0:8088" builtins.isString "Must be a string";
       listenPort =
         assertType "peerIssuer.listenPort" 8088 isValidPort
           "Must be a valid port number (1-65535)";
