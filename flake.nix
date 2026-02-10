@@ -239,8 +239,8 @@
       # deploy-rs設定
       deploy.nodes = {
         homeMachine = {
-          hostname = "homemachine"; # SSH config の Host名（Cloudflare Tunnel経由）
-          fastConnection = false; # Tunnel経由なのでfalse
+          hostname = "homemachine"; # SSH config の Host名（WireGuard VPN経由）
+          fastConnection = false; # WireGuard VPN経由なのでfalse
           interactiveSudo = false;
           remoteBuild = true; # リモートマシンでビルド（deployユーザーはtrusted-user）
 
