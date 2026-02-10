@@ -86,8 +86,6 @@ in
         domain
         "192.168.1.3:8080"
       ];
-      api-endpoint = "https://${domain}/";
-
       database = {
         # peer認証 + Unix socket + 明示的なユーザー名指定
         url = "postgresql:///${dbName}?host=/run/postgresql&user=${dbUser}";
