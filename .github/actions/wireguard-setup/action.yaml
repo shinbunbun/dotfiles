@@ -92,12 +92,20 @@ runs:
         echo "::add-mask::$OIDC_TOKEN"
         echo "token=$OIDC_TOKEN" >> "$GITHUB_OUTPUT"
 
-        # デバッグ: JWT の header と payload を表示
+        # デバッグ: JWT の header と payload を表示（Base64URL → Base64 変換）
+        decode_base64url() {
+          local data="$1"
+          local pad=$(( 4 - ${#data} % 4 ))
+          if [[ $pad -ne 4 ]]; then
+            data="${data}$(printf '=%.0s' $(seq 1 $pad))"
+          fi
+          echo "$data" | tr '_-' '/+' | base64 -d
+        }
         echo "=== JWT Debug ==="
         echo "Header:"
-        echo "$OIDC_TOKEN" | cut -d'.' -f1 | base64 -d 2>/dev/null | jq .
+        decode_base64url "$(echo "$OIDC_TOKEN" | cut -d'.' -f1)" | jq .
         echo "Payload (selected fields):"
-        echo "$OIDC_TOKEN" | cut -d'.' -f2 | base64 -d 2>/dev/null | jq '{iss, aud, sub, exp, iat}'
+        decode_base64url "$(echo "$OIDC_TOKEN" | cut -d'.' -f2)" | jq '{iss, aud, sub, exp, iat}'
         echo "================"
 
     - name: Exchange token via Authentik
