@@ -53,6 +53,7 @@ jobs:
             experimental-features = nix-command flakes
             substituters = https://cache.nixos.org http://192.168.1.3:8080/main
             trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= main:EMoov6FniyxjYhY24OcZ02dOIWKu4feJH7uGRjgwwUc=
+            netrc-file = /etc/nix/netrc
             fallback = true
             connect-timeout = 5
 
@@ -64,15 +65,8 @@ jobs:
 
       - name: Setup Attic authentication
         run: |
-          mkdir -p ~/.config/nix
-          cat > ~/.config/nix/nix.conf << EOF
-          netrc-file = $HOME/.netrc
-          EOF
-          cat > ~/.netrc << EOF
-          machine 192.168.1.3
-          password ${{ secrets.ATTIC_READ_TOKEN }}
-          EOF
-          chmod 600 ~/.netrc
+          echo "machine 192.168.1.3 password ${{ secrets.ATTIC_READ_TOKEN }}" | sudo tee /etc/nix/netrc > /dev/null
+          sudo chmod 600 /etc/nix/netrc
 
       - name: Build NixOS configuration
         run: |
@@ -127,6 +121,7 @@ jobs:
             experimental-features = nix-command flakes
             substituters = https://cache.nixos.org http://192.168.1.3:8080/main
             trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= main:EMoov6FniyxjYhY24OcZ02dOIWKu4feJH7uGRjgwwUc=
+            netrc-file = /etc/nix/netrc
             fallback = true
             connect-timeout = 5
 
@@ -138,15 +133,8 @@ jobs:
 
       - name: Setup Attic authentication
         run: |
-          mkdir -p ~/.config/nix
-          cat > ~/.config/nix/nix.conf << EOF
-          netrc-file = $HOME/.netrc
-          EOF
-          cat > ~/.netrc << EOF
-          machine 192.168.1.3
-          password ${{ secrets.ATTIC_READ_TOKEN }}
-          EOF
-          chmod 600 ~/.netrc
+          echo "machine 192.168.1.3 password ${{ secrets.ATTIC_READ_TOKEN }}" | sudo tee /etc/nix/netrc > /dev/null
+          sudo chmod 600 /etc/nix/netrc
 
       - name: Build Darwin configuration
         run: |
@@ -198,20 +186,14 @@ jobs:
             experimental-features = nix-command flakes
             substituters = https://cache.nixos.org http://192.168.1.3:8080/main
             trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= main:EMoov6FniyxjYhY24OcZ02dOIWKu4feJH7uGRjgwwUc=
+            netrc-file = /etc/nix/netrc
             fallback = true
             connect-timeout = 5
 
       - name: Setup Attic authentication
         run: |
-          mkdir -p ~/.config/nix
-          cat > ~/.config/nix/nix.conf << EOF
-          netrc-file = $HOME/.netrc
-          EOF
-          cat > ~/.netrc << EOF
-          machine 192.168.1.3
-          password ${{ secrets.ATTIC_READ_TOKEN }}
-          EOF
-          chmod 600 ~/.netrc
+          echo "machine 192.168.1.3 password ${{ secrets.ATTIC_READ_TOKEN }}" | sudo tee /etc/nix/netrc > /dev/null
+          sudo chmod 600 /etc/nix/netrc
 
       - name: Build development shell
         run: |
