@@ -1,0 +1,103 @@
+# パッケージ一括ビルド用 Reusable Workflow
+#
+# 指定されたパッケージリストを順次ビルドし、Atticキャッシュにプッシュする。
+# ローカルビルドしたattic CLIを使用してキャッシュ操作を行う。
+#
+# 使用方法:
+#   uses: ./.github/workflows/build-packages.yaml
+#   with:
+#     runner: ubuntu-latest
+#     system: x86_64-linux
+#     packages: '["attic","deploy-rs"]'
+
+name: Build Packages
+
+on:
+  workflow_call:
+    inputs:
+      runner:
+        description: 'GitHub Actions ランナー（例: ubuntu-latest, macos-latest）'
+        required: true
+        type: string
+      system:
+        description: 'Nixシステム（例: x86_64-linux, aarch64-darwin）'
+        required: true
+        type: string
+      packages:
+        description: 'ビルド対象パッケージのJSON配列（例: ["attic","deploy-rs"]）'
+        required: true
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build:
+    runs-on: ${{ inputs.runner }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup WireGuard VPN
+        uses: ./.github/actions/wireguard-setup
+        id: wireguard
+        with:
+          authentik-client-id: ${{ secrets.AUTHENTIK_CLIENT_ID }}
+
+      - name: Install Nix with flakes enabled
+        uses: cachix/install-nix-action@v31
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            substituters = https://cache.nixos.org https://cache.shinbunbun.com/main
+            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= main:EMoov6FniyxjYhY24OcZ02dOIWKu4feJH7uGRjgwwUc=
+            netrc-file = /etc/nix/netrc
+            fallback = true
+            connect-timeout = 5
+
+      - name: Setup Attic authentication
+        run: |
+          echo "machine cache.shinbunbun.com password ${{ secrets.ATTIC_READ_TOKEN }}" | sudo tee /etc/nix/netrc > /dev/null
+          sudo chmod 600 /etc/nix/netrc
+
+      - name: Build all packages
+        run: |
+          for pkg in $(echo '${{ inputs.packages }}' | jq -r '.[]'); do
+            echo "::group::Building package: $pkg"
+            nix build ".#packages.${{ inputs.system }}.$pkg" \
+              --print-build-logs \
+              --show-trace \
+              --out-link "result-pkg-$pkg"
+            echo "::endgroup::"
+          done
+
+      - name: Configure and push to Attic cache
+        if: github.event_name == 'push'
+        run: |
+          # atticがビルド対象に含まれていればローカルビルド済みのものを使用
+          if [[ -L "result-pkg-attic" ]]; then
+            ATTIC_CLI="./result-pkg-attic/bin/attic"
+          else
+            nix build .#attic --out-link attic-cli
+            ATTIC_CLI="./attic-cli/bin/attic"
+          fi
+
+          $ATTIC_CLI login ci http://192.168.1.3:8080 ${{ secrets.ATTIC_TOKEN }}
+          $ATTIC_CLI cache create main || echo "Cache already exists"
+
+          # 全パッケージをキャッシュにプッシュ
+          for link in result-pkg-*; do
+            if [[ -L "$link" ]]; then
+              echo "Pushing $link to cache..."
+              $ATTIC_CLI push -j 3 main "$link" || echo "Failed to push $link (non-fatal)"
+            fi
+          done
+        continue-on-error: true
+
+      - name: Teardown WireGuard VPN
+        uses: ./.github/actions/wireguard-teardown
+        if: always()
+        with:
+          lease-id: ${{ steps.wireguard.outputs.lease-id }}
+          authentik-client-id: ${{ secrets.AUTHENTIK_CLIENT_ID }}
