@@ -104,8 +104,8 @@ in
       };
 
       compression = {
-        type = "zstd";
-        level = 8;
+        type = cfg.attic.compression.type;
+        level = cfg.attic.compression.level;
       };
 
       garbage-collection = {
