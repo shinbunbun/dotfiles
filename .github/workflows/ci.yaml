@@ -94,6 +94,7 @@ jobs:
     if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/fix/deploy') && github.event_name == 'push' && !inputs.skip_deploy
     uses: shinbunbun/nix-ci-workflows/.github/workflows/deploy-nix.yaml@main
     with:
+      environment: production
       deploy-target: ".#homeMachine"
       ssh-hostname: homemachine
       ssh-host: "192.168.1.3"
