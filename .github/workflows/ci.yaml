@@ -10,143 +10,75 @@ on:
         type: boolean
         default: false
 
-# GitHub OIDC トークン取得に必要な権限
 permissions:
   id-token: write
   contents: read
 
 jobs:
   format-check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install Nix with flakes enabled
-        uses: cachix/install-nix-action@v31
-        with:
-          nix_path: nixpkgs=channel:nixos-unstable
-          extra_nix_config: |
-            experimental-features = nix-command flakes
-      - name: Check Nix code formatting
-        run: nix fmt -- --fail-on-change
+    uses: shinbunbun/nix-ci-workflows/.github/workflows/format-check.yaml@main
 
   discover-targets:
-    runs-on: ubuntu-latest
-    outputs:
-      nixos-matrix: ${{ steps.detect.outputs.nixos-matrix }}
-      darwin-matrix: ${{ steps.detect.outputs.darwin-matrix }}
-      has-nixos: ${{ steps.detect.outputs.has-nixos }}
-      has-darwin: ${{ steps.detect.outputs.has-darwin }}
-      linux-packages: ${{ steps.detect.outputs.linux-packages }}
-      darwin-packages: ${{ steps.detect.outputs.darwin-packages }}
-      has-linux-packages: ${{ steps.detect.outputs.has-linux-packages }}
-      has-darwin-packages: ${{ steps.detect.outputs.has-darwin-packages }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install Nix with flakes enabled
-        uses: cachix/install-nix-action@v31
-        with:
-          nix_path: nixpkgs=channel:nixos-unstable
-          extra_nix_config: |
-            experimental-features = nix-command flakes
-      - name: Detect flake targets
-        id: detect
-        run: |
-          # NixOS / Darwin 設定名を検出
-          NIXOS=$(nix eval --json .#nixosConfigurations --apply builtins.attrNames 2>/dev/null || echo '[]')
-          DARWIN=$(nix eval --json .#darwinConfigurations --apply builtins.attrNames 2>/dev/null || echo '[]')
-
-          # パッケージ検出（nix evalはビルドせずキー名のみ取得）
-          LINUX_PKGS=$(nix eval --json '.#packages.x86_64-linux' --apply builtins.attrNames 2>/dev/null || echo '[]')
-          DARWIN_PKGS=$(nix eval --json '.#packages.aarch64-darwin' --apply builtins.attrNames 2>/dev/null || echo '[]')
-
-          # matrix用JSONを生成
-          echo "nixos-matrix={\"configuration\":$NIXOS}" >> "$GITHUB_OUTPUT"
-          echo "darwin-matrix={\"configuration\":$DARWIN}" >> "$GITHUB_OUTPUT"
-
-          # 空配列チェック
-          NIXOS_COUNT=$(echo "$NIXOS" | jq 'length')
-          DARWIN_COUNT=$(echo "$DARWIN" | jq 'length')
-          LINUX_PKGS_COUNT=$(echo "$LINUX_PKGS" | jq 'length')
-          DARWIN_PKGS_COUNT=$(echo "$DARWIN_PKGS" | jq 'length')
-
-          echo "has-nixos=$( [ "$NIXOS_COUNT" -gt 0 ] && echo true || echo false )" >> "$GITHUB_OUTPUT"
-          echo "has-darwin=$( [ "$DARWIN_COUNT" -gt 0 ] && echo true || echo false )" >> "$GITHUB_OUTPUT"
-          echo "has-linux-packages=$( [ "$LINUX_PKGS_COUNT" -gt 0 ] && echo true || echo false )" >> "$GITHUB_OUTPUT"
-          echo "has-darwin-packages=$( [ "$DARWIN_PKGS_COUNT" -gt 0 ] && echo true || echo false )" >> "$GITHUB_OUTPUT"
-
-          echo "linux-packages=$LINUX_PKGS" >> "$GITHUB_OUTPUT"
-          echo "darwin-packages=$DARWIN_PKGS" >> "$GITHUB_OUTPUT"
-
-          # デバッグ出力
-          echo "NixOS configurations: $NIXOS"
-          echo "Darwin configurations: $DARWIN"
-          echo "Linux packages: $LINUX_PKGS"
-          echo "Darwin packages: $DARWIN_PKGS"
-
-  # パッケージビルド（attic, deploy-rs等を事前キャッシュ）
-  build-packages-linux:
-    needs: [format-check, discover-targets]
-    if: needs.discover-targets.outputs.has-linux-packages == 'true'
-    uses: ./.github/workflows/build-packages.yaml
-    with:
-      runner: ubuntu-latest
-      system: x86_64-linux
-      packages: ${{ needs.discover-targets.outputs.linux-packages }}
-    secrets: inherit
-
-  build-packages-darwin:
-    needs: [format-check, discover-targets]
-    if: needs.discover-targets.outputs.has-darwin-packages == 'true'
-    uses: ./.github/workflows/build-packages.yaml
-    with:
-      runner: macos-latest
-      system: aarch64-darwin
-      packages: ${{ needs.discover-targets.outputs.darwin-packages }}
-    secrets: inherit
+    uses: shinbunbun/nix-ci-workflows/.github/workflows/discover-targets.yaml@main
 
   # メインビルド
   build-nixos:
-    needs: [format-check, discover-targets, build-packages-linux]
+    needs: [format-check, discover-targets]
     if: needs.discover-targets.outputs.has-nixos == 'true'
     strategy:
       matrix: ${{ fromJSON(needs.discover-targets.outputs.nixos-matrix) }}
-    uses: ./.github/workflows/build-nix.yaml
+    uses: shinbunbun/nix-ci-workflows/.github/workflows/build-nix.yaml@main
     with:
       runner: ubuntu-latest
       build-target: ".#nixosConfigurations.${{ matrix.configuration }}.config.system.build.toplevel"
       result-name: ${{ matrix.configuration }}
       needs-sops: true
-    secrets: inherit
+      needs-wireguard: true
+      attic-server: 'http://192.168.1.3:8080'
+    secrets:
+      AUTHENTIK_CLIENT_ID: ${{ secrets.AUTHENTIK_CLIENT_ID }}
+      ATTIC_TOKEN: ${{ secrets.ATTIC_TOKEN }}
+      ATTIC_READ_TOKEN: ${{ secrets.ATTIC_READ_TOKEN }}
+      SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
 
   build-darwin:
-    needs: [format-check, discover-targets, build-packages-darwin]
+    needs: [format-check, discover-targets]
     if: needs.discover-targets.outputs.has-darwin == 'true'
     strategy:
       matrix: ${{ fromJSON(needs.discover-targets.outputs.darwin-matrix) }}
-    uses: ./.github/workflows/build-nix.yaml
+    uses: shinbunbun/nix-ci-workflows/.github/workflows/build-nix.yaml@main
     with:
       runner: macos-latest
       build-target: ".#darwinConfigurations.${{ matrix.configuration }}.config.system.build.toplevel"
       result-name: ${{ matrix.configuration }}
       needs-sops: true
-    secrets: inherit
+      needs-wireguard: true
+      attic-server: 'http://192.168.1.3:8080'
+    secrets:
+      AUTHENTIK_CLIENT_ID: ${{ secrets.AUTHENTIK_CLIENT_ID }}
+      ATTIC_TOKEN: ${{ secrets.ATTIC_TOKEN }}
+      ATTIC_READ_TOKEN: ${{ secrets.ATTIC_READ_TOKEN }}
+      SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
 
   build-devshell:
-    needs: [format-check, build-packages-linux]
-    uses: ./.github/workflows/build-nix.yaml
+    needs: format-check
+    uses: shinbunbun/nix-ci-workflows/.github/workflows/build-nix.yaml@main
     with:
       runner: ubuntu-latest
       build-target: ".#devShells.x86_64-linux.default"
       result-name: devshell
-      needs-sops: false
-    secrets: inherit
+      needs-wireguard: true
+      attic-server: 'http://192.168.1.3:8080'
+    secrets:
+      AUTHENTIK_CLIENT_ID: ${{ secrets.AUTHENTIK_CLIENT_ID }}
+      ATTIC_TOKEN: ${{ secrets.ATTIC_TOKEN }}
+      ATTIC_READ_TOKEN: ${{ secrets.ATTIC_READ_TOKEN }}
 
   notify-build-complete:
     name: Notify build completion
     needs: build-nixos
     runs-on: ubuntu-latest
     if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/fix/deploy') && github.event_name == 'push' && !inputs.skip_deploy
-
     steps:
       - name: Send Discord notification
         run: |
@@ -159,91 +91,17 @@ jobs:
   deploy-nixos:
     name: Deploy to NixOS
     needs: [build-nixos, notify-build-complete]
-    runs-on: ubuntu-latest
     if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/fix/deploy') && github.event_name == 'push' && !inputs.skip_deploy
-    environment: production
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup WireGuard VPN
-        uses: ./.github/actions/wireguard-setup
-        id: wireguard
-        with:
-          authentik-client-id: ${{ secrets.AUTHENTIK_CLIENT_ID }}
-
-      - name: Install Nix with flakes enabled
-        uses: cachix/install-nix-action@v31
-        with:
-          nix_path: nixpkgs=channel:nixos-unstable
-          extra_nix_config: |
-            experimental-features = nix-command flakes
-            substituters = https://cache.nixos.org https://cache.shinbunbun.com/main
-            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= main:EMoov6FniyxjYhY24OcZ02dOIWKu4feJH7uGRjgwwUc=
-            netrc-file = /etc/nix/netrc
-            fallback = true
-            connect-timeout = 5
-
-      - name: Setup Attic authentication
-        run: |
-          echo "machine cache.shinbunbun.com password ${{ secrets.ATTIC_READ_TOKEN }}" | sudo tee /etc/nix/netrc > /dev/null
-          sudo chmod 600 /etc/nix/netrc
-
-      - name: Setup SSH for deployment
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-
-          cat >> ~/.ssh/config << 'EOF'
-          Host homemachine
-            HostName 192.168.1.3
-            Port 31415
-            User deploy
-            IdentityFile ~/.ssh/deploy_key
-            StrictHostKeyChecking no
-          EOF
-
-      - name: Test SSH connectivity
-        run: |
-          ssh homemachine 'echo "SSH connection via WireGuard OK"'
-        timeout-minutes: 2
-
-      - name: Deploy to homeMachine
-        run: |
-          nix run .#deploy-rs -- \
-            --skip-checks \
-            .#homeMachine
-
-      - name: Post-deployment health check
-        id: health-check
-        run: |
-          sleep 10
-          ssh homemachine 'systemctl is-active atticd && echo "Attic OK" || echo "Warning: Attic not active"'
-          ssh homemachine 'systemctl is-active prometheus && echo "Prometheus OK" || echo "Warning: Prometheus not active"'
-        continue-on-error: true
-
-      - name: Notify deployment success
-        if: success()
-        run: |
-          curl -X POST "${{ secrets.DISCORD_WEBHOOK_URL }}" \
-            -H "Content-Type: application/json" \
-            -d "{
-              \"content\": \"🚀 **デプロイ成功**\\n\\nCommit: \`${{ github.sha }}\`\\nhttps://github.com/${{ github.repository }}/commit/${{ github.sha }}\"
-            }"
-
-      - name: Notify deployment failure
-        if: failure()
-        run: |
-          curl -X POST "${{ secrets.DISCORD_WEBHOOK_URL }}" \
-            -H "Content-Type: application/json" \
-            -d "{
-              \"content\": \"❌ **デプロイ失敗**\\n\\nLogs: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\"
-            }"
-
-      - name: Teardown WireGuard VPN
-        uses: ./.github/actions/wireguard-teardown
-        if: always()
-        with:
-          lease-id: ${{ steps.wireguard.outputs.lease-id }}
-          authentik-client-id: ${{ secrets.AUTHENTIK_CLIENT_ID }}
+    uses: shinbunbun/nix-ci-workflows/.github/workflows/deploy-nix.yaml@main
+    with:
+      deploy-target: ".#homeMachine"
+      ssh-hostname: homemachine
+      ssh-host: "192.168.1.3"
+      needs-sops: true
+    secrets:
+      AUTHENTIK_CLIENT_ID: ${{ secrets.AUTHENTIK_CLIENT_ID }}
+      ATTIC_TOKEN: ${{ secrets.ATTIC_TOKEN }}
+      ATTIC_READ_TOKEN: ${{ secrets.ATTIC_READ_TOKEN }}
+      DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+      SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
