@@ -51,7 +51,6 @@ in
     # macOS専用アプリケーション
     nerd-fonts.fira-code
     warp-terminal
-    google-chrome
   ];
 
   # Home Managerの有効化
