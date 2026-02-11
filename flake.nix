@@ -169,38 +169,6 @@
         pkgs.nixfmt-tree
       );
 
-      # パッケージ（将来の拡張用）
-      packages = forAllSystems (
-        system:
-        let
-          pkgs = pkgsFor system;
-          isX86Linux = system == "x86_64-linux";
-        in
-        {
-          # Attic binary cache CLI
-          attic = attic.packages.${system}.default;
-        }
-        // nixpkgs.lib.optionalAttrs isX86Linux {
-          # deploy-rs CLI（Linux専用 — CIでキャッシュ活用するためflake経由で提供）
-          deploy-rs = deploy-rs.packages.${system}.deploy-rs;
-        }
-      );
-
-      # アプリケーション（将来の拡張用）
-      apps = forAllSystems (
-        system:
-        let
-          pkgs = pkgsFor system;
-        in
-        {
-          # Attic CLI
-          attic = {
-            type = "app";
-            program = "${attic.packages.${system}.default}/bin/attic";
-          };
-        }
-      );
-
       # NixOS モジュールを export（dotfiles-private から利用可能）
       nixosModules = {
         # Base modules
