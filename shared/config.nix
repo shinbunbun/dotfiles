@@ -562,18 +562,26 @@ let
 
       # チャンク設定
       chunking = {
-        narSizeThreshold = assertType "attic.chunking.narSizeThreshold" 65536 (
+        narSizeThreshold = assertType "attic.chunking.narSizeThreshold" 131072 (
           n: builtins.isInt n && n > 0
-        ) "Must be a positive integer (bytes)"; # 64 KiB
-        minSize = assertType "attic.chunking.minSize" 16384 (
+        ) "Must be a positive integer (bytes)"; # 128 KiB
+        minSize = assertType "attic.chunking.minSize" 32768 (
           n: builtins.isInt n && n > 0
-        ) "Must be a positive integer (bytes)"; # 16 KiB
-        avgSize = assertType "attic.chunking.avgSize" 65536 (
+        ) "Must be a positive integer (bytes)"; # 32 KiB
+        avgSize = assertType "attic.chunking.avgSize" 131072 (
           n: builtins.isInt n && n > 0
-        ) "Must be a positive integer (bytes)"; # 64 KiB
-        maxSize = assertType "attic.chunking.maxSize" 262144 (
+        ) "Must be a positive integer (bytes)"; # 128 KiB
+        maxSize = assertType "attic.chunking.maxSize" 524288 (
           n: builtins.isInt n && n > 0
-        ) "Must be a positive integer (bytes)"; # 256 KiB
+        ) "Must be a positive integer (bytes)"; # 512 KiB
+      };
+
+      # 圧縮設定
+      compression = {
+        type = assertType "attic.compression.type" "zstd" builtins.isString "Must be a string";
+        level = assertType "attic.compression.level" 3 (
+          n: builtins.isInt n && n >= 1 && n <= 22
+        ) "Must be an integer between 1 and 22";
       };
     };
 
