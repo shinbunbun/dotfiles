@@ -178,6 +178,8 @@
         {
           # Attic binary cache CLI
           attic = attic.packages.${system}.default;
+          # deploy-rs CLI（CIでキャッシュ活用するためflake経由で提供）
+          deploy-rs = deploy-rs.packages.${system}.deploy-rs;
         }
       );
 
