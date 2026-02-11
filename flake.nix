@@ -174,11 +174,14 @@
         system:
         let
           pkgs = pkgsFor system;
+          isX86Linux = system == "x86_64-linux";
         in
         {
           # Attic binary cache CLI
           attic = attic.packages.${system}.default;
-          # deploy-rs CLI（CIでキャッシュ活用するためflake経由で提供）
+        }
+        // nixpkgs.lib.optionalAttrs isX86Linux {
+          # deploy-rs CLI（Linux専用 — CIでキャッシュ活用するためflake経由で提供）
           deploy-rs = deploy-rs.packages.${system}.deploy-rs;
         }
       );
