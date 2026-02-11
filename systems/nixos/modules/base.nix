@@ -34,7 +34,8 @@ in
   nix.settings = {
     substituters = [
       "https://cache.nixos.org"
-      "https://${configValues.attic.domain}/main"
+      "http://192.168.1.3:${toString configValues.attic.port}/main" # LAN直接アクセス（最優先）
+      "https://${configValues.attic.domain}/main" # 外部フォールバック
     ];
 
     trusted-public-keys = [
