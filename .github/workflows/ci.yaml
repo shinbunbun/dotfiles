@@ -29,206 +29,117 @@ jobs:
       - name: Check Nix code formatting
         run: nix fmt -- --fail-on-change
 
-  build-nixos:
-    needs: format-check
+  discover-targets:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        configuration: [homeMachine]
+    outputs:
+      nixos-matrix: ${{ steps.detect.outputs.nixos-matrix }}
+      darwin-matrix: ${{ steps.detect.outputs.darwin-matrix }}
+      has-nixos: ${{ steps.detect.outputs.has-nixos }}
+      has-darwin: ${{ steps.detect.outputs.has-darwin }}
+      linux-packages: ${{ steps.detect.outputs.linux-packages }}
+      darwin-packages: ${{ steps.detect.outputs.darwin-packages }}
+      has-linux-packages: ${{ steps.detect.outputs.has-linux-packages }}
+      has-darwin-packages: ${{ steps.detect.outputs.has-darwin-packages }}
     steps:
-
       - uses: actions/checkout@v4
-
-      - name: Setup WireGuard VPN
-        uses: ./.github/actions/wireguard-setup
-        id: wireguard
-        with:
-          authentik-client-id: ${{ secrets.AUTHENTIK_CLIENT_ID }}
-
       - name: Install Nix with flakes enabled
         uses: cachix/install-nix-action@v31
         with:
           nix_path: nixpkgs=channel:nixos-unstable
           extra_nix_config: |
             experimental-features = nix-command flakes
-            substituters = https://cache.nixos.org https://cache.shinbunbun.com/main
-            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= main:EMoov6FniyxjYhY24OcZ02dOIWKu4feJH7uGRjgwwUc=
-            netrc-file = /etc/nix/netrc
-            fallback = true
-            connect-timeout = 5
-
-      - name: Setup SOPS
+      - name: Detect flake targets
+        id: detect
         run: |
-          sudo mkdir -p /var/lib/sops-nix
-          echo "${{ secrets.SOPS_AGE_KEY }}" | sudo tee /var/lib/sops-nix/key.txt > /dev/null
-          sudo chmod 600 /var/lib/sops-nix/key.txt
+          # NixOS / Darwin 設定名を検出
+          NIXOS=$(nix eval --json .#nixosConfigurations --apply builtins.attrNames 2>/dev/null || echo '[]')
+          DARWIN=$(nix eval --json .#darwinConfigurations --apply builtins.attrNames 2>/dev/null || echo '[]')
 
-      - name: Setup Attic authentication
-        run: |
-          echo "machine cache.shinbunbun.com password ${{ secrets.ATTIC_READ_TOKEN }}" | sudo tee /etc/nix/netrc > /dev/null
-          sudo chmod 600 /etc/nix/netrc
+          # パッケージ検出（nix evalはビルドせずキー名のみ取得）
+          LINUX_PKGS=$(nix eval --json '.#packages.x86_64-linux' --apply builtins.attrNames 2>/dev/null || echo '[]')
+          DARWIN_PKGS=$(nix eval --json '.#packages.aarch64-darwin' --apply builtins.attrNames 2>/dev/null || echo '[]')
 
-      - name: Build NixOS configuration
-        run: |
-          nix build .#nixosConfigurations.${{ matrix.configuration }}.config.system.build.toplevel \
-            --print-build-logs \
-            --show-trace \
-            --out-link result-${{ matrix.configuration }}
+          # matrix用JSONを生成
+          echo "nixos-matrix={\"configuration\":$NIXOS}" >> "$GITHUB_OUTPUT"
+          echo "darwin-matrix={\"configuration\":$DARWIN}" >> "$GITHUB_OUTPUT"
 
-      - name: Configure and push to Attic cache
-        if: github.event_name == 'push'
-        run: |
-          nix build .#attic --out-link attic-cli
-          ./attic-cli/bin/attic login ci http://192.168.1.3:8080 ${{ secrets.ATTIC_TOKEN }}
-          ./attic-cli/bin/attic cache create main || echo "Cache already exists"
+          # 空配列チェック
+          NIXOS_COUNT=$(echo "$NIXOS" | jq 'length')
+          DARWIN_COUNT=$(echo "$DARWIN" | jq 'length')
+          LINUX_PKGS_COUNT=$(echo "$LINUX_PKGS" | jq 'length')
+          DARWIN_PKGS_COUNT=$(echo "$DARWIN_PKGS" | jq 'length')
 
-          # attic CLI自体をキャッシュにプッシュ（次回CI実行でキャッシュヒット）
-          echo "Pushing attic-cli to cache..."
-          ./attic-cli/bin/attic push -j 3 main attic-cli || echo "Failed to push attic-cli (non-fatal)"
+          echo "has-nixos=$( [ "$NIXOS_COUNT" -gt 0 ] && echo true || echo false )" >> "$GITHUB_OUTPUT"
+          echo "has-darwin=$( [ "$DARWIN_COUNT" -gt 0 ] && echo true || echo false )" >> "$GITHUB_OUTPUT"
+          echo "has-linux-packages=$( [ "$LINUX_PKGS_COUNT" -gt 0 ] && echo true || echo false )" >> "$GITHUB_OUTPUT"
+          echo "has-darwin-packages=$( [ "$DARWIN_PKGS_COUNT" -gt 0 ] && echo true || echo false )" >> "$GITHUB_OUTPUT"
 
-          # deploy-rs CLIをキャッシュにプッシュ（deployジョブでキャッシュヒット）
-          echo "Pushing deploy-rs to cache..."
-          nix build .#deploy-rs --out-link deploy-rs-cli
-          ./attic-cli/bin/attic push -j 3 main deploy-rs-cli || echo "Failed to push deploy-rs (non-fatal)"
+          echo "linux-packages=$LINUX_PKGS" >> "$GITHUB_OUTPUT"
+          echo "darwin-packages=$DARWIN_PKGS" >> "$GITHUB_OUTPUT"
 
-          # システムビルドをキャッシュにプッシュ
-          echo "Pushing system build to cache..."
-          ./attic-cli/bin/attic push -j 3 main result-${{ matrix.configuration }} || echo "Failed to push system build (non-fatal)"
-        continue-on-error: true
+          # デバッグ出力
+          echo "NixOS configurations: $NIXOS"
+          echo "Darwin configurations: $DARWIN"
+          echo "Linux packages: $LINUX_PKGS"
+          echo "Darwin packages: $DARWIN_PKGS"
 
-      - name: Teardown WireGuard VPN
-        uses: ./.github/actions/wireguard-teardown
-        if: always()
-        with:
-          lease-id: ${{ steps.wireguard.outputs.lease-id }}
-          authentik-client-id: ${{ secrets.AUTHENTIK_CLIENT_ID }}
+  # パッケージビルド（attic, deploy-rs等を事前キャッシュ）
+  build-packages-linux:
+    needs: [format-check, discover-targets]
+    if: needs.discover-targets.outputs.has-linux-packages == 'true'
+    uses: ./.github/workflows/build-packages.yaml
+    with:
+      runner: ubuntu-latest
+      system: x86_64-linux
+      packages: ${{ needs.discover-targets.outputs.linux-packages }}
+    secrets: inherit
+
+  build-packages-darwin:
+    needs: [format-check, discover-targets]
+    if: needs.discover-targets.outputs.has-darwin-packages == 'true'
+    uses: ./.github/workflows/build-packages.yaml
+    with:
+      runner: macos-latest
+      system: aarch64-darwin
+      packages: ${{ needs.discover-targets.outputs.darwin-packages }}
+    secrets: inherit
+
+  # メインビルド
+  build-nixos:
+    needs: [format-check, discover-targets, build-packages-linux]
+    if: needs.discover-targets.outputs.has-nixos == 'true'
+    strategy:
+      matrix: ${{ fromJSON(needs.discover-targets.outputs.nixos-matrix) }}
+    uses: ./.github/workflows/build-nix.yaml
+    with:
+      runner: ubuntu-latest
+      build-target: ".#nixosConfigurations.${{ matrix.configuration }}.config.system.build.toplevel"
+      result-name: ${{ matrix.configuration }}
+      needs-sops: true
+    secrets: inherit
 
   build-darwin:
-    needs: format-check
-    runs-on: macos-latest
+    needs: [format-check, discover-targets, build-packages-darwin]
+    if: needs.discover-targets.outputs.has-darwin == 'true'
     strategy:
-      matrix:
-        configuration: [macbook]
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup WireGuard VPN
-        uses: ./.github/actions/wireguard-setup
-        id: wireguard
-        with:
-          authentik-client-id: ${{ secrets.AUTHENTIK_CLIENT_ID }}
-
-      - name: Install Nix with flakes enabled
-        uses: cachix/install-nix-action@v31
-        with:
-          nix_path: nixpkgs=channel:nixos-unstable
-          extra_nix_config: |
-            experimental-features = nix-command flakes
-            substituters = https://cache.nixos.org https://cache.shinbunbun.com/main
-            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= main:EMoov6FniyxjYhY24OcZ02dOIWKu4feJH7uGRjgwwUc=
-            netrc-file = /etc/nix/netrc
-            fallback = true
-            connect-timeout = 5
-
-      - name: Setup SOPS
-        run: |
-          sudo mkdir -p /var/lib/sops-nix
-          echo "${{ secrets.SOPS_AGE_KEY }}" | sudo tee /var/lib/sops-nix/key.txt > /dev/null
-          sudo chmod 600 /var/lib/sops-nix/key.txt
-
-      - name: Setup Attic authentication
-        run: |
-          echo "machine cache.shinbunbun.com password ${{ secrets.ATTIC_READ_TOKEN }}" | sudo tee /etc/nix/netrc > /dev/null
-          sudo chmod 600 /etc/nix/netrc
-
-      - name: Build Darwin configuration
-        run: |
-          nix build .#darwinConfigurations.${{ matrix.configuration }}.config.system.build.toplevel \
-            --print-build-logs \
-            --show-trace \
-            --out-link result-${{ matrix.configuration }}
-
-      - name: Configure and push to Attic cache
-        if: github.event_name == 'push'
-        run: |
-          nix build .#attic --out-link attic-cli
-          ./attic-cli/bin/attic login ci http://192.168.1.3:8080 ${{ secrets.ATTIC_TOKEN }}
-          ./attic-cli/bin/attic cache create main || echo "Cache already exists"
-
-          # attic CLI自体をキャッシュにプッシュ（次回CI実行でキャッシュヒット）
-          echo "Pushing attic-cli to cache..."
-          ./attic-cli/bin/attic push -j 3 main attic-cli || echo "Failed to push attic-cli (non-fatal)"
-
-          # Darwinビルドをキャッシュにプッシュ
-          echo "Pushing Darwin build to cache..."
-          ./attic-cli/bin/attic push -j 3 main result-${{ matrix.configuration }} || echo "Failed to push Darwin build (non-fatal)"
-        continue-on-error: true
-
-      - name: Teardown WireGuard VPN
-        uses: ./.github/actions/wireguard-teardown
-        if: always()
-        with:
-          lease-id: ${{ steps.wireguard.outputs.lease-id }}
-          authentik-client-id: ${{ secrets.AUTHENTIK_CLIENT_ID }}
+      matrix: ${{ fromJSON(needs.discover-targets.outputs.darwin-matrix) }}
+    uses: ./.github/workflows/build-nix.yaml
+    with:
+      runner: macos-latest
+      build-target: ".#darwinConfigurations.${{ matrix.configuration }}.config.system.build.toplevel"
+      result-name: ${{ matrix.configuration }}
+      needs-sops: true
+    secrets: inherit
 
   build-devshell:
-    needs: format-check
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup WireGuard VPN
-        uses: ./.github/actions/wireguard-setup
-        id: wireguard
-        with:
-          authentik-client-id: ${{ secrets.AUTHENTIK_CLIENT_ID }}
-
-      - name: Install Nix with flakes enabled
-        uses: cachix/install-nix-action@v31
-        with:
-          nix_path: nixpkgs=channel:nixos-unstable
-          extra_nix_config: |
-            experimental-features = nix-command flakes
-            substituters = https://cache.nixos.org https://cache.shinbunbun.com/main
-            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= main:EMoov6FniyxjYhY24OcZ02dOIWKu4feJH7uGRjgwwUc=
-            netrc-file = /etc/nix/netrc
-            fallback = true
-            connect-timeout = 5
-
-      - name: Setup Attic authentication
-        run: |
-          echo "machine cache.shinbunbun.com password ${{ secrets.ATTIC_READ_TOKEN }}" | sudo tee /etc/nix/netrc > /dev/null
-          sudo chmod 600 /etc/nix/netrc
-
-      - name: Build development shell
-        run: |
-          nix build .#devShells.x86_64-linux.default \
-            --print-build-logs \
-            --show-trace \
-            --out-link result-devshell
-
-      - name: Configure and push to Attic cache
-        if: github.event_name == 'push'
-        run: |
-          nix build .#attic --out-link attic-cli
-          ./attic-cli/bin/attic login ci http://192.168.1.3:8080 ${{ secrets.ATTIC_TOKEN }}
-          ./attic-cli/bin/attic cache create main || echo "Cache already exists"
-
-          # attic CLI自体をキャッシュにプッシュ（次回CI実行でキャッシュヒット）
-          echo "Pushing attic-cli to cache..."
-          ./attic-cli/bin/attic push -j 3 main attic-cli || echo "Failed to push attic-cli (non-fatal)"
-
-          # devshellビルドをキャッシュにプッシュ
-          echo "Pushing devshell build to cache..."
-          ./attic-cli/bin/attic push -j 3 main result-devshell || echo "Failed to push devshell build (non-fatal)"
-        continue-on-error: true
-
-      - name: Teardown WireGuard VPN
-        uses: ./.github/actions/wireguard-teardown
-        if: always()
-        with:
-          lease-id: ${{ steps.wireguard.outputs.lease-id }}
-          authentik-client-id: ${{ secrets.AUTHENTIK_CLIENT_ID }}
+    needs: [format-check, build-packages-linux]
+    uses: ./.github/workflows/build-nix.yaml
+    with:
+      runner: ubuntu-latest
+      build-target: ".#devShells.x86_64-linux.default"
+      result-name: devshell
+      needs-sops: false
+    secrets: inherit
 
   notify-build-complete:
     name: Notify build completion

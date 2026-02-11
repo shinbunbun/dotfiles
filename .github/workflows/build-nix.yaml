@@ -1,0 +1,101 @@
+# 単一ターゲットビルド用 Reusable Workflow
+#
+# 指定されたNixビルドターゲットをビルドし、Atticキャッシュにプッシュする。
+# SOPS秘密鍵のセットアップはオプション。
+#
+# 使用方法:
+#   uses: ./.github/workflows/build-nix.yaml
+#   with:
+#     runner: ubuntu-latest
+#     build-target: ".#nixosConfigurations.homeMachine.config.system.build.toplevel"
+#     result-name: homeMachine
+#     needs-sops: true
+
+name: Build Nix Target
+
+on:
+  workflow_call:
+    inputs:
+      runner:
+        description: 'GitHub Actions ランナー（例: ubuntu-latest, macos-latest）'
+        required: true
+        type: string
+      build-target:
+        description: 'Nixビルドターゲット式（例: .#nixosConfigurations.homeMachine.config.system.build.toplevel）'
+        required: true
+        type: string
+      result-name:
+        description: '--out-linkの名前（例: homeMachine）'
+        required: true
+        type: string
+      needs-sops:
+        description: 'SOPS秘密鍵のセットアップが必要か'
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build:
+    runs-on: ${{ inputs.runner }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup WireGuard VPN
+        uses: ./.github/actions/wireguard-setup
+        id: wireguard
+        with:
+          authentik-client-id: ${{ secrets.AUTHENTIK_CLIENT_ID }}
+
+      - name: Install Nix with flakes enabled
+        uses: cachix/install-nix-action@v31
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            substituters = https://cache.nixos.org https://cache.shinbunbun.com/main
+            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= main:EMoov6FniyxjYhY24OcZ02dOIWKu4feJH7uGRjgwwUc=
+            netrc-file = /etc/nix/netrc
+            fallback = true
+            connect-timeout = 5
+
+      - name: Setup SOPS
+        if: inputs.needs-sops
+        run: |
+          sudo mkdir -p /var/lib/sops-nix
+          echo "${{ secrets.SOPS_AGE_KEY }}" | sudo tee /var/lib/sops-nix/key.txt > /dev/null
+          sudo chmod 600 /var/lib/sops-nix/key.txt
+
+      - name: Setup Attic authentication
+        run: |
+          echo "machine cache.shinbunbun.com password ${{ secrets.ATTIC_READ_TOKEN }}" | sudo tee /etc/nix/netrc > /dev/null
+          sudo chmod 600 /etc/nix/netrc
+
+      - name: Build Nix target
+        run: |
+          nix build "${{ inputs.build-target }}" \
+            --print-build-logs \
+            --show-trace \
+            --out-link "result-${{ inputs.result-name }}"
+
+      - name: Configure and push to Attic cache
+        if: github.event_name == 'push'
+        run: |
+          # atticはbuild-packagesステップでキャッシュ済みなので高速に取得できる
+          nix build .#attic --out-link attic-cli
+          ./attic-cli/bin/attic login ci http://192.168.1.3:8080 ${{ secrets.ATTIC_TOKEN }}
+          ./attic-cli/bin/attic cache create main || echo "Cache already exists"
+
+          echo "Pushing build result to cache..."
+          ./attic-cli/bin/attic push -j 3 main "result-${{ inputs.result-name }}" || echo "Failed to push build result (non-fatal)"
+        continue-on-error: true
+
+      - name: Teardown WireGuard VPN
+        uses: ./.github/actions/wireguard-teardown
+        if: always()
+        with:
+          lease-id: ${{ steps.wireguard.outputs.lease-id }}
+          authentik-client-id: ${{ secrets.AUTHENTIK_CLIENT_ID }}
