@@ -38,3 +38,15 @@ output "tunnel_endpoints" {
     desktop_services = local.desktop_tunnel_endpoint
   }
 }
+
+# Authentik Applications
+output "authentik_applications" {
+  description = "Authentik Application slugs"
+  value = {
+    couchdb              = authentik_application.couchdb.slug
+    cloudflare_zero_trust = authentik_application.cloudflare_zero_trust.slug
+    grafana              = authentik_application.grafana.slug
+    opensearch_dashboards = authentik_application.opensearch_dashboards.slug
+    wg_lease             = authentik_application.wg_lease.slug
+  }
+}

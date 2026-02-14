@@ -1,0 +1,16 @@
+/*
+  Authentik グループ定義
+
+  カスタムグループを管理する。
+  デフォルトグループ（authentik Admins等）はauthentik_data.tfでdata source参照。
+*/
+
+resource "authentik_group" "cloudflare_access" {
+  name         = "Cloudflare Access"
+  is_superuser = false
+}
+
+resource "authentik_group" "obsidian_users" {
+  name         = "Obsidian Users"
+  is_superuser = false
+}
