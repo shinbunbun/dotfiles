@@ -3,6 +3,12 @@ provider "cloudflare" {
   api_token = var.cloudflare_api_token
 }
 
+# Authentik Provider設定
+provider "authentik" {
+  url   = var.authentik_url
+  token = var.authentik_api_token
+}
+
 # ローカル変数でドメイン情報を定義
 locals {
   # ベースドメイン

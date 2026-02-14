@@ -81,6 +81,37 @@ pkgs.mkShell {
     fi
     echo ""
 
+    # SOPSからAuthentik設定を環境変数に読み込む
+    if [ -f secrets/authentik-terraform.yaml ]; then
+      export TF_VAR_authentik_api_token=$(sops -d --extract '["authentik"]["api-token"]' secrets/authentik-terraform.yaml 2>/dev/null)
+      [ -n "$TF_VAR_authentik_api_token" ] && echo "✓ Authentik API token loaded"
+    fi
+
+    # Grafana OAuth (secrets/grafana.yaml)
+    if [ -f secrets/grafana.yaml ]; then
+      export TF_VAR_grafana_oauth_client_id=$(sops -d --extract '["grafana"]["oauth_client_id"]' secrets/grafana.yaml 2>/dev/null)
+      export TF_VAR_grafana_oauth_client_secret=$(sops -d --extract '["grafana"]["oauth_client_secret"]' secrets/grafana.yaml 2>/dev/null)
+      [ -n "$TF_VAR_grafana_oauth_client_id" ] && echo "✓ Grafana OAuth secrets loaded"
+    fi
+
+    # Cloudflare OIDC (secrets/authentik-cloudflare-oidc.yaml)
+    if [ -f secrets/authentik-cloudflare-oidc.yaml ]; then
+      export TF_VAR_cloudflare_oidc_client_id=$(sops -d --extract '["cloudflare"]["oidc_client_id"]' secrets/authentik-cloudflare-oidc.yaml 2>/dev/null)
+      export TF_VAR_cloudflare_oidc_client_secret=$(sops -d --extract '["cloudflare"]["oidc_client_secret"]' secrets/authentik-cloudflare-oidc.yaml 2>/dev/null)
+      [ -n "$TF_VAR_cloudflare_oidc_client_id" ] && echo "✓ Cloudflare OIDC secrets loaded"
+    fi
+
+    # CouchDB OAuth (secrets/authentik-terraform.yaml)
+    if [ -f secrets/authentik-terraform.yaml ]; then
+      export TF_VAR_couchdb_oauth_client_id=$(sops -d --extract '["couchdb"]["oauth_client_id"]' secrets/authentik-terraform.yaml 2>/dev/null)
+      export TF_VAR_couchdb_oauth_client_secret=$(sops -d --extract '["couchdb"]["oauth_client_secret"]' secrets/authentik-terraform.yaml 2>/dev/null)
+      [ -n "$TF_VAR_couchdb_oauth_client_id" ] && echo "✓ CouchDB OAuth secrets loaded"
+      export TF_VAR_opensearch_oauth_client_id=$(sops -d --extract '["opensearch"]["oauth_client_id"]' secrets/authentik-terraform.yaml 2>/dev/null)
+      export TF_VAR_opensearch_oauth_client_secret=$(sops -d --extract '["opensearch"]["oauth_client_secret"]' secrets/authentik-terraform.yaml 2>/dev/null)
+      [ -n "$TF_VAR_opensearch_oauth_client_id" ] && echo "✓ OpenSearch OAuth secrets loaded"
+    fi
+    echo ""
+
     echo "Terraform commands (cd terraform/):"
     echo "  - terraform init"
     echo "  - terraform plan"

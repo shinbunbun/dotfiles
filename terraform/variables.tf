@@ -46,3 +46,65 @@ variable "oidc_claim_value" {
   type        = string
   default     = "Cloudflare Access"
 }
+
+# --- Authentik ---
+variable "authentik_api_token" {
+  description = "Authentik API Token"
+  type        = string
+  sensitive   = true
+}
+
+variable "authentik_url" {
+  description = "Authentik API URL"
+  type        = string
+  default     = "https://auth.shinbunbun.com"
+}
+
+# 各プロバイダーのclient_id/secretはSOPSから注入
+variable "grafana_oauth_client_id" {
+  description = "Grafana OAuth2 Client ID"
+  type        = string
+  sensitive   = true
+}
+
+variable "grafana_oauth_client_secret" {
+  description = "Grafana OAuth2 Client Secret"
+  type        = string
+  sensitive   = true
+}
+
+variable "cloudflare_oidc_client_id" {
+  description = "Cloudflare OIDC Client ID"
+  type        = string
+  sensitive   = true
+}
+
+variable "cloudflare_oidc_client_secret" {
+  description = "Cloudflare OIDC Client Secret"
+  type        = string
+  sensitive   = true
+}
+
+variable "couchdb_oauth_client_id" {
+  description = "CouchDB (shinbunbun-home-idp) OAuth2 Client ID"
+  type        = string
+  sensitive   = true
+}
+
+variable "couchdb_oauth_client_secret" {
+  description = "CouchDB (shinbunbun-home-idp) OAuth2 Client Secret"
+  type        = string
+  sensitive   = true
+}
+
+variable "opensearch_oauth_client_id" {
+  description = "OpenSearch Dashboards OAuth2 Client ID"
+  type        = string
+  sensitive   = true
+}
+
+variable "opensearch_oauth_client_secret" {
+  description = "OpenSearch Dashboards OAuth2 Client Secret"
+  type        = string
+  sensitive   = true
+}
