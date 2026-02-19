@@ -44,6 +44,14 @@ in
       mode = "0400";
     };
 
+    # Grafana secret_key（データソース設定の署名に使用）
+    secrets."grafana/secret_key" = {
+      sopsFile = "${inputs.self}/secrets/grafana.yaml";
+      owner = "grafana";
+      group = "grafana";
+      mode = "0400";
+    };
+
     templates."grafana/oauth-env" = {
       content = ''
         GRAFANA_OAUTH_CLIENT_ID=${config.sops.placeholder."grafana/oauth_client_id"}
@@ -82,6 +90,9 @@ in
       mode = "0400";
     };
   };
+
+  # Grafana secret_key設定（nixpkgsでデフォルト値が削除されたため明示的に設定が必要）
+  services.grafana.settings.security.secret_key = "$__file{${config.sops.secrets."grafana/secret_key".path}}";
 
   # オブザーバビリティ設定（nixos-observability）
   services.observability = {
