@@ -44,6 +44,13 @@ in
       mode = "0400";
     };
 
+    secrets."grafana/secret_key" = {
+      sopsFile = "${inputs.self}/secrets/grafana.yaml";
+      owner = "grafana";
+      group = "grafana";
+      mode = "0400";
+    };
+
     templates."grafana/oauth-env" = {
       content = ''
         GRAFANA_OAUTH_CLIENT_ID=${config.sops.placeholder."grafana/oauth_client_id"}
@@ -210,6 +217,7 @@ in
         enable = true;
         port = cfg.monitoring.grafana.port;
         domain = cfg.monitoring.grafana.domain;
+        secretKeyFile = config.sops.secrets."grafana/secret_key".path;
 
         oauth = {
           enable = true;
