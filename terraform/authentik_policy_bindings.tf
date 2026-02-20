@@ -15,7 +15,7 @@ resource "authentik_policy_binding" "wg_lease_allow_github" {
 # CouchDB: akadminユーザーのアクセス許可
 resource "authentik_policy_binding" "couchdb_akadmin" {
   target = authentik_application.couchdb.uuid
-  user   = 4 # akadmin user pk
+  user   = data.authentik_user.akadmin.pk
   order  = 0
 }
 
