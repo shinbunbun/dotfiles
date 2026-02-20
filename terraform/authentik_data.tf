@@ -28,6 +28,8 @@ data "authentik_certificate_key_pair" "default" {
   name = "authentik Self-signed Certificate"
 }
 
+# カスタム証明書だがdata sourceとして参照する。
+# 秘密鍵をTerraform stateに含めないための意図的な設計。
 data "authentik_certificate_key_pair" "es256_jwt_signing" {
   name = "es256-jwt-signing"
 }
@@ -56,6 +58,11 @@ data "authentik_flow" "default_source_enrollment" {
 # --- デフォルトグループ ---
 data "authentik_group" "admins" {
   name = "authentik Admins"
+}
+
+# --- デフォルトユーザー ---
+data "authentik_user" "akadmin" {
+  username = "akadmin"
 }
 
 # --- Embedded Outpost ---
