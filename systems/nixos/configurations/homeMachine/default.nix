@@ -32,7 +32,6 @@ in
     ../../modules/security.nix
     ../../modules/system-tools.nix
     ../../modules/wireguard.nix
-    ../../modules/nfs.nix
 
     # サービスモジュール
     ../../modules/services/services.nix

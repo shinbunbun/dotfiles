@@ -37,20 +37,6 @@
     fsType = "vfat";
   };
 
-  fileSystems."/mnt/k8s" = {
-    device = "/dev/disk/by-uuid/dc37e1f6-c488-4491-b524-96fc14e27a92";
-    fsType = "ext4";
-    options = [ "nofail" ];
-  };
-
-  fileSystems."/export/k8s" = {
-    device = "/mnt/k8s";
-    options = [
-      "bind"
-      "nofail"
-    ];
-  };
-
   swapDevices = [
     { device = "/dev/disk/by-uuid/42a8faf1-0f52-476e-a6d9-1fd777514493"; }
   ];

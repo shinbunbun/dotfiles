@@ -115,10 +115,12 @@ in
     };
   };
 
-  # データディレクトリの作成
+  # ストレージディレクトリの作成
+  # atticdはDynamicUserのため、rebuild時にユーザーが存在しない場合がある
+  # root所有で作成し、サービス側のReadWritePathsで書き込み権限を確保
+  # /var/lib/atticdはDynamicUserが自動管理（symlink → private/atticd）するため不要
   systemd.tmpfiles.rules = [
-    "d ${storagePath} 0755 atticd atticd -"
-    "d /var/lib/atticd 0755 atticd atticd -"
+    "d ${storagePath} 0755 root root -"
   ];
 
   # systemd設定の調整（Atticモジュールのデフォルトを拡張）
@@ -129,6 +131,9 @@ in
     ];
     wants = [ "network-online.target" ];
     requires = [ "postgresql.service" ];
+    serviceConfig = {
+      ReadWritePaths = [ storagePath ];
+    };
   };
 
   # ファイアウォール設定
