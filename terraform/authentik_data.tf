@@ -57,3 +57,8 @@ data "authentik_flow" "default_source_enrollment" {
 data "authentik_group" "admins" {
   name = "authentik Admins"
 }
+
+# --- Embedded Outpost ---
+data "authentik_outpost" "embedded" {
+  name = "authentik Embedded Outpost"
+}
