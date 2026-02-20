@@ -6,5 +6,9 @@ terraform {
       source  = "cloudflare/cloudflare"
       version = "~> 5.0"
     }
+    authentik = {
+      source  = "goauthentik/authentik"
+      version = "~> 2025.12"
+    }
   }
 }
