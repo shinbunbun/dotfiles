@@ -476,11 +476,13 @@ let
         assertType "opensearch.dataDir" "/var/lib/opensearch" isValidPath
           "Must be an absolute path";
 
-      # メモリ設定（現在のログ量に最適化: 8GB）
-      heapSize = assertType "opensearch.heapSize" "8g" builtins.isString "Must be a string";
-      maxMemory = assertType "opensearch.maxMemory" 10737418240 (
+      # メモリ設定（ヒープ4GB + Off-heap用4GB = 合計8GB）
+      # ヒープ8GBではOff-heap(Lucene mmap等)用メモリが不足しスワップが発生するため、
+      # ヒープを4GBに削減してOff-heap用の余裕を確保
+      heapSize = assertType "opensearch.heapSize" "4g" builtins.isString "Must be a string";
+      maxMemory = assertType "opensearch.maxMemory" 8589934592 (
         n: builtins.isInt n && n > 0
-      ) "Must be a positive integer (bytes)"; # 8GB + 2GB（システム用）= 10GB
+      ) "Must be a positive integer (bytes)"; # 4GB heap + 4GB off-heap = 8GB
 
       # クラスター設定
       clusterName =
