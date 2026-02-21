@@ -49,6 +49,7 @@ in
   sops = {
     defaultSopsFile = "${inputs.self}/secrets/ssh-keys.yaml";
     age.keyFile = cfg.sops.keyFile;
+    age.sshKeyPaths = [ ];
 
     secrets."ssh_keys/bunbun" = {
       path = "/etc/ssh/authorized_keys.d/${username}";
