@@ -31,6 +31,9 @@ in
   # Nixpkgs設定
   nixpkgs.config.allowUnfree = true;
 
+  # Touch IDを使用したsudo認証
+  security.pam.services.sudo_local.touchIdAuth = true;
+
   # Homebrew設定
   homebrew = {
     enable = true;

@@ -103,6 +103,11 @@ let
             assertType "networking.hosts.nixosDesktop.hostname" "nixos-desktop" builtins.isString
               "Must be a string";
         };
+        macmini = {
+          hostname =
+            assertType "networking.hosts.macmini.hostname" "shinbunbun-macmini" builtins.isString
+              "Must be a string";
+        };
       };
 
       # インターフェース設定

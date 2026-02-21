@@ -30,6 +30,32 @@ in
     inputs.sops-nix.darwinModules.sops
   ];
 
+  # ホスト名設定
+  networking.hostName = cfg.networking.hosts.macmini.hostname;
+  networking.computerName = cfg.networking.hosts.macmini.hostname;
+  networking.localHostName = cfg.networking.hosts.macmini.hostname;
+
+  # SSH（Remote Login）有効化
+  services.openssh.enable = true;
+
+  # SSHセキュリティ設定（パスワード認証無効化、公開鍵認証のみ）
+  services.openssh.extraConfig = ''
+    PasswordAuthentication no
+    KbdInteractiveAuthentication no
+    AuthorizedKeysFile ${cfg.ssh.authorizedKeysPath}
+  '';
+
+  # SOPS設定（SSH公開鍵の復号）
+  sops = {
+    defaultSopsFile = "${inputs.self}/secrets/ssh-keys.yaml";
+    age.keyFile = cfg.sops.keyFile;
+
+    secrets."ssh_keys/bunbun" = {
+      path = "/etc/ssh/authorized_keys.d/${username}";
+      mode = "0444";
+    };
+  };
+
   # Nixpkgs設定
   nixpkgs.config.allowUnfree = true;
 
