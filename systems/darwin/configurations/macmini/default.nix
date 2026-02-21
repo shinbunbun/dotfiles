@@ -30,6 +30,14 @@ in
     inputs.sops-nix.darwinModules.sops
   ];
 
+  # ホスト名設定
+  networking.hostName = cfg.networking.hosts.macmini.hostname;
+  networking.computerName = cfg.networking.hosts.macmini.hostname;
+  networking.localHostName = cfg.networking.hosts.macmini.hostname;
+
+  # SSH（Remote Login）有効化
+  services.openssh.enable = true;
+
   # Nixpkgs設定
   nixpkgs.config.allowUnfree = true;
 
