@@ -4,7 +4,6 @@
   macOSシステムの基本設定を提供します：
   - システムバージョン設定
   - Nix設定（sandbox、trusted-users）
-  - Touch IDを使用したsudo認証
 */
 {
   config,
@@ -46,6 +45,4 @@ in
   nix.extraOptions = ''
     experimental-features = nix-command flakes
   '';
-
-  security.pam.services.sudo_local.touchIdAuth = true;
 }
