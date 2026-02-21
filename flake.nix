@@ -147,6 +147,13 @@
             ./systems/darwin/configurations/macbook/default.nix
           ];
         };
+        macmini = nix-darwin.lib.darwinSystem {
+          system = "aarch64-darwin";
+          specialArgs = { inherit inputs; };
+          modules = [
+            ./systems/darwin/configurations/macmini/default.nix
+          ];
+        };
       };
 
       # 開発シェル
