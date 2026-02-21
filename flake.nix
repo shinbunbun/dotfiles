@@ -232,7 +232,7 @@
         };
       };
 
-      # deploy-rs checks
-      checks = builtins.mapAttrs (system: deployLib: deployLib.deployChecks self.deploy) deploy-rs.lib;
+      # deploy-rs checks（デプロイ先がx86_64-linuxのみのため、該当システムに限定）
+      checks."x86_64-linux" = deploy-rs.lib.x86_64-linux.deployChecks self.deploy;
     };
 }
