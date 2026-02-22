@@ -39,6 +39,11 @@ in
   networking.computerName = cfg.networking.hosts.macmini.hostname;
   networking.localHostName = cfg.networking.hosts.macmini.hostname;
 
+  # 電源管理設定（ヘッドレス運用のためスリープ無効化）
+  power.sleep.computer = "never";
+  power.sleep.display = "never";
+  power.sleep.harddisk = "never";
+
   # SSH（Remote Login）有効化
   services.openssh.enable = true;
 
