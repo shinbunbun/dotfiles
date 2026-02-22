@@ -40,7 +40,7 @@ in
     # Nix開発ツール
     nil
     nixd
-    nixfmt-rfc-style
+    nixfmt
   ];
 
   # Home Managerの有効化
