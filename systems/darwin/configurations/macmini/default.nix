@@ -94,6 +94,9 @@ in
     };
   };
 
+  # bleutilパッケージ（Bluetooth制御用）
+  environment.systemPackages = [ pkgs.blueutil ];
+
   # ヘッドレスサーバー向け: 不要サービスを無効化
   system.activationScripts.postActivation.text = lib.mkAfter ''
     echo "ヘッドレスサーバー向け: 不要サービスを無効化..." >&2
@@ -102,11 +105,12 @@ in
     # 注: キー名の "Reciever" はApple側のtypo
     sudo -u ${username} defaults -currentHost write com.apple.controlcenter AirplayRecieverEnabled -bool false 2>/dev/null || true
 
-    # Bluetooth無効化（/Library/Preferencesに直接書き込み）
-    defaults write /Library/Preferences/com.apple.Bluetooth ControllerPowerState -int 0
-    defaults write /Library/Preferences/com.apple.Bluetooth BluetoothAutoSeekKeyboard -bool false
-    defaults write /Library/Preferences/com.apple.Bluetooth BluetoothAutoSeekPointingDevice -bool false
-    killall -HUP bluetoothd 2>/dev/null || true
+    # AirPlayXPCHelperデーモンを無効化（ヘッドレスでは不要）
+    launchctl disable system/com.apple.AirPlayXPCHelper
+    launchctl bootout system/com.apple.AirPlayXPCHelper 2>/dev/null || true
+
+    # Bluetoothを確実に電源OFF（bleutilで即座に反映）
+    ${pkgs.blueutil}/bin/blueutil --power 0
   '';
 
   # Home Manager設定
