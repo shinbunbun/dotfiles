@@ -141,6 +141,9 @@ in
         evaluationInterval = cfg.monitoring.prometheus.evaluationInterval;
         externalUrl = "https://${cfg.monitoring.grafana.domain}";
 
+        # macOS メモリメトリクスを Linux 互換名にリマップする recording rules
+        recordingRules = import inputs.nixos-observability-config.assets.recordingRules;
+
         scrapeConfigs = [
           {
             job_name = "node";
