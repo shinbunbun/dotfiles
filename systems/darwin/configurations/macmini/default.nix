@@ -29,6 +29,9 @@ in
     ../../modules/node-exporter.nix
     ../../modules/fluent-bit.nix
 
+    # リモートアクセス
+    ../../modules/screen-sharing.nix
+
     # 外部モジュール
     inputs.home-manager.darwinModules.home-manager
     inputs.sops-nix.darwinModules.sops
