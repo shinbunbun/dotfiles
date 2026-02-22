@@ -2,6 +2,7 @@
   Darwin Fluent Bit設定
 
   macOS用のFluent BitとmacOSログストリーミングデーモンをlaunchdで起動します。
+  nixpkgsのfluent-bitはaarch64-darwinでzstdリンクが壊れているため、overrideAttrsで修正しています。
 
   構成:
   1. macos-log-stream: macOS Unified Logging Systemの log stream 出力をファイルに書き出す
@@ -19,6 +20,13 @@
 
 let
   cfg = import ../../../shared/config.nix;
+
+  # fluent-bit の aarch64-darwin zstd リンク修正
+  fluent-bit = pkgs.fluent-bit.overrideAttrs (old: {
+    env = (old.env or { }) // {
+      NIX_LDFLAGS = "-L${pkgs.zstd.out}/lib -lzstd";
+    };
+  });
 
   # macOS用 Fluent Bit設定ファイル生成
   fluentBitConfigs = import inputs.nixos-observability-config.lib.fluentBit.darwinGenerator {
@@ -77,7 +85,7 @@ let
   '';
 in
 {
-  environment.systemPackages = [ pkgs.fluent-bit ];
+  environment.systemPackages = [ fluent-bit ];
 
   # Fluent Bit用ストレージディレクトリ作成
   system.activationScripts.postActivation.text = ''
@@ -105,7 +113,7 @@ in
     serviceConfig = {
       Label = "io.fluentbit.fluent-bit";
       ProgramArguments = [
-        "${pkgs.fluent-bit}/bin/fluent-bit"
+        "${fluent-bit}/bin/fluent-bit"
         "-c"
         "${fluentBitConfigs.main}"
       ];
