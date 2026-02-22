@@ -18,6 +18,9 @@ in
 {
   system.activationScripts.postActivation.text = lib.mkAfter ''
     echo "Enabling Screen Sharing..." >&2
+    # サービスを一度無効化してから再有効化（macOSが内部状態を正しくリセットするために必要）
+    launchctl unload -w ${plist} 2>/dev/null || true
+    sleep 1
     launchctl load -w ${plist} 2>/dev/null || true
     /usr/sbin/dseditgroup -o edit -a ${username} -t user com.apple.access_screensharing 2>/dev/null || true
     echo "Screen Sharing enabled for user: ${username}" >&2
