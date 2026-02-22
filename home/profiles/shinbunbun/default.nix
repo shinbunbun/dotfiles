@@ -46,11 +46,10 @@ in
     # Nix開発ツール
     nil
     nixd
-    nixfmt-rfc-style
+    nixfmt
 
     # macOS専用アプリケーション
     nerd-fonts.fira-code
-    warp-terminal
   ];
 
   # Home Managerの有効化

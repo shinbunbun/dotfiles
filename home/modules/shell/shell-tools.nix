@@ -9,11 +9,12 @@
 
   starshipはステータス表示と時刻表示が有効化されています。
 */
-{ pkgs, ... }:
+{ pkgs, config, ... }:
 {
   # zsh config
   programs.zsh = {
     enable = true;
+    dotDir = "${config.xdg.configHome}/zsh";
     enableCompletion = true;
     autosuggestion.enable = true;
     plugins = [

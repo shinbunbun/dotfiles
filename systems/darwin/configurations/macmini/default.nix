@@ -80,7 +80,9 @@ in
     };
     casks = [
       "claude" # Claude AIアシスタント
+      "claude-code" # Claude Code CLIツール
       "google-chrome" # Webブラウザ
+      "warp" # ターミナル
     ];
     masApps = {
       "Xcode" = 497799835;
