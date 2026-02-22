@@ -25,6 +25,10 @@ in
     ../../modules/optimise.nix
     # WireGuardは不要
 
+    # 監視・ログ収集
+    ../../modules/node-exporter.nix
+    ../../modules/fluent-bit.nix
+
     # 外部モジュール
     inputs.home-manager.darwinModules.home-manager
     inputs.sops-nix.darwinModules.sops

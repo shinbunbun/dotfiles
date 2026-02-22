@@ -159,6 +159,14 @@ in
                   instance = cfg.networking.hosts.nixosDesktop.hostname;
                 };
               }
+              {
+                targets = [
+                  "${cfg.networking.hosts.macmini.ip}:${toString cfg.monitoring.nodeExporter.port}"
+                ];
+                labels = {
+                  instance = cfg.networking.hosts.macmini.hostname;
+                };
+              }
             ];
           }
           {
