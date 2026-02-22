@@ -42,27 +42,26 @@ in
   services.openssh.extraConfig = ''
     PasswordAuthentication no
     KbdInteractiveAuthentication no
-    AuthorizedKeysFile ${cfg.ssh.authorizedKeysPath}
   '';
 
-  # SOPS設定（SSH公開鍵の復号）
+  # SSH公開鍵認証（nix-darwinのAuthorizedKeysCommand経由で配置）
+  users.users.${username}.openssh.authorizedKeys.keys = [
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPsh7m83p/bIrnzDVYUTzNfw9OAgVH1nu80Qg2TElgVL"
+  ];
+
+  # SOPS設定（Atticプライベートキャッシュ用netrc）
   sops = {
-    defaultSopsFile = "${inputs.self}/secrets/ssh-keys.yaml";
+    defaultSopsFile = "${inputs.self}/secrets/nix.yaml";
     age.keyFile = cfg.sops.keyFile;
     age.sshKeyPaths = [ ];
 
-    secrets."ssh_keys/bunbun" = {
+    secrets."nix_netrc" = {
       mode = "0444";
     };
   };
 
-  # SOPS復号後にauthorized_keysをコピー配置
-  # macOSのsshdはシンボリックリンクを辿れないため、実ファイルとしてコピーする
-  system.activationScripts.postActivation.text = ''
-    mkdir -p /etc/ssh/authorized_keys.d
-    cp /run/secrets/ssh_keys/bunbun /etc/ssh/authorized_keys.d/${username}
-    chmod 0444 /etc/ssh/authorized_keys.d/${username}
-  '';
+  # プライベートキャッシュの認証用netrc
+  nix.settings.netrc-file = config.sops.secrets."nix_netrc".path;
 
   # Nixpkgs設定
   nixpkgs.config.allowUnfree = true;
