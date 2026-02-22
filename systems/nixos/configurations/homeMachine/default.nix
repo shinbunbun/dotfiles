@@ -66,6 +66,9 @@ in
 
   # Nixpkgs設定
   nixpkgs.config.allowUnfree = true;
+  nixpkgs.overlays = [
+    inputs.claude-code.overlays.default
+  ];
 
   # RouterOSバックアップ設定
   services.routerosBackup = {
