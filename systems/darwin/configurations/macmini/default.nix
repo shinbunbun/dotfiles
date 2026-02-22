@@ -110,7 +110,7 @@ in
     launchctl bootout system/com.apple.AirPlayXPCHelper 2>/dev/null || true
 
     # Bluetoothを確実に電源OFF（bleutilで即座に反映）
-    ${pkgs.blueutil}/bin/blueutil --power 0
+    BLUEUTIL_ALLOW_ROOT=1 ${pkgs.blueutil}/bin/blueutil --power 0
   '';
 
   # Home Manager設定
