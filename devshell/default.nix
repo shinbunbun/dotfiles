@@ -109,6 +109,9 @@ pkgs.mkShell {
       export TF_VAR_opensearch_oauth_client_id=$(sops -d --extract '["opensearch"]["oauth_client_id"]' secrets/authentik-terraform.yaml 2>/dev/null)
       export TF_VAR_opensearch_oauth_client_secret=$(sops -d --extract '["opensearch"]["oauth_client_secret"]' secrets/authentik-terraform.yaml 2>/dev/null)
       [ -n "$TF_VAR_opensearch_oauth_client_id" ] && echo "✓ OpenSearch OAuth secrets loaded"
+      export TF_VAR_argocd_oauth_client_id=$(sops -d --extract '["argocd"]["oauth_client_id"]' secrets/authentik-terraform.yaml 2>/dev/null)
+      export TF_VAR_argocd_oauth_client_secret=$(sops -d --extract '["argocd"]["oauth_client_secret"]' secrets/authentik-terraform.yaml 2>/dev/null)
+      [ -n "$TF_VAR_argocd_oauth_client_id" ] && echo "✓ ArgoCD OAuth secrets loaded"
     fi
     echo ""
 

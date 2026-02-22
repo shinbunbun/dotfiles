@@ -215,6 +215,7 @@
           attic = ./systems/nixos/modules/services/attic.nix;
           peer-issuer = ./systems/nixos/modules/services/peer-issuer.nix;
           deploy-user = ./systems/nixos/modules/services/deploy-user.nix;
+          argocd = ./systems/nixos/modules/services/argocd.nix;
         };
       };
 

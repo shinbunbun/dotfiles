@@ -10,6 +10,7 @@ output "access_application_ids" {
     desktop_cockpit       = cloudflare_zero_trust_access_application.desktop_cockpit.id
     desktop_ttyd          = cloudflare_zero_trust_access_application.desktop_ttyd.id
     opensearch_dashboards = cloudflare_zero_trust_access_application.opensearch_dashboards.id
+    argocd                = cloudflare_zero_trust_access_application.argocd.id
   }
 }
 
@@ -27,6 +28,7 @@ output "dns_records" {
     desktop_cockpit       = cloudflare_dns_record.desktop_cockpit.name
     desktop_ttyd          = cloudflare_dns_record.desktop_ttyd.name
     opensearch_dashboards = cloudflare_dns_record.opensearch_dashboards.name
+    argocd                = cloudflare_dns_record.argocd.name
   }
 }
 
@@ -48,5 +50,6 @@ output "authentik_applications" {
     grafana              = authentik_application.grafana.slug
     opensearch_dashboards = authentik_application.opensearch_dashboards.slug
     wg_lease             = authentik_application.wg_lease.slug
+    argocd               = authentik_application.argocd.slug
   }
 }

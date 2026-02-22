@@ -27,6 +27,7 @@ locals {
     ttyd                  = "desktop-terminal.${local.base_domain}"
     opensearch_dashboards = "opensearch.${local.base_domain}"
     calendar_bot          = "calendar-bot.${local.base_domain}"
+    argocd                = "argocd.${local.base_domain}"
   }
 
   # Cloudflare Tunnel エンドポイント

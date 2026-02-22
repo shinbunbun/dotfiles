@@ -397,6 +397,15 @@ let
       };
     };
 
+    # ArgoCD設定
+    argocd = {
+      domain = assertType "argocd.domain" "argocd.shinbunbun.com" builtins.isString "Must be a string";
+      namespace = assertType "argocd.namespace" "argocd" builtins.isString "Must be a string";
+      helmChartVersion =
+        assertType "argocd.helmChartVersion" "9.4.3" builtins.isString
+          "Must be a string";
+    };
+
     # Authentik設定
     authentik = {
       domain = assertType "authentik.domain" "auth.shinbunbun.com" builtins.isString "Must be a string";
@@ -422,6 +431,11 @@ let
         calendarBot = {
           domain =
             assertType "cloudflare.desktop.calendarBot.domain" "calendar-bot.shinbunbun.com" builtins.isString
+              "Must be a string";
+        };
+        argocd = {
+          domain =
+            assertType "cloudflare.desktop.argocd.domain" "argocd.shinbunbun.com" builtins.isString
               "Must be a string";
         };
       };

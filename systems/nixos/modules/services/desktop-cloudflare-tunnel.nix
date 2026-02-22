@@ -3,7 +3,7 @@
 
   機能:
   - nixos-desktop専用のトンネル設定
-  - Cockpit、ttyd、OpenSearch DashboardsをCloudflare経由で公開
+  - Cockpit、ttyd、OpenSearch Dashboards、ArgoCDをCloudflare経由で公開
   - SOPS統合による認証情報管理
 
   注意:
@@ -70,6 +70,16 @@ in
               noTLSVerify = true;
               httpHostHeader = "${tunnelConfig.calendarBot.domain}";
               originServerName = "${tunnelConfig.calendarBot.domain}";
+            };
+          };
+
+          # ArgoCD - Zero Trust Accessで認証必要
+          "${tunnelConfig.argocd.domain}" = {
+            service = "http://localhost:80"; # Traefik
+            originRequest = {
+              noTLSVerify = true;
+              httpHostHeader = "${tunnelConfig.argocd.domain}";
+              originServerName = "${tunnelConfig.argocd.domain}";
             };
           };
         };

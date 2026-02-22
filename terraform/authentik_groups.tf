@@ -14,3 +14,13 @@ resource "authentik_group" "obsidian_users" {
   name         = "Obsidian Users"
   is_superuser = false
 }
+
+resource "authentik_group" "argocd_admins" {
+  name         = "ArgoCD Admins"
+  is_superuser = false
+}
+
+resource "authentik_group" "argocd_users" {
+  name         = "ArgoCD Users"
+  is_superuser = false
+}

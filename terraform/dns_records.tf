@@ -127,6 +127,17 @@ resource "cloudflare_dns_record" "opensearch_dashboards" {
   comment = "Managed by Terraform - OpenSearch Dashboards via desktop-services tunnel"
 }
 
+# ArgoCD
+resource "cloudflare_dns_record" "argocd" {
+  zone_id = var.cloudflare_zone_id
+  name    = "argocd"
+  content = local.desktop_tunnel_endpoint
+  type    = "CNAME"
+  ttl     = 1
+  proxied = true
+  comment = "Managed by Terraform - ArgoCD via desktop-services tunnel"
+}
+
 # Google Calendar Bot
 resource "cloudflare_dns_record" "calendar_bot" {
   zone_id = var.cloudflare_zone_id
