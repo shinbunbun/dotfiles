@@ -52,10 +52,17 @@ in
     age.sshKeyPaths = [ ];
 
     secrets."ssh_keys/bunbun" = {
-      path = "/etc/ssh/authorized_keys.d/${username}";
       mode = "0444";
     };
   };
+
+  # SOPS復号後にauthorized_keysをコピー配置
+  # macOSのsshdはシンボリックリンクを辿れないため、実ファイルとしてコピーする
+  system.activationScripts.postActivation.text = ''
+    mkdir -p /etc/ssh/authorized_keys.d
+    cp /run/secrets/ssh_keys/bunbun /etc/ssh/authorized_keys.d/${username}
+    chmod 0444 /etc/ssh/authorized_keys.d/${username}
+  '';
 
   # Nixpkgs設定
   nixpkgs.config.allowUnfree = true;
