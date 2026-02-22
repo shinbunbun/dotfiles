@@ -11,12 +11,15 @@
 { lib, ... }:
 
 let
+  cfg = import ../../../shared/config.nix;
+  username = cfg.users.darwin.username;
   plist = "/System/Library/LaunchDaemons/com.apple.screensharing.plist";
 in
 {
   system.activationScripts.postActivation.text = lib.mkAfter ''
     echo "Enabling Screen Sharing..." >&2
     launchctl load -w ${plist} 2>/dev/null || true
-    echo "Screen Sharing enabled." >&2
+    /usr/sbin/dseditgroup -o edit -a ${username} -t user com.apple.access_screensharing 2>/dev/null || true
+    echo "Screen Sharing enabled for user: ${username}" >&2
   '';
 }
