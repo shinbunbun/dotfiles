@@ -104,6 +104,7 @@ let
               "Must be a string";
         };
         macmini = {
+          ip = assertType "networking.hosts.macmini.ip" "192.168.1.5" isValidIP "Must be a valid IP address";
           hostname =
             assertType "networking.hosts.macmini.hostname" "shinbunbun-macmini" builtins.isString
               "Must be a string";
