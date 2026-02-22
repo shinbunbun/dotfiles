@@ -10,6 +10,7 @@
 { pkgs, ... }:
 {
   home.packages = [
+    pkgs.claude-code
   ];
 
   home.file.".claude/CLAUDE.md" = {

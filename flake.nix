@@ -82,6 +82,12 @@
       url = "github:shinbunbun/peer-issuer";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # claude-code: Claude Code CLIツール（Nix native binary）
+    claude-code = {
+      url = "github:sadjow/claude-code-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -99,6 +105,7 @@
       deploy-rs,
       attic,
       peer-issuer,
+      claude-code,
       ...
     }@inputs:
     let

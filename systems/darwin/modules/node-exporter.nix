@@ -32,6 +32,7 @@ in
         "--collector.uname"
         "--web.listen-address=:${toString nodeExporterPort}"
         "--collector.filesystem.mount-points-exclude=^/(dev|System/Volumes/VM|System/Volumes/Preboot|System/Volumes/Update)($|/)"
+        "--no-collector.thermal"
         "--collector.netdev.device-exclude=^(utun|awdl|llw|bridge|gif|stf|ap).*$"
       ];
       KeepAlive = true;
