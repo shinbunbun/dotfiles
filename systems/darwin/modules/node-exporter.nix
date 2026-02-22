@@ -31,7 +31,7 @@ in
         "--collector.boottime"
         "--collector.uname"
         "--web.listen-address=:${toString nodeExporterPort}"
-        "--collector.filesystem.mount-points-exclude=^/(dev|System/Volumes/VM|System/Volumes/Preboot|System/Volumes/Update)($|/)"
+        "--collector.filesystem.mount-points-exclude=^/(dev|nix|System/Volumes/(VM|Preboot|Update|xarts|iSCPreboot|Hardware)|private/var/run/secrets\\.d)($|/)"
         "--no-collector.thermal"
         "--collector.netdev.device-exclude=^(utun|awdl|llw|bridge|gif|stf|ap).*$"
       ];
