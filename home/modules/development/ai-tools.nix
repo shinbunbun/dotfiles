@@ -9,9 +9,11 @@
 */
 { pkgs, ... }:
 {
-  home.packages = [
-    pkgs.claude-code
-  ];
+  home.packages =
+    with pkgs;
+    lib.optionals stdenv.isLinux [
+      claude-code
+    ];
 
   home.file.".claude/CLAUDE.md" = {
     text = ''
