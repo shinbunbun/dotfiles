@@ -99,8 +99,9 @@ in
     serviceConfig = {
       Label = "com.shinbunbun.macos-log-stream";
       ProgramArguments = [
-        "/bin/bash"
-        "${logStreamScript}"
+        "/bin/sh"
+        "-c"
+        "/bin/wait4path /nix/store && exec /bin/bash ${logStreamScript}"
       ];
       KeepAlive = true;
       RunAtLoad = true;
@@ -113,9 +114,9 @@ in
     serviceConfig = {
       Label = "io.fluentbit.fluent-bit";
       ProgramArguments = [
-        "${fluent-bit}/bin/fluent-bit"
+        "/bin/sh"
         "-c"
-        "${fluentBitConfigs.main}"
+        "/bin/wait4path /nix/store && exec ${fluent-bit}/bin/fluent-bit -c ${fluentBitConfigs.main}"
       ];
       KeepAlive = true;
       RunAtLoad = true;
