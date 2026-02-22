@@ -50,7 +50,6 @@ in
 
     # macOS専用アプリケーション
     nerd-fonts.fira-code
-    warp-terminal
   ];
 
   # Home Managerの有効化

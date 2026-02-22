@@ -65,6 +65,7 @@ in
       "obsidian" # ナレッジマネジメント
       "claude" # Claude AIアシスタント
       "claude-code" # Claude Code CLIツール
+      "warp" # ターミナル
 
       # クリエイティブツール
       "adobe-creative-cloud" # Adobe Creative Cloud
