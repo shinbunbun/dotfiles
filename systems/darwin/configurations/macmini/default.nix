@@ -76,6 +76,7 @@ in
     };
     casks = [
       "claude" # Claude AIアシスタント
+      "claude-code" # Claude Code CLIツール
       "google-chrome" # Webブラウザ
     ];
     masApps = {

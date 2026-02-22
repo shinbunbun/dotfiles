@@ -64,6 +64,7 @@ in
       # 生産性ツール
       "obsidian" # ナレッジマネジメント
       "claude" # Claude AIアシスタント
+      "claude-code" # Claude Code CLIツール
 
       # クリエイティブツール
       "adobe-creative-cloud" # Adobe Creative Cloud
