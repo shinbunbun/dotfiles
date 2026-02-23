@@ -137,15 +137,11 @@ let
   '';
 in
 {
-  # k3s マニフェスト配置（k3s が自動適用）
-  environment.etc = {
-    "rancher/k3s/server/manifests/argocd.yaml" = {
-      text = helmChartManifest;
-    };
-    "rancher/k3s/server/manifests/argocd-ingress.yaml" = {
-      text = ingressRouteManifest;
-    };
-  };
+  # k3s マニフェスト配置（/var/lib/rancher/k3s/server/manifests/ に配置して k3s が自動適用）
+  systemd.tmpfiles.rules = [
+    "L+ /var/lib/rancher/k3s/server/manifests/argocd.yaml - - - - ${pkgs.writeText "argocd.yaml" helmChartManifest}"
+    "L+ /var/lib/rancher/k3s/server/manifests/argocd-ingress.yaml - - - - ${pkgs.writeText "argocd-ingress.yaml" ingressRouteManifest}"
+  ];
 
   # SOPS シークレット定義
   sops.secrets = {
