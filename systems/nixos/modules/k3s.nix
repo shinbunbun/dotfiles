@@ -77,7 +77,10 @@ in
       after = [ "sops-nix.service" ];
       wantedBy = [ "multi-user.target" ];
 
-      path = [ pkgs.coreutils ];
+      path = [
+        pkgs.coreutils
+        pkgs.systemd
+      ];
 
       serviceConfig = {
         Type = "oneshot";
@@ -107,6 +110,11 @@ in
           EOF
 
           chmod 0600 /etc/rancher/k3s/registries.yaml
+
+          # k3sが既に稼働中の場合、registries.yamlの変更を反映するため再起動
+          if systemctl is-active --quiet k3s.service; then
+            systemctl restart k3s.service
+          fi
         '';
     };
 
