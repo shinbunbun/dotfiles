@@ -65,6 +65,10 @@ data "authentik_user" "akadmin" {
   username = "akadmin"
 }
 
+data "authentik_user" "shinbunbun" {
+  username = "shinbunbun"
+}
+
 # --- Embedded Outpost ---
 data "authentik_outpost" "embedded" {
   name = "authentik Embedded Outpost"

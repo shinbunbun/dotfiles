@@ -18,6 +18,7 @@ resource "authentik_group" "obsidian_users" {
 resource "authentik_group" "argocd_admins" {
   name         = "ArgoCD Admins"
   is_superuser = false
+  users        = [data.authentik_user.shinbunbun.id]
 }
 
 resource "authentik_group" "argocd_users" {
