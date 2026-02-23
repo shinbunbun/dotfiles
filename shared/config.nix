@@ -410,7 +410,7 @@ let
           "Must be a string";
       # k8s専用Age公開鍵（Secret暗号化用、秘密鍵はArgoCD repo-serverのみ保持）
       k8sAgePublicKey =
-        assertType "argocd.k8sAgePublicKey" "age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        assertType "argocd.k8sAgePublicKey" "age1jfkfpwsze8rj0pnzmachzwpqaqk594s7qkazucavues4g499waeqwdkac4"
           builtins.isString
           "Must be a string";
     };
