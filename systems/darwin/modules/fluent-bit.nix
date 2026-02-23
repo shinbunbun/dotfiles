@@ -78,6 +78,8 @@ let
       TIMESTAMP=$(/bin/date "+%Y%m%d-%H%M%S")
       mv "$LOG_FILE" "$ROTATE_DIR/macos-unified.$TIMESTAMP.log"
       touch "$LOG_FILE"
+      # mvでファイルが移動すると、log streamプロセスのfdが旧ファイルを指し続けるため再起動が必要
+      launchctl kickstart -k system/com.shinbunbun.macos-log-stream
     fi
 
     # 古いアーカイブを削除
@@ -99,8 +101,9 @@ in
     serviceConfig = {
       Label = "com.shinbunbun.macos-log-stream";
       ProgramArguments = [
-        "/bin/bash"
-        "${logStreamScript}"
+        "/bin/sh"
+        "-c"
+        "/bin/wait4path /nix/store && exec /bin/bash ${logStreamScript}"
       ];
       KeepAlive = true;
       RunAtLoad = true;
@@ -113,9 +116,9 @@ in
     serviceConfig = {
       Label = "io.fluentbit.fluent-bit";
       ProgramArguments = [
-        "${fluent-bit}/bin/fluent-bit"
+        "/bin/sh"
         "-c"
-        "${fluentBitConfigs.main}"
+        "/bin/wait4path /nix/store && exec ${fluent-bit}/bin/fluent-bit -c ${fluentBitConfigs.main}"
       ];
       KeepAlive = true;
       RunAtLoad = true;
