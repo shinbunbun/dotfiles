@@ -119,6 +119,35 @@ resource "authentik_provider_oauth2" "opensearch_dashboards" {
   }
 }
 
+# ArgoCD OAuth2
+resource "authentik_provider_oauth2" "argocd" {
+  name               = "ArgoCD"
+  authorization_flow = data.authentik_flow.default_authorization_implicit_consent.id
+  invalidation_flow  = data.authentik_flow.default_provider_invalidation.id
+  client_type        = "confidential"
+  client_id          = var.argocd_oauth_client_id
+  client_secret      = var.argocd_oauth_client_secret
+  signing_key        = data.authentik_certificate_key_pair.es256_jwt_signing.id
+  allowed_redirect_uris = [
+    { matching_mode = "strict", url = "https://argocd.shinbunbun.com/auth/callback" }
+  ]
+  property_mappings = [
+    authentik_property_mapping_provider_scope.oidc_groups.id,
+    data.authentik_property_mapping_provider_scope.openid.id,
+    data.authentik_property_mapping_provider_scope.email.id,
+    data.authentik_property_mapping_provider_scope.profile.id,
+  ]
+  sub_mode                   = "hashed_user_id"
+  issuer_mode                = "per_provider"
+  include_claims_in_id_token = true
+  access_code_validity       = "minutes=1"
+  access_token_validity      = "minutes=5"
+  refresh_token_validity     = "days=30"
+  lifecycle {
+    ignore_changes = [logout_method, refresh_token_threshold]
+  }
+}
+
 # --- Proxy Provider ---
 
 # wg-lease Proxy Provider（Embedded Outpost経由）

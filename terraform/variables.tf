@@ -108,3 +108,15 @@ variable "opensearch_oauth_client_secret" {
   type        = string
   sensitive   = true
 }
+
+variable "argocd_oauth_client_id" {
+  description = "ArgoCD OAuth2 Client ID"
+  type        = string
+  sensitive   = true
+}
+
+variable "argocd_oauth_client_secret" {
+  description = "ArgoCD OAuth2 Client Secret"
+  type        = string
+  sensitive   = true
+}

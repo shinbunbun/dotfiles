@@ -35,6 +35,14 @@ resource "authentik_application" "opensearch_dashboards" {
   policy_engine_mode = "any"
 }
 
+resource "authentik_application" "argocd" {
+  name               = "ArgoCD"
+  slug               = "argocd"
+  protocol_provider  = authentik_provider_oauth2.argocd.id
+  meta_launch_url    = "https://argocd.shinbunbun.com"
+  policy_engine_mode = "any"
+}
+
 resource "authentik_application" "wg_lease" {
   name              = "wg-lease"
   slug              = "wg-lease"

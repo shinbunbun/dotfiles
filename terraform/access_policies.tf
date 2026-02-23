@@ -100,6 +100,24 @@ resource "cloudflare_zero_trust_access_application" "desktop_ttyd" {
   }]
 }
 
+# ArgoCD - 認証必須
+resource "cloudflare_zero_trust_access_application" "argocd" {
+  account_id                = var.cloudflare_account_id
+  name                      = "ArgoCD"
+  domain                    = local.desktop_services.argocd
+  type                      = "self_hosted"
+  session_duration          = "24h"
+  auto_redirect_to_identity = true
+  allowed_idps              = [var.identity_provider_id]
+  enable_binding_cookie     = false
+  options_preflight_bypass  = false
+
+  policies = [{
+    id         = cloudflare_zero_trust_access_policy.oidc_groups_allow.id
+    precedence = 1
+  }]
+}
+
 # OpenSearch Dashboards - 認証必須
 resource "cloudflare_zero_trust_access_application" "opensearch_dashboards" {
   account_id                = var.cloudflare_account_id
