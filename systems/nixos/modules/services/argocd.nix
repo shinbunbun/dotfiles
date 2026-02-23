@@ -222,16 +222,10 @@ in
         OIDC_CLIENT_ID=$(cat ${oidcClientIdPath})
         OIDC_CLIENT_SECRET=$(cat ${oidcClientSecretPath})
 
-        kubectl -n ${argocdCfg.namespace} patch secret argocd-secret \
-          --type merge \
-          -p "{\"stringData\": {\"oidc.authentik.clientID\": \"$OIDC_CLIENT_ID\", \"oidc.authentik.clientSecret\": \"$OIDC_CLIENT_SECRET\"}}" \
-          || {
-            # argocd-secret がまだ存在しない場合は作成
-            kubectl -n ${argocdCfg.namespace} create secret generic argocd-secret \
-              --from-literal=oidc.authentik.clientID="$OIDC_CLIENT_ID" \
-              --from-literal=oidc.authentik.clientSecret="$OIDC_CLIENT_SECRET" \
-              --dry-run=client -o yaml | kubectl apply -f -
-          }
+        kubectl -n ${argocdCfg.namespace} create secret generic argocd-secret \
+          --from-literal=oidc.authentik.clientID="$OIDC_CLIENT_ID" \
+          --from-literal=oidc.authentik.clientSecret="$OIDC_CLIENT_SECRET" \
+          --dry-run=client -o yaml | kubectl apply -f -
 
         # GitHub Deploy Key のリポジトリシークレット
         echo "Applying GitHub Deploy Key..."
