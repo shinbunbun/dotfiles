@@ -404,6 +404,15 @@ let
       helmChartVersion =
         assertType "argocd.helmChartVersion" "9.4.3" builtins.isString
           "Must be a string";
+      # KSOPS（Kustomize + SOPS）プラグインのイメージバージョン
+      ksopsImage =
+        assertType "argocd.ksopsImage" "viaductoss/ksops:v4.3.2" builtins.isString
+          "Must be a string";
+      # k8s専用Age公開鍵（Secret暗号化用、秘密鍵はArgoCD repo-serverのみ保持）
+      k8sAgePublicKey =
+        assertType "argocd.k8sAgePublicKey" "age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          builtins.isString
+          "Must be a string";
     };
 
     # GitHub Container Registry設定
