@@ -112,8 +112,9 @@ in
           chmod 0600 /etc/rancher/k3s/registries.yaml
 
           # k3sが既に稼働中の場合、registries.yamlの変更を反映するため再起動
+          # --no-block: before=k3s.serviceとの循環待ちを防止
           if systemctl is-active --quiet k3s.service; then
-            systemctl restart k3s.service
+            systemctl restart --no-block k3s.service
           fi
         '';
     };
