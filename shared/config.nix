@@ -406,6 +406,12 @@ let
           "Must be a string";
     };
 
+    # GitHub Container Registry設定
+    ghcr = {
+      registry = assertType "ghcr.registry" "ghcr.io" builtins.isString "Must be a string";
+      username = assertType "ghcr.username" "shinbunbun" builtins.isString "Must be a string";
+    };
+
     # Authentik設定
     authentik = {
       domain = assertType "authentik.domain" "auth.shinbunbun.com" builtins.isString "Must be a string";

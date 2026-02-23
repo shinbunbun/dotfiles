@@ -6,12 +6,13 @@
   - Traefik IngressRouteによるHTTPルーティング
   - SOPS統合によるOIDCクレデンシャルの安全な管理
   - GitHub Deploy Keyの自動投入（k8s-appsリポジトリアクセス用）
+  - ArgoCD Image Updater用ghcr.ioレジストリ認証シークレットの投入
   - Authentik OIDCによるSSO認証
   - グループベースのRBAC（ArgoCD Admins / ArgoCD Users）
 
   使用方法:
   1. dotfiles-privateのnixos-desktop設定でこのモジュールをimport
-  2. secrets/argocd.yamlにOIDCクレデンシャルとDeploy Keyを設定
+  2. secrets/argocd.yamlにOIDCクレデンシャル、Deploy Key、ghcr PATを設定
   3. nixos-rebuildでデプロイ
   4. https://argocd.shinbunbun.com でアクセス
 
@@ -162,6 +163,12 @@ in
       group = "root";
       mode = "0400";
     };
+    "argocd/ghcr_pat" = {
+      sopsFile = "${inputs.self}/secrets/argocd.yaml";
+      owner = "root";
+      group = "root";
+      mode = "0400";
+    };
   };
 
   # Kubernetes Secret 投入用 systemd サービス
@@ -190,6 +197,8 @@ in
         oidcClientIdPath = config.sops.secrets."argocd/oidc_client_id".path;
         oidcClientSecretPath = config.sops.secrets."argocd/oidc_client_secret".path;
         deployKeyPath = config.sops.secrets."argocd/github_deploy_key".path;
+        ghcrPatPath = config.sops.secrets."argocd/ghcr_pat".path;
+        ghcrUsername = cfg.ghcr.username;
       in
       ''
         export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
@@ -236,6 +245,13 @@ in
           --dry-run=client -o yaml | kubectl apply -f -
         kubectl -n ${argocdCfg.namespace} label secret repo-k8s-apps \
           argocd.argoproj.io/secret-type=repository --overwrite
+
+        # Image Updater 用 ghcr.io レジストリ認証シークレット
+        echo "Applying Image Updater ghcr.io credentials..."
+        GHCR_PAT=$(cat ${ghcrPatPath})
+        kubectl -n ${argocdCfg.namespace} create secret generic argocd-image-updater-ghcr-credentials \
+          --from-literal=credentials="${ghcrUsername}:$GHCR_PAT" \
+          --dry-run=client -o yaml | kubectl apply -f -
 
         # ArgoCD Server を再起動して OIDC 設定を反映
         echo "Restarting ArgoCD server to apply OIDC config..."
