@@ -331,11 +331,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1771837354,
-        "narHash": "sha256-dN/0RJ1j3aRZbf9us7bIa4Iy44xkTZ5eAKi1Dbp+m4Y=",
+        "lastModified": 1771838433,
+        "narHash": "sha256-22x0EO8KV1kf9Mocd/G+fm6IN3k27ftWl0F5poGWYig=",
         "owner": "shinbunbun",
         "repo": "nixos-observability-config",
-        "rev": "f3c70071e3e7f59b3ed6fd816ce2a0b1d17d8c6c",
+        "rev": "60982f25bd60cd85412ca3518bc0c3985be2b3f9",
         "type": "github"
       },
       "original": {
