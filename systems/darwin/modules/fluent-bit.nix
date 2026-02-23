@@ -78,6 +78,8 @@ let
       TIMESTAMP=$(/bin/date "+%Y%m%d-%H%M%S")
       mv "$LOG_FILE" "$ROTATE_DIR/macos-unified.$TIMESTAMP.log"
       touch "$LOG_FILE"
+      # mvでファイルが移動すると、log streamプロセスのfdが旧ファイルを指し続けるため再起動が必要
+      launchctl kickstart -k system/com.shinbunbun.macos-log-stream
     fi
 
     # 古いアーカイブを削除
