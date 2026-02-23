@@ -7,19 +7,27 @@
   - SOPS統合によるOIDCクレデンシャルの安全な管理
   - GitHub Deploy Keyの自動投入（k8s-appsリポジトリアクセス用）
   - ArgoCD Image Updater用ghcr.ioレジストリ認証シークレットの投入
+  - KSOPS（Kustomize + SOPS）によるGitリポジトリ内暗号化Secret管理
   - Authentik OIDCによるSSO認証
   - グループベースのRBAC（ArgoCD Admins / ArgoCD Users）
+
+  KSOPS対応:
+  - repo-serverにKSOPSプラグインをinitContainerでインストール
+  - k8s専用Age秘密鍵をKubernetes Secretとして投入し、repo-serverにマウント
+  - k8s-appsリポジトリ内のSOPS暗号化SecretをArgoCD同期時に自動復号
 
   使用方法:
   1. dotfiles-privateのnixos-desktop設定でこのモジュールをimport
   2. secrets/argocd.yamlにOIDCクレデンシャル、Deploy Key、ghcr PATを設定
-  3. nixos-rebuildでデプロイ
-  4. https://argocd.shinbunbun.com でアクセス
+  3. secrets/k8s-age-key.yamlにk8s専用Age秘密鍵をSOPS暗号化して保存
+  4. nixos-rebuildでデプロイ
+  5. https://argocd.shinbunbun.com でアクセス
 
   前提条件:
   - k3sサービスが有効であること
   - Cloudflare Tunnelが設定済みであること
   - Authentik OIDCプロバイダーが設定済みであること
+  - k8s専用Age鍵ペアが生成済みであること
 */
 {
   config,
@@ -49,6 +57,8 @@ let
     configs = {
       cm = {
         url = "https://${argocdCfg.domain}";
+        # KSOPS（Kustomize + SOPS）プラグインを有効化
+        "kustomize.buildOptions" = "--enable-alpha-plugins --enable-exec";
         # Dex を無効化（外部 OIDC を直接使用）
         "dex.config" = "";
         # OIDC 設定
@@ -99,6 +109,67 @@ let
     # Notifications を無効化（不要）
     notifications = {
       enabled = false;
+    };
+
+    # repo-server に KSOPS プラグインと Age 鍵を追加
+    repoServer = {
+      # KSOPS バイナリをインストールする init container
+      initContainers = [
+        {
+          name = "install-ksops";
+          image = argocdCfg.ksopsImage;
+          command = [
+            "/bin/sh"
+            "-c"
+          ];
+          args = [ "cp /usr/local/bin/ksops /custom-tools/ksops" ];
+          volumeMounts = [
+            {
+              mountPath = "/custom-tools";
+              name = "custom-tools";
+            }
+          ];
+        }
+      ];
+
+      # カスタムツールと Age 鍵用のボリューム
+      volumes = [
+        {
+          name = "custom-tools";
+          emptyDir = { };
+        }
+        {
+          name = "sops-age";
+          secret = {
+            secretName = "sops-age-key";
+          };
+        }
+      ];
+
+      # KSOPS バイナリと Age 鍵のマウント
+      volumeMounts = [
+        {
+          mountPath = "/usr/local/bin/ksops";
+          name = "custom-tools";
+          subPath = "ksops";
+        }
+        {
+          mountPath = "/home/argocd/.config/sops/age";
+          name = "sops-age";
+        }
+      ];
+
+      # SOPS が Age 鍵ファイルを見つけるための環境変数
+      env = [
+        {
+          name = "XDG_CONFIG_HOME";
+          value = "/home/argocd/.config";
+        }
+        {
+          name = "SOPS_AGE_KEY_FILE";
+          value = "/home/argocd/.config/sops/age/keys.txt";
+        }
+      ];
     };
   };
 
@@ -169,6 +240,13 @@ in
       group = "root";
       mode = "0400";
     };
+    # k8s専用Age秘密鍵（KSOPS復号用、ArgoCD repo-serverに投入）
+    "k8s/age_key" = {
+      sopsFile = "${inputs.self}/secrets/k8s-age-key.yaml";
+      owner = "root";
+      group = "root";
+      mode = "0400";
+    };
   };
 
   # Kubernetes Secret 投入用 systemd サービス
@@ -198,6 +276,7 @@ in
         oidcClientSecretPath = config.sops.secrets."argocd/oidc_client_secret".path;
         deployKeyPath = config.sops.secrets."argocd/github_deploy_key".path;
         ghcrPatPath = config.sops.secrets."argocd/ghcr_pat".path;
+        k8sAgeKeyPath = config.sops.secrets."k8s/age_key".path;
         ghcrUsername = cfg.ghcr.username;
       in
       ''
@@ -245,6 +324,12 @@ in
           --dry-run=client -o yaml | kubectl apply -f -
         kubectl -n ${argocdCfg.namespace} label secret repo-k8s-apps \
           argocd.argoproj.io/secret-type=repository --overwrite
+
+        # k8s専用 Age 秘密鍵を Kubernetes Secret として投入（KSOPS復号用）
+        echo "Applying k8s Age key for KSOPS..."
+        kubectl -n ${argocdCfg.namespace} create secret generic sops-age-key \
+          --from-file=keys.txt=${k8sAgeKeyPath} \
+          --dry-run=client -o yaml | kubectl apply -f -
 
         # Image Updater 用 ghcr.io レジストリ認証シークレット
         echo "Applying Image Updater ghcr.io credentials..."
