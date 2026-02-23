@@ -24,8 +24,14 @@ in
     # macOS推奨: Fixed-output derivations（npm依存関係など）をサンドボックスから除外
     # これによりDNS解決とネットワークアクセスが正常に動作する
     sandbox = "relaxed";
-    trusted-users = [ "@admin" ];
-    allowed-users = [ "@admin" ];
+    trusted-users = [
+      "@admin"
+      "_github-runner"
+    ];
+    allowed-users = [
+      "@admin"
+      "_github-runner"
+    ];
 
     # Attic バイナリキャッシュ設定（プライベート）
     substituters = [
