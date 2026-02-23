@@ -101,6 +101,10 @@ let
     };
   };
 
+  # Nix store に保存するマニフェストファイル
+  helmChartFile = pkgs.writeText "argocd-helmchart.yaml" helmChartManifest;
+  ingressRouteFile = pkgs.writeText "argocd-ingress.yaml" ingressRouteManifest;
+
   # HelmChart CRD マニフェスト
   helmChartManifest = ''
     apiVersion: helm.cattle.io/v1
@@ -137,11 +141,6 @@ let
   '';
 in
 {
-  # k3s マニフェスト配置（/var/lib/rancher/k3s/server/manifests/ に配置して k3s が自動適用）
-  systemd.tmpfiles.rules = [
-    "L+ /var/lib/rancher/k3s/server/manifests/argocd.yaml - - - - ${pkgs.writeText "argocd.yaml" helmChartManifest}"
-    "L+ /var/lib/rancher/k3s/server/manifests/argocd-ingress.yaml - - - - ${pkgs.writeText "argocd-ingress.yaml" ingressRouteManifest}"
-  ];
 
   # SOPS シークレット定義
   sops.secrets = {
@@ -200,6 +199,11 @@ in
         until kubectl cluster-info >/dev/null 2>&1; do
           sleep 5
         done
+
+        # HelmChart CRD と IngressRoute を kubectl apply で適用
+        echo "Applying ArgoCD HelmChart and IngressRoute manifests..."
+        kubectl apply -f ${helmChartFile}
+        kubectl apply -f ${ingressRouteFile}
 
         # ArgoCD namespace が作成されるまで待機
         echo "Waiting for ArgoCD namespace..."
