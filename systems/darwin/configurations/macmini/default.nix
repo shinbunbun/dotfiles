@@ -32,6 +32,9 @@ in
     # 外部モジュール
     inputs.home-manager.darwinModules.home-manager
     inputs.sops-nix.darwinModules.sops
+
+    # GitHub Actions Self-Hosted Runner
+    ./github-runner.nix
   ];
 
   # ホスト名設定
