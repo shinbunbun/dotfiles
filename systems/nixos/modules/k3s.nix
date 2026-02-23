@@ -68,6 +68,48 @@ in
       extraFlags = lib.strings.concatStringsSep " " extraFlags;
     };
 
+    # ghcr.io認証用のregistries.yamlを動的生成するsystemdサービス
+    # k3sのcontainerdレベルでレジストリ認証を設定し、ImagePullSecretを不要にする
+    # SOPSシークレット定義はargocd.nixモジュールで行う
+    systemd.services.k3s-registries = {
+      description = "k3s Container Registry Authentication Setup";
+      before = [ "k3s.service" ];
+      after = [ "sops-nix.service" ];
+      wantedBy = [ "multi-user.target" ];
+
+      path = [ pkgs.coreutils ];
+
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+      };
+
+      script =
+        let
+          ghcrPatPath = config.sops.secrets."argocd/ghcr_pat".path;
+          registry = cfg.ghcr.registry;
+          username = cfg.ghcr.username;
+        in
+        ''
+          mkdir -p /etc/rancher/k3s
+
+          GHCR_PAT=$(cat ${ghcrPatPath})
+          cat > /etc/rancher/k3s/registries.yaml <<EOF
+          mirrors:
+            ${registry}:
+              endpoint:
+                - "https://${registry}"
+          configs:
+            "${registry}":
+              auth:
+                username: ${username}
+                password: $GHCR_PAT
+          EOF
+
+          chmod 0600 /etc/rancher/k3s/registries.yaml
+        '';
+    };
+
     # k3sツールとkubectl等をシステムパスに追加
     environment.systemPackages = with pkgs; [
       k3s
