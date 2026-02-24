@@ -182,6 +182,7 @@ let
         extraFlags = [
           "--flannel-backend=vxlan"
           "--write-kubeconfig-mode=0644"
+          "--node-ip=192.168.1.4"
         ];
       };
 
