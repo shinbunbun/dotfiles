@@ -183,6 +183,11 @@ let
           "--flannel-backend=vxlan"
           "--write-kubeconfig-mode=0644"
           "--node-ip=192.168.1.4"
+          # kubelet: cadvisorの統計収集間隔を延長（デフォルト10s → 30s）
+          "--kubelet-arg=housekeeping-interval=30s"
+          # NetworkPolicyコントローラ（kube-router）を無効化
+          # 3秒ごとのmetrics tickループを停止させる
+          "--disable-network-policy"
         ];
 
         # GoランタイムのMAXPROCS設定（CPUコア数が多い環境でスケジューラの空回りを防止）

@@ -54,6 +54,23 @@ let
   clusterInit = k3sConfig.clusterInit or false;
   extraFlags = k3sConfig.extraFlags or [ ];
   goMaxProcs = k3sConfig.goMaxProcs or null;
+
+  # Traefik HelmChartConfig: Hub機能とGateway API providerを無効化し、
+  # 不要なCRD watchersを削減してAPI serverの負荷を軽減する
+  traefikConfig = pkgs.writeText "traefik-config.yaml" ''
+    apiVersion: helm.cattle.io/v1
+    kind: HelmChartConfig
+    metadata:
+      name: traefik
+      namespace: kube-system
+    spec:
+      valuesContent: |-
+        hub:
+          enabled: false
+        providers:
+          kubernetesGateway:
+            enabled: false
+  '';
 in
 {
   config = lib.mkIf enable {
@@ -68,6 +85,12 @@ in
       # 追加フラグ
       extraFlags = lib.strings.concatStringsSep " " extraFlags;
     };
+
+    # Traefik HelmChartConfigをk3sマニフェストディレクトリに自動配置
+    # k3sが起動時に自動デプロイする
+    systemd.tmpfiles.rules = [
+      "L+ /var/lib/rancher/k3s/server/manifests/traefik-config.yaml - - - - ${traefikConfig}"
+    ];
 
     # GoランタイムのMAXPROCS制限（CPUコア数が多い環境でスケジューラの空回りを防止）
     systemd.services.k3s.environment = lib.mkIf (goMaxProcs != null) {
