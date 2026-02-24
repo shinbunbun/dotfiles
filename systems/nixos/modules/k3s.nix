@@ -53,6 +53,7 @@ let
   role = k3sConfig.role or "server";
   clusterInit = k3sConfig.clusterInit or false;
   extraFlags = k3sConfig.extraFlags or [ ];
+  goMaxProcs = k3sConfig.goMaxProcs or null;
 in
 {
   config = lib.mkIf enable {
@@ -66,6 +67,11 @@ in
 
       # 追加フラグ
       extraFlags = lib.strings.concatStringsSep " " extraFlags;
+    };
+
+    # GoランタイムのMAXPROCS制限（CPUコア数が多い環境でスケジューラの空回りを防止）
+    systemd.services.k3s.environment = lib.mkIf (goMaxProcs != null) {
+      GOMAXPROCS = toString goMaxProcs;
     };
 
     # ghcr.io認証用のregistries.yamlを動的生成するsystemdサービス
