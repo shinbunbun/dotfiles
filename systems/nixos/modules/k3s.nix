@@ -53,7 +53,6 @@ let
   role = k3sConfig.role or "server";
   clusterInit = k3sConfig.clusterInit or false;
   extraFlags = k3sConfig.extraFlags or [ ];
-  goMaxProcs = k3sConfig.goMaxProcs or null;
 
   # Traefik HelmChartConfig: Hub機能とGateway API providerを無効化し、
   # 不要なCRD watchersを削減してAPI serverの負荷を軽減する
@@ -91,11 +90,6 @@ in
     systemd.tmpfiles.rules = [
       "L+ /var/lib/rancher/k3s/server/manifests/traefik-config.yaml - - - - ${traefikConfig}"
     ];
-
-    # GoランタイムのMAXPROCS制限（CPUコア数が多い環境でスケジューラの空回りを防止）
-    systemd.services.k3s.environment = lib.mkIf (goMaxProcs != null) {
-      GOMAXPROCS = toString goMaxProcs;
-    };
 
     # ghcr.io認証用のregistries.yamlを動的生成するsystemdサービス
     # k3sのcontainerdレベルでレジストリ認証を設定し、ImagePullSecretを不要にする
