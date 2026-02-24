@@ -184,6 +184,9 @@ let
           "--write-kubeconfig-mode=0644"
           "--node-ip=192.168.1.4"
         ];
+
+        # GoランタイムのMAXPROCS設定（CPUコア数が多い環境でスケジューラの空回りを防止）
+        goMaxProcs = assertType "k3s.desktop.goMaxProcs" 4 builtins.isInt "Must be an integer";
       };
 
       # 将来のhomeMachine用設定（現時点では無効）
