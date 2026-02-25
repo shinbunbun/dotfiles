@@ -62,6 +62,7 @@
     # nixos-observability-config
     nixos-observability-config = {
       url = "github:shinbunbun/nixos-observability-config";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # deploy-rs
