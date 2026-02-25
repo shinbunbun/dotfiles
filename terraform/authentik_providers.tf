@@ -77,6 +77,7 @@ resource "authentik_provider_oauth2" "grafana" {
     { matching_mode = "strict", url = "https://grafana.shinbunbun.com/login/generic_oauth" }
   ]
   property_mappings = [
+    authentik_property_mapping_provider_scope.oidc_groups.id,
     data.authentik_property_mapping_provider_scope.openid.id,
     data.authentik_property_mapping_provider_scope.email.id,
     data.authentik_property_mapping_provider_scope.profile.id,
