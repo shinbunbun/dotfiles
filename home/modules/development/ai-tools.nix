@@ -3,7 +3,7 @@
 
   このモジュールはAI関連のツールを提供します：
   - claude-code: Claudeの公式CLIツール
-  - loki-mcp-server: Loki MCPサーバー（Claude CodeからLokiへのLogQLクエリ実行用）
+  - mcp-grafana: Grafana MCPサーバー（Claude CodeからGrafana/Loki/Prometheusへのクエリ実行用）
 
   Claudeのグローバル設定ファイル（CLAUDE.md）も配置し、
   日本語での応答をデフォルト設定としています。
@@ -14,7 +14,7 @@
     with pkgs;
     lib.optionals stdenv.isLinux [
       claude-code
-      loki-mcp-server
+      mcp-grafana
     ];
 
   home.file.".claude/CLAUDE.md" = {

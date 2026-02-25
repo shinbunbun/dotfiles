@@ -68,7 +68,6 @@ in
   nixpkgs.config.allowUnfree = true;
   nixpkgs.overlays = [
     inputs.claude-code.overlays.default
-    (import ../../overlays/loki-mcp.nix)
   ];
 
   # RouterOSバックアップ設定
