@@ -12,9 +12,11 @@
 {
   home.packages =
     with pkgs;
-    lib.optionals stdenv.isLinux [
-      claude-code
+    [
       mcp-grafana
+    ]
+    ++ lib.optionals stdenv.isLinux [
+      claude-code
     ];
 
   home.file.".claude/CLAUDE.md" = {
