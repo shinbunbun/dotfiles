@@ -237,6 +237,7 @@ in
           authUrl = "${cfg.authentik.baseUrl}/application/o/authorize/";
           tokenUrl = "${cfg.authentik.baseUrl}/application/o/token/";
           apiUrl = "${cfg.authentik.baseUrl}/application/o/userinfo/";
+          scopes = "openid email profile groups";
           roleAttributePath = "contains(groups[*], 'Grafana Admins') && 'Admin' || contains(groups[*], 'Grafana Editors') && 'Editor' || 'Viewer'";
           autoLogin = true;
         };

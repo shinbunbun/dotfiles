@@ -25,3 +25,9 @@ resource "authentik_group" "argocd_users" {
   name         = "ArgoCD Users"
   is_superuser = false
 }
+
+resource "authentik_group" "grafana_admins" {
+  name         = "Grafana Admins"
+  is_superuser = false
+  users        = [data.authentik_user.shinbunbun.id]
+}
