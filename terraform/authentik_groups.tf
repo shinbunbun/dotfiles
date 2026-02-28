@@ -8,7 +8,7 @@
 resource "authentik_group" "cloudflare_access" {
   name         = "Cloudflare Access"
   is_superuser = false
-  users        = [authentik_user.hina.id]
+  users        = [authentik_user.hina.id, data.authentik_user.shinbunbun.id]
 }
 
 resource "authentik_group" "obsidian_users" {
