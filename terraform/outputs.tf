@@ -11,6 +11,7 @@ output "access_application_ids" {
     desktop_ttyd          = cloudflare_zero_trust_access_application.desktop_ttyd.id
     opensearch_dashboards = cloudflare_zero_trust_access_application.opensearch_dashboards.id
     argocd                = cloudflare_zero_trust_access_application.argocd.id
+    calendar_bot          = cloudflare_zero_trust_access_application.calendar_bot.id
   }
 }
 
