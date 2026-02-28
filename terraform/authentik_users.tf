@@ -8,4 +8,5 @@
 resource "authentik_user" "hina" {
   username = "hina"
   name     = "hina"
+  email    = "hina@shinbunbun.com"
 }
