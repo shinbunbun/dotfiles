@@ -65,7 +65,7 @@ in
 
           # Google Calendar Bot - Zero Trust Accessで認証必要
           "${tunnelConfig.calendarBot.domain}" = {
-            service = "http://localhost:8080";
+            service = "http://localhost:80"; # Traefik (k8s)
             originRequest = {
               noTLSVerify = true;
               httpHostHeader = "${tunnelConfig.calendarBot.domain}";
