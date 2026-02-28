@@ -8,6 +8,7 @@
 resource "authentik_group" "cloudflare_access" {
   name         = "Cloudflare Access"
   is_superuser = false
+  users        = [authentik_user.hina.id]
 }
 
 resource "authentik_group" "obsidian_users" {
@@ -24,6 +25,7 @@ resource "authentik_group" "argocd_admins" {
 resource "authentik_group" "argocd_users" {
   name         = "ArgoCD Users"
   is_superuser = false
+  users        = [authentik_user.hina.id]
 }
 
 resource "authentik_group" "grafana_admins" {
