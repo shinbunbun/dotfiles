@@ -26,6 +26,7 @@ in
     # シェルツール
     ../../modules/shell/shell-tools.nix
     ../../modules/shell/version-control.nix
+    ../../modules/shell/tmux.nix
 
     # セキュリティツール
     ../../modules/security/security-tools.nix
