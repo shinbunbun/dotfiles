@@ -56,6 +56,11 @@ in
     KbdInteractiveAuthentication no
   '';
 
+  # Mosh（Mobile Shell）パッケージ
+  environment.systemPackages = [
+    pkgs.mosh
+  ];
+
   # SSH公開鍵認証（nix-darwinのAuthorizedKeysCommand経由で配置）
   users.users.${username}.openssh.authorizedKeys.keys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPsh7m83p/bIrnzDVYUTzNfw9OAgVH1nu80Qg2TElgVL"
