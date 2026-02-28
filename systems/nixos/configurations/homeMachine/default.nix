@@ -34,6 +34,7 @@ in
     ../../modules/wireguard.nix
 
     # サービスモジュール
+    ../../modules/services/mosh.nix
     ../../modules/services/services.nix
     # ../../modules/services/monitoring.nix          # nixos-observability に移行
     # ../../modules/services/alertmanager.nix        # nixos-observability に移行
