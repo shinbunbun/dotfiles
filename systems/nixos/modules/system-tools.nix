@@ -8,7 +8,6 @@
   - openssl: 暗号化ツール
   - python3: スクリプト実行環境
   - gnumake: ビルド自動化ツール
-  - attic: Nix binary cacheクライアント
 
   これらのツールをシステム全体で利用可能にします。
 */

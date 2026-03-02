@@ -1,6 +1,6 @@
-# Cloudflare Terraform設定
+# Cloudflare + Authentik Terraform設定
 
-このディレクトリには、CloudflareのDNSレコードとAccess PolicyをTerraformで管理するための設定が含まれています。
+このディレクトリには、CloudflareのDNSレコード・Access PolicyおよびAuthentikのIdP設定をTerraformで管理するための設定が含まれています。
 
 ## 概要
 
@@ -11,6 +11,14 @@
   - Terraform CloudFlare Provider v5で`cloudflare_zero_trust_access_policy`リソースのOIDC claim対応が実装されたため、Terraformで管理
   - 全アプリケーションで共有の認証ポリシーを使用
 - **DNS Records**: トンネルに関連するDNSレコード(CNAMEレコード)
+- **Authentik**:
+  - OAuth2/Proxyプロバイダー
+  - アプリケーション登録
+  - ユーザー・グループ管理
+  - 認可ポリシー・バインディング
+  - アウトポスト設定
+  - プロパティマッピング
+  - フェデレーションソース
 
 ### 管理対象外 (NixOSで管理)
 
@@ -123,15 +131,25 @@ terraform destroy
 
 ```
 terraform/
-├── versions.tf              # Terraformとプロバイダーのバージョン指定
-├── backend.tf               # R2バックエンド設定
-├── main.tf                  # プロバイダー設定とローカル変数
-├── variables.tf             # 変数定義
-├── access_policies.tf       # Access ApplicationとPolicyの定義
-├── dns_records.tf           # DNSレコードの定義
-├── outputs.tf               # 出力変数の定義
-├── .gitignore               # Git除外設定
-└── README.md                # このファイル
+├── versions.tf                    # Terraformとプロバイダーのバージョン指定
+├── backend.tf                     # R2バックエンド設定
+├── main.tf                        # プロバイダー設定とローカル変数
+├── variables.tf                   # 変数定義
+├── access_policies.tf             # Access ApplicationとPolicyの定義
+├── dns_records.tf                 # DNSレコードの定義
+├── outputs.tf                     # 出力変数の定義
+├── authentik_applications.tf      # Authentikアプリケーション登録
+├── authentik_data.tf              # Authentikデータソース参照
+├── authentik_groups.tf            # Authentikグループ管理
+├── authentik_outposts.tf          # Authentikアウトポスト設定
+├── authentik_policies.tf          # Authentik認可ポリシー
+├── authentik_policy_bindings.tf   # Authentikポリシーバインディング
+├── authentik_property_mappings.tf # Authentikプロパティマッピング
+├── authentik_providers.tf         # Authentik OAuth2/Proxyプロバイダー
+├── authentik_sources.tf           # Authentikフェデレーションソース
+├── authentik_users.tf             # Authentikユーザー管理
+├── .gitignore                     # Git除外設定
+└── README.md                      # このファイル
 ```
 
 ## 管理対象のサービス
@@ -152,7 +170,6 @@ terraform/
 |---------|-----|-----------|------|
 | Cockpit | ✓ | ✓ | OIDC認証 |
 | ttyd | ✓ | ✓ | OIDC認証 |
-| OpenSearch Dashboards | ✓ | ✓ | OIDC認証 |
 
 ## State管理
 

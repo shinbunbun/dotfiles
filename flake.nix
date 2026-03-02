@@ -200,19 +200,13 @@
 
         # Service modules
         services = {
-          monitoring = ./systems/nixos/modules/services/monitoring.nix;
-          loki = ./systems/nixos/modules/services/loki.nix;
           cockpit = ./systems/nixos/modules/services/cockpit.nix;
           ttyd = ./systems/nixos/modules/services/ttyd.nix;
-          opensearch = ./systems/nixos/modules/services/opensearch.nix;
-          opensearch-dashboards = ./systems/nixos/modules/services/opensearch-dashboards.nix;
-          fluent-bit = ./systems/nixos/modules/services/fluent-bit.nix;
           authentik = ./systems/nixos/modules/services/authentik.nix;
           obsidian-livesync = ./systems/nixos/modules/services/obsidian-livesync.nix;
           routeros-backup = ./systems/nixos/modules/services/routeros-backup.nix;
           unified-cloudflare-tunnel = ./systems/nixos/modules/services/unified-cloudflare-tunnel.nix;
           desktop-cloudflare-tunnel = ./systems/nixos/modules/services/desktop-cloudflare-tunnel.nix;
-          alertmanager = ./systems/nixos/modules/services/alertmanager.nix;
           attic = ./systems/nixos/modules/services/attic.nix;
           peer-issuer = ./systems/nixos/modules/services/peer-issuer.nix;
           deploy-user = ./systems/nixos/modules/services/deploy-user.nix;
