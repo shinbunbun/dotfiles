@@ -59,6 +59,10 @@ let
         url = "https://${argocdCfg.domain}";
         # KSOPS（Kustomize + SOPS）プラグインを有効化
         "kustomize.buildOptions" = "--enable-alpha-plugins --enable-exec";
+        # Web Terminal（exec）機能を有効化
+        "exec.enabled" = "true";
+        # 利用可能なシェルの優先順位（Linux Podのみ想定）
+        "exec.shells" = "bash,sh";
         # Dex を無効化（外部 OIDC を直接使用）
         "dex.config" = "";
         # OIDC 設定
@@ -86,6 +90,7 @@ let
           p, role:app-manager, applications, sync, */*, allow
           p, role:app-manager, applications, action/*, */*, allow
           p, role:app-manager, logs, get, */*, allow
+          p, role:app-manager, exec, create, */*, allow
           p, role:app-manager, projects, get, *, allow
           g, ArgoCD Admins, role:admin
           g, ArgoCD Users, role:app-manager
