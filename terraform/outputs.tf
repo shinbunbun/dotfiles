@@ -12,6 +12,7 @@ output "access_application_ids" {
     opensearch_dashboards = cloudflare_zero_trust_access_application.opensearch_dashboards.id
     argocd                = cloudflare_zero_trust_access_application.argocd.id
     calendar_bot          = cloudflare_zero_trust_access_application.calendar_bot.id
+    calendar_bot_webhook  = cloudflare_zero_trust_access_application.calendar_bot_webhook.id
   }
 }
 
@@ -46,11 +47,11 @@ output "tunnel_endpoints" {
 output "authentik_applications" {
   description = "Authentik Application slugs"
   value = {
-    couchdb              = authentik_application.couchdb.slug
+    couchdb               = authentik_application.couchdb.slug
     cloudflare_zero_trust = authentik_application.cloudflare_zero_trust.slug
-    grafana              = authentik_application.grafana.slug
+    grafana               = authentik_application.grafana.slug
     opensearch_dashboards = authentik_application.opensearch_dashboards.slug
-    wg_lease             = authentik_application.wg_lease.slug
-    argocd               = authentik_application.argocd.slug
+    wg_lease              = authentik_application.wg_lease.slug
+    argocd                = authentik_application.argocd.slug
   }
 }

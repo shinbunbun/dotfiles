@@ -154,12 +154,40 @@ resource "cloudflare_zero_trust_access_application" "calendar_bot" {
   }]
 }
 
+# Google Calendar Bot Webhook - 認証バイパス（Google Push通知受信用）
+resource "cloudflare_zero_trust_access_application" "calendar_bot_webhook" {
+  account_id                = var.cloudflare_account_id
+  name                      = "Google Calendar Bot Webhook"
+  domain                    = "${local.desktop_services.calendar_bot}/api/webhook/calendar"
+  type                      = "self_hosted"
+  session_duration          = "24h"
+  auto_redirect_to_identity = false
+  enable_binding_cookie     = false
+  options_preflight_bypass  = false
+
+  policies = [{
+    id         = cloudflare_zero_trust_access_policy.webhook_bypass.id
+    precedence = 1
+  }]
+}
+
 
 # ========================================
 # CloudFlare Zero Trust Access Policies
 # ========================================
 # 全ApplicationでOIDC認証Policyを共有
 # ========================================
+
+# 共有Policy: Webhookバイパス（認証不要な外部連携パス用）
+resource "cloudflare_zero_trust_access_policy" "webhook_bypass" {
+  account_id = var.cloudflare_account_id
+  name       = "Webhook Bypass"
+  decision   = "bypass"
+
+  include = [{
+    everyone = {}
+  }]
+}
 
 # 共有Policy: OIDC groups claim認証
 resource "cloudflare_zero_trust_access_policy" "oidc_groups_allow" {
