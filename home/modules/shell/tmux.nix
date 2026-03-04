@@ -6,6 +6,7 @@
   - 直感的なキーバインド（| で縦分割、- で横分割）
   - システムクリップボード連携（tmux-yank）
   - 基本設定の改善（tmux-sensible）
+  - 拡張キー対応（Shift+Enter等の修飾キー付きシーケンスをアプリケーションに転送）
 
   使い方:
     tmux           - 新しいセッションを開始
@@ -57,6 +58,10 @@
 
       # ペイン番号も1始まりに
       setw -g pane-base-index 1
+
+      # 拡張キー対応（Shift+Enter等の修飾キー付きシーケンスをアプリケーションに転送）
+      set -s extended-keys on
+      set -as terminal-features 'xterm*:extkeys'
     '';
   };
 }
