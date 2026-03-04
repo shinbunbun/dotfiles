@@ -54,6 +54,74 @@ let
   clusterInit = k3sConfig.clusterInit or false;
   extraFlags = k3sConfig.extraFlags or [ ];
 
+  # 監視用RBACマニフェスト: Prometheus外部スクレイプ用のServiceAccount・ClusterRole・トークン
+  # k3s起動時に自動デプロイされ、長寿命トークンで認証する
+  monitoringRbacConfig = pkgs.writeText "monitoring-rbac.yaml" ''
+    apiVersion: v1
+    kind: Namespace
+    metadata:
+      name: monitoring
+    ---
+    apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      name: monitoring-sa
+      namespace: monitoring
+    ---
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: ClusterRole
+    metadata:
+      name: monitoring-reader
+    rules:
+      - apiGroups: [""]
+        resources:
+          - nodes
+          - nodes/metrics
+          - nodes/proxy
+          - services
+          - endpoints
+          - pods
+        verbs: ["get", "list", "watch"]
+      - apiGroups: ["apps"]
+        resources:
+          - deployments
+          - replicasets
+          - statefulsets
+          - daemonsets
+        verbs: ["get", "list", "watch"]
+      - apiGroups: ["batch"]
+        resources:
+          - jobs
+          - cronjobs
+        verbs: ["get", "list", "watch"]
+      - nonResourceURLs:
+          - /metrics
+          - /metrics/cadvisor
+        verbs: ["get"]
+    ---
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: ClusterRoleBinding
+    metadata:
+      name: monitoring-reader-binding
+    roleRef:
+      apiGroup: rbac.authorization.k8s.io
+      kind: ClusterRole
+      name: monitoring-reader
+    subjects:
+      - kind: ServiceAccount
+        name: monitoring-sa
+        namespace: monitoring
+    ---
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: monitoring-sa-token
+      namespace: monitoring
+      annotations:
+        kubernetes.io/service-account.name: monitoring-sa
+    type: kubernetes.io/service-account-token
+  '';
+
   # Traefik HelmChartConfig: Hub機能とGateway API providerを無効化し、
   # 不要なCRD watchersを削減してAPI serverの負荷を軽減する
   traefikConfig = pkgs.writeText "traefik-config.yaml" ''
@@ -85,10 +153,11 @@ in
       extraFlags = lib.strings.concatStringsSep " " extraFlags;
     };
 
-    # Traefik HelmChartConfigをk3sマニフェストディレクトリに自動配置
+    # k3sマニフェストディレクトリに設定ファイルを自動配置
     # k3sが起動時に自動デプロイする
     systemd.tmpfiles.rules = [
       "L+ /var/lib/rancher/k3s/server/manifests/traefik-config.yaml - - - - ${traefikConfig}"
+      "L+ /var/lib/rancher/k3s/server/manifests/monitoring-rbac.yaml - - - - ${monitoringRbacConfig}"
     ];
 
     # ghcr.io認証用のregistries.yamlを動的生成するsystemdサービス
@@ -156,6 +225,7 @@ in
       allowedTCPPorts = lib.mkIf (role == "server") [
         6443 # Kubernetes API Server
         10250 # Kubelet metrics
+        cfg.monitoring.k3sMetrics.kubeStateMetricsPort # kube-state-metrics NodePort
       ];
 
       # k3s内部通信用ポート範囲
