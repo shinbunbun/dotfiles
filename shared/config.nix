@@ -362,6 +362,19 @@ let
             "Must be a string";
       };
 
+      # k3sメトリクス設定
+      k3sMetrics = {
+        kubeStateMetricsPort =
+          assertType "monitoring.k3sMetrics.kubeStateMetricsPort" 30080 isValidPort
+            "Must be a valid port number (1-65535)";
+        kubeletPort =
+          assertType "monitoring.k3sMetrics.kubeletPort" 10250 isValidPort
+            "Must be a valid port number (1-65535)";
+        apiServerPort =
+          assertType "monitoring.k3sMetrics.apiServerPort" 6443 isValidPort
+            "Must be a valid port number (1-65535)";
+      };
+
       # Loki設定
       loki = {
         port = assertType "monitoring.loki.port" 3100 isValidPort "Must be a valid port number (1-65535)";
@@ -575,6 +588,9 @@ let
       opensearchPort =
         assertType "fluentBit.opensearchPort" 9200 isValidPort
           "Must be a valid port number (1-65535)";
+      k3sPodLogDir =
+        assertType "fluentBit.k3sPodLogDir" "/var/log/pods" isValidPath
+          "Must be an absolute path";
     };
 
     # Atticバイナリキャッシュ設定
