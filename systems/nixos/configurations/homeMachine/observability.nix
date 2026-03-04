@@ -88,6 +88,15 @@ in
       group = "prometheus";
       mode = "0400";
     };
+
+    # k3s監視用トークン
+    secrets."k3s/monitoring_token" = {
+      key = "k3s_monitoring_token";
+      sopsFile = "${inputs.self}/secrets/monitoring.yaml";
+      owner = "prometheus";
+      group = "prometheus";
+      mode = "0400";
+    };
   };
 
   # オブザーバビリティ設定（nixos-observability）
@@ -204,6 +213,78 @@ in
               {
                 target_label = "__address__";
                 replacement = "localhost:${toString cfg.monitoring.snmpExporter.port}";
+              }
+            ];
+          }
+          # k3s kubeletメトリクス
+          {
+            job_name = "k3s-kubelet";
+            scheme = "https";
+            tls_config = {
+              insecure_skip_verify = true;
+            };
+            bearer_token_file = config.sops.secrets."k3s/monitoring_token".path;
+            static_configs = [
+              {
+                targets = [
+                  "${cfg.networking.hosts.nixosDesktop.ip}:${toString cfg.monitoring.k3sMetrics.kubeletPort}"
+                ];
+                labels = {
+                  instance = cfg.networking.hosts.nixosDesktop.hostname;
+                };
+              }
+            ];
+          }
+          # k3s cAdvisorメトリクス（コンテナリソース使用量）
+          {
+            job_name = "k3s-cadvisor";
+            scheme = "https";
+            tls_config = {
+              insecure_skip_verify = true;
+            };
+            bearer_token_file = config.sops.secrets."k3s/monitoring_token".path;
+            metrics_path = "/metrics/cadvisor";
+            static_configs = [
+              {
+                targets = [
+                  "${cfg.networking.hosts.nixosDesktop.ip}:${toString cfg.monitoring.k3sMetrics.kubeletPort}"
+                ];
+                labels = {
+                  instance = cfg.networking.hosts.nixosDesktop.hostname;
+                };
+              }
+            ];
+          }
+          # k3s API Serverメトリクス
+          {
+            job_name = "k3s-apiserver";
+            scheme = "https";
+            tls_config = {
+              insecure_skip_verify = true;
+            };
+            bearer_token_file = config.sops.secrets."k3s/monitoring_token".path;
+            static_configs = [
+              {
+                targets = [
+                  "${cfg.networking.hosts.nixosDesktop.ip}:${toString cfg.monitoring.k3sMetrics.apiServerPort}"
+                ];
+                labels = {
+                  instance = cfg.networking.hosts.nixosDesktop.hostname;
+                };
+              }
+            ];
+          }
+          # kube-state-metricsメトリクス（クラスタオブジェクト状態）
+          {
+            job_name = "kube-state-metrics";
+            static_configs = [
+              {
+                targets = [
+                  "${cfg.networking.hosts.nixosDesktop.ip}:${toString cfg.monitoring.k3sMetrics.kubeStateMetricsPort}"
+                ];
+                labels = {
+                  instance = cfg.networking.hosts.nixosDesktop.hostname;
+                };
               }
             ];
           }
