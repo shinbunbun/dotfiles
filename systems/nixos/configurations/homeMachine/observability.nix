@@ -99,6 +99,9 @@ in
     };
   };
 
+  # bearer_token_fileがSOPSで管理され、ビルド時には存在しないためチェックを無効化
+  services.prometheus.checkConfig = false;
+
   # オブザーバビリティ設定（nixos-observability）
   services.observability = {
     # Alertmanager設定
