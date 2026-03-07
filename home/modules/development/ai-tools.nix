@@ -24,4 +24,9 @@
       ユーザーには日本語で応答してください。
     '';
   };
+
+  home.file.".claude/statusline.sh" = {
+    source = ./claude-statusline.sh;
+    executable = true;
+  };
 }
