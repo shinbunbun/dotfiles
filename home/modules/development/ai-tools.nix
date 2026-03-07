@@ -21,6 +21,12 @@
       claude-code
     ];
 
+  programs.zsh.initExtra = ''
+    if command -v gh &>/dev/null; then
+      export GITHUB_PERSONAL_ACCESS_TOKEN="$(gh auth token 2>/dev/null)"
+    fi
+  '';
+
   home.file.".claude/CLAUDE.md" = {
     text = ''
       ユーザーには日本語で応答してください。
