@@ -24,12 +24,12 @@ resource "authentik_provider_oauth2" "couchdb" {
     data.authentik_property_mapping_provider_scope.email.id,
     data.authentik_property_mapping_provider_scope.profile.id,
   ]
-  sub_mode                  = "hashed_user_id"
-  issuer_mode               = "per_provider"
+  sub_mode                   = "hashed_user_id"
+  issuer_mode                = "per_provider"
   include_claims_in_id_token = true
-  access_code_validity      = "minutes=1"
-  access_token_validity     = "minutes=5"
-  refresh_token_validity    = "days=30"
+  access_code_validity       = "minutes=1"
+  access_token_validity      = "minutes=5"
+  refresh_token_validity     = "days=30"
   lifecycle {
     ignore_changes = [logout_method, refresh_token_threshold]
   }
@@ -53,12 +53,12 @@ resource "authentik_provider_oauth2" "cloudflare_zero_trust" {
     data.authentik_property_mapping_provider_scope.email.id,
     data.authentik_property_mapping_provider_scope.profile.id,
   ]
-  sub_mode                  = "hashed_user_id"
-  issuer_mode               = "per_provider"
+  sub_mode                   = "hashed_user_id"
+  issuer_mode                = "per_provider"
   include_claims_in_id_token = true
-  access_code_validity      = "minutes=1"
-  access_token_validity     = "minutes=5"
-  refresh_token_validity    = "days=30"
+  access_code_validity       = "minutes=1"
+  access_token_validity      = "minutes=5"
+  refresh_token_validity     = "days=30"
   lifecycle {
     ignore_changes = [logout_method, refresh_token_threshold]
   }
@@ -82,12 +82,12 @@ resource "authentik_provider_oauth2" "grafana" {
     data.authentik_property_mapping_provider_scope.email.id,
     data.authentik_property_mapping_provider_scope.profile.id,
   ]
-  sub_mode                  = "hashed_user_id"
-  issuer_mode               = "per_provider"
+  sub_mode                   = "hashed_user_id"
+  issuer_mode                = "per_provider"
   include_claims_in_id_token = true
-  access_code_validity      = "minutes=1"
-  access_token_validity     = "minutes=5"
-  refresh_token_validity    = "days=30"
+  access_code_validity       = "minutes=1"
+  access_token_validity      = "minutes=5"
+  refresh_token_validity     = "days=30"
   lifecycle {
     ignore_changes = [logout_method, refresh_token_threshold]
   }
@@ -109,12 +109,12 @@ resource "authentik_provider_oauth2" "opensearch_dashboards" {
     data.authentik_property_mapping_provider_scope.email.id,
     data.authentik_property_mapping_provider_scope.profile.id,
   ]
-  sub_mode                  = "hashed_user_id"
-  issuer_mode               = "per_provider"
+  sub_mode                   = "hashed_user_id"
+  issuer_mode                = "per_provider"
   include_claims_in_id_token = true
-  access_code_validity      = "minutes=1"
-  access_token_validity     = "minutes=5"
-  refresh_token_validity    = "days=30"
+  access_code_validity       = "minutes=1"
+  access_token_validity      = "minutes=5"
+  refresh_token_validity     = "days=30"
   lifecycle {
     ignore_changes = [logout_method, refresh_token_threshold]
   }
@@ -166,10 +166,10 @@ resource "authentik_provider_proxy" "wg_lease" {
     data.authentik_property_mapping_provider_scope.profile.id,
     data.authentik_property_mapping_provider_scope.proxy.id,
   ]
-  access_token_validity      = "hours=24"
-  refresh_token_validity     = "days=30"
+  access_token_validity        = "hours=24"
+  refresh_token_validity       = "days=30"
   internal_host_ssl_validation = true
-  intercept_header_auth      = true
+  intercept_header_auth        = true
   jwks_sources = [
     authentik_source_oauth.github_actions_oidc.id,
   ]

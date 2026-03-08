@@ -9,6 +9,13 @@ provider "authentik" {
   token = var.authentik_api_token
 }
 
+# OpenSearch Provider設定
+provider "opensearch" {
+  url               = var.opensearch_url
+  healthcheck       = true
+  sign_aws_requests = false
+}
+
 # ローカル変数でドメイン情報を定義
 locals {
   # ベースドメイン
