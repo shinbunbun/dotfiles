@@ -234,9 +234,23 @@
             user = "root";
           };
         };
+
+        macmini = {
+          hostname = "macmini"; # SSH config の Host名（WireGuard VPN経由）
+          fastConnection = false; # WireGuard VPN経由なのでfalse
+          interactiveSudo = false;
+          remoteBuild = true; # リモートマシンでビルド（deployユーザーはtrusted-user）
+
+          profiles.system = {
+            sshUser = "deploy"; # デプロイ専用ユーザー
+            path = deploy-rs.lib.aarch64-darwin.activate.darwin self.darwinConfigurations.macmini;
+            user = "root";
+          };
+        };
       };
 
-      # deploy-rs checks（デプロイ先がx86_64-linuxのみのため、該当システムに限定）
+      # deploy-rs checks
       checks."x86_64-linux" = deploy-rs.lib.x86_64-linux.deployChecks self.deploy;
+      checks."aarch64-darwin" = deploy-rs.lib.aarch64-darwin.deployChecks self.deploy;
     };
 }

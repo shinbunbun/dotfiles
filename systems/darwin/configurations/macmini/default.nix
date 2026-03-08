@@ -23,7 +23,9 @@ in
     # 基本モジュール
     ../../modules/base.nix
     ../../modules/optimise.nix
-    # WireGuardは不要
+
+    # デプロイ用ユーザー
+    ../../modules/deploy-user.nix
 
     # 監視・ログ収集
     ../../modules/node-exporter.nix

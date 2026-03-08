@@ -76,7 +76,7 @@ jobs:
 
   notify-build-complete:
     name: Notify build completion
-    needs: build-nixos
+    needs: [build-nixos, build-darwin]
     runs-on: ubuntu-latest
     if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/fix/deploy') && github.event_name == 'push' && !inputs.skip_deploy
     steps:
@@ -99,6 +99,28 @@ jobs:
       ssh-hostname: homemachine
       ssh-host: "192.168.1.3"
       needs-sops: true
+    secrets:
+      AUTHENTIK_CLIENT_ID: ${{ secrets.AUTHENTIK_CLIENT_ID }}
+      ATTIC_TOKEN: ${{ secrets.ATTIC_TOKEN }}
+      ATTIC_READ_TOKEN: ${{ secrets.ATTIC_READ_TOKEN }}
+      DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+      SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
+
+  deploy-macmini:
+    name: Deploy to macmini
+    needs: [build-darwin, notify-build-complete]
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/fix/deploy') && github.event_name == 'push' && !inputs.skip_deploy
+    uses: shinbunbun/nix-ci-workflows/.github/workflows/deploy-nix.yaml@main
+    with:
+      environment: production
+      deploy-target: ".#macmini"
+      ssh-hostname: macmini
+      ssh-host: "192.168.1.5"
+      ssh-port: '22'
+      ssh-user: 'deploy'
+      needs-sops: true
+      needs-wireguard: true
     secrets:
       AUTHENTIK_CLIENT_ID: ${{ secrets.AUTHENTIK_CLIENT_ID }}
       ATTIC_TOKEN: ${{ secrets.ATTIC_TOKEN }}
