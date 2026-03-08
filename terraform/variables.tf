@@ -120,3 +120,10 @@ variable "argocd_oauth_client_secret" {
   type        = string
   sensitive   = true
 }
+
+# --- OpenSearch ---
+variable "opensearch_url" {
+  description = "OpenSearch URL"
+  type        = string
+  default     = "http://192.168.1.4:9200"
+}
