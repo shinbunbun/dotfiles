@@ -8,6 +8,7 @@
 {
   config,
   pkgs,
+  lib,
   inputs,
   ...
 }:
@@ -16,6 +17,10 @@
     sopsFile = "${inputs.self}/secrets/github-runner.yaml";
     owner = "_github-runner";
   };
+
+  # 既存の _github-runner ユーザーのホームディレクトリに合わせる
+  # nix-darwin は既存ユーザーのホームディレクトリ変更を許可しないため明示的に指定
+  users.users._github-runner.home = lib.mkForce "/private/var/lib/github-runners";
 
   services.github-runners.dotfiles-private = {
     enable = true;
