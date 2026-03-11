@@ -37,6 +37,15 @@ in
       chown -R ${deployUser}:staff /Users/${deployUser}/.ssh
       chmod 700 /Users/${deployUser}/.ssh
       chmod 600 /Users/${deployUser}/.ssh/authorized_keys
+
+      # deploy ユーザーのログインシェルを /bin/zsh に設定
+      # ssh-ng:// プロトコルでの nix-daemon 実行時に /etc/zshenv が読まれ、
+      # Nix の PATH（/run/current-system/sw/bin 等）が設定されるために必要
+      currentShell=$(dscl . -read /Users/${deployUser} UserShell 2>/dev/null | awk '{print $2}')
+      if [ "$currentShell" != "/bin/zsh" ]; then
+        echo "Setting deploy user shell to /bin/zsh (was: $currentShell)"
+        dscl . -create /Users/${deployUser} UserShell /bin/zsh
+      fi
     fi
   '';
 
