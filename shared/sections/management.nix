@@ -43,6 +43,9 @@ v: {
       calendarBot = {
         domain = v.assertString "cloudflare.desktop.calendarBot.domain" "calendar-bot.shinbunbun.com";
       };
+      mixi2Bot = {
+        domain = v.assertString "cloudflare.desktop.mixi2Bot.domain" "mixi2-bot.shinbunbun.com";
+      };
       argocd = {
         domain = v.assertString "cloudflare.desktop.argocd.domain" "argocd.shinbunbun.com";
       };
