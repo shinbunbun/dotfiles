@@ -148,3 +148,14 @@ resource "cloudflare_dns_record" "calendar_bot" {
   proxied = true
   comment = "Managed by Terraform - Google Calendar Bot via desktop-services tunnel"
 }
+
+# mixi2 Bot
+resource "cloudflare_dns_record" "mixi2_bot" {
+  zone_id = var.cloudflare_zone_id
+  name    = "mixi2-bot.${local.base_domain}"
+  content = local.desktop_tunnel_endpoint
+  type    = "CNAME"
+  ttl     = 1
+  proxied = true
+  comment = "Managed by Terraform - mixi2 Bot via desktop-services tunnel"
+}
