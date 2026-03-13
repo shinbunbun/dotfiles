@@ -154,6 +154,23 @@ resource "cloudflare_zero_trust_access_application" "calendar_bot" {
   }]
 }
 
+# mixi2 Bot - Webhook受信のため全体バイパス
+resource "cloudflare_zero_trust_access_application" "mixi2_bot" {
+  account_id                = var.cloudflare_account_id
+  name                      = "mixi2 Bot"
+  domain                    = local.desktop_services.mixi2_bot
+  type                      = "self_hosted"
+  session_duration          = "24h"
+  auto_redirect_to_identity = false
+  enable_binding_cookie     = false
+  options_preflight_bypass  = false
+
+  policies = [{
+    id         = cloudflare_zero_trust_access_policy.webhook_bypass.id
+    precedence = 1
+  }]
+}
+
 # Google Calendar Bot Webhook - 認証バイパス（Google Push通知受信用）
 resource "cloudflare_zero_trust_access_application" "calendar_bot_webhook" {
   account_id                = var.cloudflare_account_id

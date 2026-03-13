@@ -73,6 +73,16 @@ in
             };
           };
 
+          # mixi2 Bot - Webhook受信用
+          "${tunnelConfig.mixi2Bot.domain}" = {
+            service = "http://localhost:80"; # Traefik (k8s)
+            originRequest = {
+              noTLSVerify = true;
+              httpHostHeader = "${tunnelConfig.mixi2Bot.domain}";
+              originServerName = "${tunnelConfig.mixi2Bot.domain}";
+            };
+          };
+
           # ArgoCD - Zero Trust Accessで認証必要
           "${tunnelConfig.argocd.domain}" = {
             service = "http://localhost:80"; # Traefik

@@ -34,6 +34,7 @@ locals {
     ttyd                  = "desktop-terminal.${local.base_domain}"
     opensearch_dashboards = "opensearch.${local.base_domain}"
     calendar_bot          = "calendar-bot.${local.base_domain}"
+    mixi2_bot             = "mixi2-bot.${local.base_domain}"
     argocd                = "argocd.${local.base_domain}"
   }
 
