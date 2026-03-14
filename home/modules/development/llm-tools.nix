@@ -7,9 +7,9 @@
   - 対応コマンド: mlx_lm.generate, mlx_lm.chat, mlx_lm.server, mlx_lm.convert
 
   使用方法:
-    python -m mlx_lm.generate --model mlx-community/Qwen3.5-4B-MLX-4bit --prompt "Hello"
-    python -m mlx_lm.chat --model mlx-community/Qwen3.5-4B-MLX-4bit
-    # サーバーはlaunchdで自動起動（ポート8080）
+    python -m mlx_lm generate --model mlx-community/Qwen3.5-4B-MLX-4bit --prompt "Hello"
+    python -m mlx_lm chat --model mlx-community/Qwen3.5-4B-MLX-4bit
+    # サーバーはlaunchdで自動起動（ポート8081）
 */
 { pkgs, lib, ... }:
 let
@@ -31,7 +31,8 @@ in
       ProgramArguments = [
         "${mlxPython}/bin/python"
         "-m"
-        "mlx_lm.server"
+        "mlx_lm"
+        "server"
         "--model"
         cfg.mlxLm.model
         "--port"
