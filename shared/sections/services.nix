@@ -35,6 +35,11 @@ v: {
     baseUrl = v.assertString "authentik.baseUrl" "https://auth.shinbunbun.com";
   };
 
+  mlxLm = {
+    model = v.assertString "mlxLm.model" "mlx-community/Qwen3.5-4B-MLX-4bit";
+    port = v.assertPort "mlxLm.port" 8081;
+  };
+
   routerosBackup = {
     routerIP = v.assertIP "routerosBackup.routerIP" "192.168.1.1";
     routerUser = v.assertString "routerosBackup.routerUser" "admin";
