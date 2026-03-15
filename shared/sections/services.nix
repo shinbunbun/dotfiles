@@ -36,7 +36,7 @@ v: {
   };
 
   mlxLm = {
-    model = v.assertString "mlxLm.model" "mlx-community/Qwen3.5-2B-OptiQ-4bit";
+    model = v.assertString "mlxLm.model" "mlx-community/Qwen3.5-4B-MLX-4bit";
     port = v.assertPort "mlxLm.port" 8081;
   };
 
