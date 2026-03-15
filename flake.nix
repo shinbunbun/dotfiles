@@ -160,6 +160,8 @@
           specialArgs = { inherit inputs; };
           modules = [
             ./systems/darwin/configurations/macmini/default.nix
+            # MLX Metal GPU有効化（PyPI wheelベース）
+            { nixpkgs.overlays = [ (import ./overlays/mlx-metal.nix) ]; }
           ];
         };
       };

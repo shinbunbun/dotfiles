@@ -22,6 +22,7 @@ in
     ../../modules/development/cloud-tools.nix
     ../../modules/development/development-tools.nix
     ../../modules/development/editors.nix
+    ../../modules/development/llm-tools.nix
 
     # シェルツール
     ../../modules/shell/shell-tools.nix

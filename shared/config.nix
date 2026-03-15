@@ -115,6 +115,10 @@ let
       port = config.attic.port;
     }
     {
+      name = "mlxLm";
+      port = config.mlxLm.port;
+    }
+    {
       name = "peerIssuer";
       port = config.peerIssuer.listenPort;
     }
