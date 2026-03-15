@@ -41,6 +41,8 @@ in
         "server"
         "--model"
         cfg.mlxLm.model
+        "--host"
+        "0.0.0.0" # LAN内の他マシンからもアクセス可能にする
         "--port"
         (builtins.toString cfg.mlxLm.port)
         "--prompt-cache-bytes"
