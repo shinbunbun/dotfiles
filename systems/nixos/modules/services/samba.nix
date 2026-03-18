@@ -9,14 +9,9 @@
   - WS-Discovery対応（macOS/Windowsからの自動検出）
 
   設定:
-  - TCP 445 でリッスン（allowedNetworksからのみ許可）
+  - TCP 445 でリッスン（hosts allow/denyでアクセス制御）
 */
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
+{ lib, ... }:
 let
   cfg = import ../../../../shared/config.nix;
   enable = cfg.samba.enable;
@@ -31,7 +26,7 @@ in
   config = lib.mkIf enable {
     services.samba = {
       enable = true;
-      openFirewall = false; # ファイアウォールは手動で制御
+      openFirewall = true;
 
       settings = {
         global = {
@@ -71,15 +66,5 @@ in
       openFirewall = true; # discovery用ポートはLAN内で開放
     };
 
-    # ファイアウォール設定 - 特定のネットワークからのみ許可
-    networking.firewall.extraCommands = lib.mkIf config.networking.firewall.enable ''
-      # Sambaアクセスを制限（TCP 445）
-      ${lib.concatMapStrings (network: ''
-        iptables -A nixos-fw -p tcp --dport 445 -s ${network} -j ACCEPT
-      '') allowedNetworks}
-
-      # WireGuardインターフェースからのアクセスを許可
-      iptables -A nixos-fw -p tcp --dport 445 -i wg0 -j ACCEPT
-    '';
   };
 }
