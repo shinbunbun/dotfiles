@@ -214,6 +214,7 @@
           deploy-user = ./systems/nixos/modules/services/deploy-user.nix;
           argocd = ./systems/nixos/modules/services/argocd.nix;
           mosh = ./systems/nixos/modules/services/mosh.nix;
+          samba = ./systems/nixos/modules/services/samba.nix;
         };
       };
 

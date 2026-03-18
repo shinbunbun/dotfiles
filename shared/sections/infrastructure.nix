@@ -49,6 +49,12 @@ v: {
     options = v.assertString "nfs.options" "rw,nohide,insecure,no_subtree_check,no_root_squash";
   };
 
+  samba = {
+    enable = v.assertBool "samba.enable" false;
+    workgroup = v.assertString "samba.workgroup" "WORKGROUP";
+    serverString = v.assertString "samba.serverString" "NixOS NAS";
+  };
+
   attic = {
     port = v.assertPort "attic.port" 8080;
     domain = v.assertString "attic.domain" "cache.shinbunbun.com";
