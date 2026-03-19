@@ -53,6 +53,9 @@ v: {
     enable = v.assertBool "samba.enable" false;
     workgroup = v.assertString "samba.workgroup" "WORKGROUP";
     serverString = v.assertString "samba.serverString" "NixOS NAS";
+    keepalive = v.assertNonNegativeInt "samba.keepalive" 60;
+    deadTime = v.assertNonNegativeInt "samba.deadTime" 0;
+    serverMultiChannelSupport = v.assertBool "samba.serverMultiChannelSupport" false;
   };
 
   attic = {

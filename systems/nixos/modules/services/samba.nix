@@ -3,6 +3,7 @@
 
   機能:
   - SMB3以上のプロトコルのみ対応（セキュリティ確保）
+  - macOS接続安定性（keepalive、マルチチャネル制御）
   - macOS互換VFS（fruit, streams_xattr）
   - ゲストアクセス禁止
   - journaldログ出力（既存FluentBit経由でLoki/Grafanaに自動収集）
@@ -17,6 +18,9 @@ let
   enable = cfg.samba.enable;
   workgroup = cfg.samba.workgroup;
   serverString = cfg.samba.serverString;
+  keepalive = cfg.samba.keepalive;
+  deadTime = cfg.samba.deadTime;
+  serverMultiChannelSupport = cfg.samba.serverMultiChannelSupport;
   allowedNetworks = cfg.networking.allowedNetworks;
 
   # allowedNetworksをSamba hosts allow形式に変換
@@ -53,6 +57,11 @@ in
           # アクセス制御
           "hosts allow" = hostsAllow;
           "hosts deny" = "0.0.0.0/0";
+
+          # macOS接続安定性
+          "keepalive" = keepalive;
+          "dead time" = deadTime;
+          "server multi channel support" = if serverMultiChannelSupport then "yes" else "no";
 
           # パフォーマンス
           "use sendfile" = "yes";
