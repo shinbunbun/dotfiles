@@ -27,6 +27,9 @@ in
     # デプロイ用ユーザー
     ../../modules/deploy-user.nix
 
+    # SMBクライアント設定
+    ../../modules/smb-client.nix
+
     # 監視・ログ収集
     ../../modules/node-exporter.nix
     ../../modules/fluent-bit.nix
