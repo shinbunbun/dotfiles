@@ -86,6 +86,16 @@ in
   # プライベートキャッシュの認証用netrc
   nix.settings.netrc-file = config.sops.secrets."nix_netrc".path;
 
+  # macmini固有: CIランナーとしてのNix Store蓄積を抑制（optimise.nixの週次/30日保持を上書き）
+  nix.gc = {
+    automatic = true;
+    interval = lib.mkForce {
+      Hour = 3;
+      Minute = 0;
+    };
+    options = lib.mkForce "--delete-older-than 7d";
+  };
+
   # Nixpkgs設定
   nixpkgs.config.allowUnfree = true;
 
