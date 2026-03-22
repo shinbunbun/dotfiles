@@ -9,7 +9,7 @@
      - 起動時に前回停止時刻からのログをキャッチアップ（欠落ゼロ設計）
      - リアルタイムストリーミングで /var/log/macos-unified.log にアペンド
   2. fluent-bit: /var/log/macos-unified.log を tail input で読み取り、Loki/OpenSearchに転送
-  3. macos-log-rotate: 日次ログローテーション（7日保持）
+  3. macos-log-rotate: 日次ログローテーション（3日保持、gzip圧縮）
 */
 {
   config,
@@ -69,21 +69,22 @@ let
     #!/bin/bash
     LOG_FILE="/var/log/macos-unified.log"
     ROTATE_DIR="/var/log/macos-unified-archive"
-    RETENTION_DAYS=7
+    RETENTION_DAYS=3
 
     mkdir -p "$ROTATE_DIR"
 
-    # 現在のログファイルをローテーション
+    # 現在のログファイルをローテーション（gzip圧縮）
     if [ -f "$LOG_FILE" ] && [ -s "$LOG_FILE" ]; then
       TIMESTAMP=$(/bin/date "+%Y%m%d-%H%M%S")
       mv "$LOG_FILE" "$ROTATE_DIR/macos-unified.$TIMESTAMP.log"
+      /usr/bin/gzip "$ROTATE_DIR/macos-unified.$TIMESTAMP.log"
       touch "$LOG_FILE"
       # mvでファイルが移動すると、log streamプロセスのfdが旧ファイルを指し続けるため再起動が必要
       launchctl kickstart -k system/com.shinbunbun.macos-log-stream
     fi
 
-    # 古いアーカイブを削除
-    find "$ROTATE_DIR" -name "macos-unified.*.log" -mtime +$RETENTION_DAYS -delete
+    # 古いアーカイブを削除（圧縮済み・未圧縮両方を対象）
+    find "$ROTATE_DIR" -name "macos-unified.*.log*" -mtime +$RETENTION_DAYS -delete
   '';
 in
 {
