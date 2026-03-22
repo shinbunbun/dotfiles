@@ -35,7 +35,7 @@ in
           + "--collector.uname "
           + "--web.listen-address=:${toString nodeExporterPort} "
           + ''--collector.filesystem.mount-points-exclude='^/(dev|nix|System/Volumes/(VM|Preboot|Update|xarts|iSCPreboot|Hardware)|private/var/run/secrets\.d)($|/)' ''
-          + "--collector.filesystem.fs-types-exclude='^(autofs|devfs)$' "
+          + "--collector.filesystem.fs-types-exclude='^(autofs|devfs|smbfs)$' "
           + "--no-collector.thermal "
           + "--collector.netdev.device-exclude='^(utun|awdl|llw|bridge|gif|stf|ap).*$' "
         )

@@ -51,6 +51,9 @@ in
           "fruit:wipe_intentionally_left_blank_rfork" = "yes";
           "fruit:delete_empty_adfiles" = "yes";
 
+          # Time Machine無効化（TM非対応の共有でカーネルエラーを防止）
+          "fruit:time machine" = "no";
+
           # ログ設定
           logging = "systemd";
 
