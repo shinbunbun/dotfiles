@@ -126,6 +126,10 @@ let
       name = "peerIssuer.router";
       port = config.peerIssuer.routerPort;
     }
+    {
+      name = "jellyfin";
+      port = config.jellyfin.port;
+    }
   ];
 
   # ポート衝突の自動検出
