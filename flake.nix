@@ -215,6 +215,7 @@
           argocd = ./systems/nixos/modules/services/argocd.nix;
           mosh = ./systems/nixos/modules/services/mosh.nix;
           samba = ./systems/nixos/modules/services/samba.nix;
+          jellyfin = ./systems/nixos/modules/services/jellyfin.nix;
         };
       };
 

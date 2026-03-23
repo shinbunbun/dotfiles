@@ -40,6 +40,11 @@ v: {
     port = v.assertPort "mlxLm.port" 8081;
   };
 
+  jellyfin = {
+    enable = v.assertBool "jellyfin.enable" false;
+    port = v.assertPort "jellyfin.port" 8096;
+  };
+
   routerosBackup = {
     routerIP = v.assertIP "routerosBackup.routerIP" "192.168.1.1";
     routerUser = v.assertString "routerosBackup.routerUser" "admin";
