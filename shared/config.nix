@@ -130,6 +130,10 @@ let
       name = "jellyfin";
       port = config.jellyfin.port;
     }
+    {
+      name = "nextcloud";
+      port = config.nextcloud.port;
+    }
   ];
 
   # ポート衝突の自動検出
