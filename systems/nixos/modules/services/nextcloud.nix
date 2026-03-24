@@ -12,17 +12,20 @@
   - nginx のリッスンポートは nextcloud.port でカスタマイズ
   - adminpassFile 等のシークレットはホスト固有設定で注入
 */
-{ lib, pkgs, ... }:
+{
+  lib,
+  pkgs,
+  config,
+  ...
+}:
 let
   cfg = import ../../../../shared/config.nix;
-  enable = cfg.nextcloud.enable;
   port = cfg.nextcloud.port;
   domain = cfg.nextcloud.domain;
 in
 {
-  config = lib.mkIf enable {
+  config = lib.mkIf config.services.nextcloud.enable {
     services.nextcloud = {
-      enable = true;
       package = pkgs.nextcloud32;
       hostName = domain;
 
