@@ -216,6 +216,7 @@
           mosh = ./systems/nixos/modules/services/mosh.nix;
           samba = ./systems/nixos/modules/services/samba.nix;
           jellyfin = ./systems/nixos/modules/services/jellyfin.nix;
+          nextcloud = ./systems/nixos/modules/services/nextcloud.nix;
         };
       };
 

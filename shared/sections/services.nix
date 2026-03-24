@@ -45,6 +45,12 @@ v: {
     port = v.assertPort "jellyfin.port" 8096;
   };
 
+  nextcloud = {
+    enable = v.assertBool "nextcloud.enable" false;
+    port = v.assertPort "nextcloud.port" 8443;
+    domain = v.assertString "nextcloud.domain" "nextcloud.local";
+  };
+
   routerosBackup = {
     routerIP = v.assertIP "routerosBackup.routerIP" "192.168.1.1";
     routerUser = v.assertString "routerosBackup.routerUser" "admin";
