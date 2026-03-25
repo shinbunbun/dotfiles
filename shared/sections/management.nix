@@ -49,6 +49,9 @@ v: {
       argocd = {
         domain = v.assertString "cloudflare.desktop.argocd.domain" "argocd.shinbunbun.com";
       };
+      nextcloud = {
+        domain = v.assertString "cloudflare.desktop.nextcloud.domain" "nextcloud.shinbunbun.com";
+      };
     };
   };
 }

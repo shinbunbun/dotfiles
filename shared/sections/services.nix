@@ -48,7 +48,7 @@ v: {
   nextcloud = {
     enable = v.assertBool "nextcloud.enable" false;
     port = v.assertPort "nextcloud.port" 8443;
-    domain = v.assertString "nextcloud.domain" "nextcloud.local";
+    domain = v.assertString "nextcloud.domain" "nextcloud.shinbunbun.com";
   };
 
   routerosBackup = {

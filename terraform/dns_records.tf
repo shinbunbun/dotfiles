@@ -149,6 +149,17 @@ resource "cloudflare_dns_record" "calendar_bot" {
   comment = "Managed by Terraform - Google Calendar Bot via desktop-services tunnel"
 }
 
+# Nextcloud
+resource "cloudflare_dns_record" "nextcloud" {
+  zone_id = var.cloudflare_zone_id
+  name    = "nextcloud.${local.base_domain}"
+  content = local.desktop_tunnel_endpoint
+  type    = "CNAME"
+  ttl     = 1
+  proxied = true
+  comment = "Managed by Terraform - Nextcloud via desktop-services tunnel"
+}
+
 # mixi2 Bot
 resource "cloudflare_dns_record" "mixi2_bot" {
   zone_id = var.cloudflare_zone_id

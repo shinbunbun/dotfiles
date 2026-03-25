@@ -121,6 +121,18 @@ variable "argocd_oauth_client_secret" {
   sensitive   = true
 }
 
+variable "nextcloud_oauth_client_id" {
+  description = "Nextcloud OAuth2 Client ID"
+  type        = string
+  sensitive   = true
+}
+
+variable "nextcloud_oauth_client_secret" {
+  description = "Nextcloud OAuth2 Client Secret"
+  type        = string
+  sensitive   = true
+}
+
 # --- OpenSearch ---
 variable "opensearch_url" {
   description = "OpenSearch URL"
