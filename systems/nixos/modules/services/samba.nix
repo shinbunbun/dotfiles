@@ -12,10 +12,9 @@
   設定:
   - TCP 445 でリッスン（hosts allow/denyでアクセス制御）
 */
-{ lib, ... }:
+{ config, lib, ... }:
 let
   cfg = import ../../../../shared/config.nix;
-  enable = cfg.samba.enable;
   workgroup = cfg.samba.workgroup;
   serverString = cfg.samba.serverString;
   keepalive = cfg.samba.keepalive;
@@ -27,56 +26,62 @@ let
   hostsAllow = lib.concatStringsSep " " allowedNetworks;
 in
 {
-  config = lib.mkIf enable {
-    services.samba = {
-      enable = true;
-      openFirewall = true;
+  config = lib.mkMerge [
+    # shared/config.nix で samba.enable = true の場合、サービス自体を有効化
+    (lib.mkIf cfg.samba.enable {
+      services.samba.enable = true;
+    })
 
-      settings = {
-        global = {
-          workgroup = workgroup;
-          "server string" = serverString;
+    # Sambaが有効な場合（どこで有効化されたかに関わらず）、グローバル設定を適用
+    (lib.mkIf config.services.samba.enable {
+      services.samba = {
+        openFirewall = true;
 
-          # セキュリティ設定
-          "server min protocol" = "SMB3_00";
-          "map to guest" = "never";
+        settings = {
+          global = {
+            workgroup = workgroup;
+            "server string" = serverString;
 
-          # macOS互換性
-          "vfs objects" = "fruit streams_xattr";
-          "fruit:metadata" = "stream";
-          "fruit:model" = "MacSamba";
-          "fruit:posix_rename" = "yes";
-          "fruit:veto_appledouble" = "no";
-          "fruit:nfs_aces" = "no";
-          "fruit:wipe_intentionally_left_blank_rfork" = "yes";
-          "fruit:delete_empty_adfiles" = "yes";
+            # セキュリティ設定
+            "server min protocol" = "SMB3_00";
+            "map to guest" = "never";
 
-          # Time Machine無効化（TM非対応の共有でカーネルエラーを防止）
-          "fruit:time machine" = "no";
+            # macOS互換性
+            "vfs objects" = "fruit streams_xattr";
+            "fruit:metadata" = "stream";
+            "fruit:model" = "MacSamba";
+            "fruit:posix_rename" = "yes";
+            "fruit:veto_appledouble" = "no";
+            "fruit:nfs_aces" = "no";
+            "fruit:wipe_intentionally_left_blank_rfork" = "yes";
+            "fruit:delete_empty_adfiles" = "yes";
 
-          # ログ設定
-          logging = "systemd";
+            # Time Machine無効化（TM非対応の共有でカーネルエラーを防止）
+            "fruit:time machine" = "no";
 
-          # アクセス制御
-          "hosts allow" = hostsAllow;
-          "hosts deny" = "0.0.0.0/0";
+            # ログ設定
+            logging = "systemd";
 
-          # macOS接続安定性
-          "keepalive" = keepalive;
-          "dead time" = deadTime;
-          "server multi channel support" = if serverMultiChannelSupport then "yes" else "no";
+            # アクセス制御
+            "hosts allow" = hostsAllow;
+            "hosts deny" = "0.0.0.0/0";
 
-          # パフォーマンス
-          "use sendfile" = "yes";
+            # macOS接続安定性
+            "keepalive" = keepalive;
+            "dead time" = deadTime;
+            "server multi channel support" = if serverMultiChannelSupport then "yes" else "no";
+
+            # パフォーマンス
+            "use sendfile" = "yes";
+          };
         };
       };
-    };
 
-    # WS-Discovery（macOS/Windowsからの自動検出）
-    services.samba-wsdd = {
-      enable = true;
-      openFirewall = true; # discovery用ポートはLAN内で開放
-    };
-
-  };
+      # WS-Discovery（macOS/Windowsからの自動検出）
+      services.samba-wsdd = {
+        enable = true;
+        openFirewall = true; # discovery用ポートはLAN内で開放
+      };
+    })
+  ];
 }
