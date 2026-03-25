@@ -36,6 +36,7 @@ locals {
     calendar_bot          = "calendar-bot.${local.base_domain}"
     mixi2_bot             = "mixi2-bot.${local.base_domain}"
     argocd                = "argocd.${local.base_domain}"
+    nextcloud             = "nextcloud.${local.base_domain}"
   }
 
   # Cloudflare Tunnel エンドポイント

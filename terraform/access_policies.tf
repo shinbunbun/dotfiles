@@ -136,6 +136,24 @@ resource "cloudflare_zero_trust_access_application" "opensearch_dashboards" {
   }]
 }
 
+# Nextcloud - 認証必須
+resource "cloudflare_zero_trust_access_application" "nextcloud" {
+  account_id                = var.cloudflare_account_id
+  name                      = "Nextcloud"
+  domain                    = local.desktop_services.nextcloud
+  type                      = "self_hosted"
+  session_duration          = "24h"
+  auto_redirect_to_identity = true
+  allowed_idps              = [var.identity_provider_id]
+  enable_binding_cookie     = false
+  options_preflight_bypass  = false
+
+  policies = [{
+    id         = cloudflare_zero_trust_access_policy.oidc_groups_allow.id
+    precedence = 1
+  }]
+}
+
 # Google Calendar Bot - 認証必須
 resource "cloudflare_zero_trust_access_application" "calendar_bot" {
   account_id                = var.cloudflare_account_id

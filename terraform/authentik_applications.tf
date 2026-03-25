@@ -43,6 +43,14 @@ resource "authentik_application" "argocd" {
   policy_engine_mode = "any"
 }
 
+resource "authentik_application" "nextcloud" {
+  name               = "Nextcloud"
+  slug               = "nextcloud"
+  protocol_provider  = authentik_provider_oauth2.nextcloud.id
+  meta_launch_url    = "https://nextcloud.shinbunbun.com"
+  policy_engine_mode = "any"
+}
+
 resource "authentik_application" "wg_lease" {
   name               = "wg-lease"
   slug               = "wg-lease"

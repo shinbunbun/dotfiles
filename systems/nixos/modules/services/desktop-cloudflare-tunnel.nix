@@ -92,6 +92,16 @@ in
               originServerName = "${tunnelConfig.argocd.domain}";
             };
           };
+
+          # Nextcloud - Zero Trust Accessで認証必要
+          "${tunnelConfig.nextcloud.domain}" = {
+            service = "http://localhost:${toString cfg.nextcloud.port}";
+            originRequest = {
+              noTLSVerify = true;
+              httpHostHeader = "${tunnelConfig.nextcloud.domain}";
+              originServerName = "${tunnelConfig.nextcloud.domain}";
+            };
+          };
         };
       };
     };
