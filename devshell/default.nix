@@ -112,6 +112,9 @@ pkgs.mkShell {
       export TF_VAR_argocd_oauth_client_id=$(sops -d --extract '["argocd"]["oidc_client_id"]' secrets/authentik-terraform.yaml 2>/dev/null)
       export TF_VAR_argocd_oauth_client_secret=$(sops -d --extract '["argocd"]["oidc_client_secret"]' secrets/authentik-terraform.yaml 2>/dev/null)
       [ -n "$TF_VAR_argocd_oauth_client_id" ] && echo "✓ ArgoCD OAuth secrets loaded"
+      export TF_VAR_nextcloud_oauth_client_id=$(sops -d --extract '["nextcloud"]["oauth_client_id"]' secrets/authentik-terraform.yaml 2>/dev/null)
+      export TF_VAR_nextcloud_oauth_client_secret=$(sops -d --extract '["nextcloud"]["oauth_client_secret"]' secrets/authentik-terraform.yaml 2>/dev/null)
+      [ -n "$TF_VAR_nextcloud_oauth_client_id" ] && echo "✓ Nextcloud OAuth secrets loaded"
     fi
     echo ""
 
