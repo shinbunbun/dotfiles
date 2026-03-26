@@ -51,6 +51,11 @@ v: {
     domain = v.assertString "nextcloud.domain" "nextcloud.shinbunbun.com";
   };
 
+  immich = {
+    enable = v.assertBool "immich.enable" false;
+    port = v.assertPort "immich.port" 2283;
+  };
+
   routerosBackup = {
     routerIP = v.assertIP "routerosBackup.routerIP" "192.168.1.1";
     routerUser = v.assertString "routerosBackup.routerUser" "admin";
