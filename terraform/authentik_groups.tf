@@ -33,3 +33,9 @@ resource "authentik_group" "grafana_admins" {
   is_superuser = false
   users        = [data.authentik_user.shinbunbun.id]
 }
+
+resource "authentik_group" "nextcloud_admins" {
+  name         = "Nextcloud Admins"
+  is_superuser = false
+  users        = [data.authentik_user.shinbunbun.id]
+}
