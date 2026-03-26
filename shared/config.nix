@@ -134,6 +134,10 @@ let
       name = "nextcloud";
       port = config.nextcloud.port;
     }
+    {
+      name = "immich";
+      port = config.immich.port;
+    }
   ];
 
   # ポート衝突の自動検出
