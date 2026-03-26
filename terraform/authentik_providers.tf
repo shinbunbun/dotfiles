@@ -162,7 +162,7 @@ resource "authentik_provider_oauth2" "nextcloud" {
     { matching_mode = "strict", url = "https://nextcloud.shinbunbun.com/apps/user_oidc/code" }
   ]
   property_mappings = [
-    authentik_property_mapping_provider_scope.oidc_groups.id,
+    authentik_property_mapping_provider_scope.nextcloud_groups.id,
     data.authentik_property_mapping_provider_scope.openid.id,
     data.authentik_property_mapping_provider_scope.email.id,
     data.authentik_property_mapping_provider_scope.profile.id,
