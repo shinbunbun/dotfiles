@@ -4,7 +4,7 @@
   Mac Mini用のmacOSシステム設定を定義します。
   MacBookと比較して以下の違いがあります：
   - WireGuardは不要
-  - Homebrewパッケージは最小限（Claude, Google Chrome, Xcode のみ）
+  - Homebrewパッケージは最小限（Claude, Google Chrome のみ）
 */
 {
   config,
@@ -113,9 +113,6 @@ in
       "google-chrome" # Webブラウザ
       "warp" # ターミナル
     ];
-    masApps = {
-      "Xcode" = 497799835;
-    };
   };
 
   # Home Manager設定
