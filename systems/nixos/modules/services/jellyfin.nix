@@ -9,15 +9,14 @@
   - デフォルトポート8096でリッスン
   - jellyfinユーザーにrender/videoグループ付与（GPU利用）
 */
-{ lib, ... }:
-let
-  cfg = import ../../../../shared/config.nix;
-  enable = cfg.jellyfin.enable;
-in
 {
-  config = lib.mkIf enable {
+  lib,
+  config,
+  ...
+}:
+{
+  config = lib.mkIf config.services.jellyfin.enable {
     services.jellyfin = {
-      enable = true;
       openFirewall = true;
     };
 
