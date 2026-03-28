@@ -68,7 +68,8 @@ resource "opensearch_ism_policy" "logs_lifecycle" {
       }]
       states = [
         {
-          name = "hot"
+          name    = "hot"
+          actions = []
           transitions = [{
             state_name = "warm"
             conditions = {
@@ -83,9 +84,19 @@ resource "opensearch_ism_policy" "logs_lifecycle" {
               force_merge = {
                 max_num_segments = 1
               }
+              retry = {
+                backoff = "exponential"
+                count   = 3
+                delay   = "1m"
+              }
             },
             {
               read_only = {}
+              retry = {
+                backoff = "exponential"
+                count   = 3
+                delay   = "1m"
+              }
             }
           ]
           transitions = [{
@@ -96,8 +107,15 @@ resource "opensearch_ism_policy" "logs_lifecycle" {
           }]
         },
         {
-          name        = "close"
-          actions     = [{ close = {} }]
+          name = "close"
+          actions = [{
+            close = {}
+            retry = {
+              backoff = "exponential"
+              count   = 3
+              delay   = "1m"
+            }
+          }]
           transitions = []
         }
       ]
