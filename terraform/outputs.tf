@@ -13,7 +13,21 @@ output "access_application_ids" {
     argocd                = cloudflare_zero_trust_access_application.argocd.id
     calendar_bot          = cloudflare_zero_trust_access_application.calendar_bot.id
     calendar_bot_webhook  = cloudflare_zero_trust_access_application.calendar_bot_webhook.id
+    immich                = cloudflare_zero_trust_access_application.immich.id
   }
+}
+
+# Immichモバイルアプリ用Service Token
+output "immich_mobile_service_token_client_id" {
+  description = "Immich Mobile App - CF-Access-Client-Id"
+  value       = cloudflare_zero_trust_access_service_token.immich_mobile.client_id
+  sensitive   = true
+}
+
+output "immich_mobile_service_token_client_secret" {
+  description = "Immich Mobile App - CF-Access-Client-Secret（初回のみ表示）"
+  value       = cloudflare_zero_trust_access_service_token.immich_mobile.client_secret
+  sensitive   = true
 }
 
 # DNSレコード情報

@@ -154,6 +154,50 @@ resource "cloudflare_zero_trust_access_application" "nextcloud" {
   }]
 }
 
+# Immich - ブラウザはOIDC認証、モバイルアプリはService Token認証
+resource "cloudflare_zero_trust_access_application" "immich" {
+  account_id                = var.cloudflare_account_id
+  name                      = "Immich"
+  domain                    = local.desktop_services.immich
+  type                      = "self_hosted"
+  session_duration          = "24h"
+  auto_redirect_to_identity = true
+  allowed_idps              = [var.identity_provider_id]
+  enable_binding_cookie     = false
+  options_preflight_bypass  = false
+
+  policies = [
+    {
+      id         = cloudflare_zero_trust_access_policy.oidc_groups_allow.id
+      precedence = 1
+    },
+    {
+      id         = cloudflare_zero_trust_access_policy.immich_service_auth.id
+      precedence = 2
+    },
+  ]
+}
+
+# Service Token（Immichモバイルアプリ用）
+resource "cloudflare_zero_trust_access_service_token" "immich_mobile" {
+  account_id = var.cloudflare_account_id
+  name       = "Immich Mobile App"
+  duration   = "8760h"
+}
+
+# Service Auth Policy（Service Tokenでのアクセスを許可）
+resource "cloudflare_zero_trust_access_policy" "immich_service_auth" {
+  account_id = var.cloudflare_account_id
+  name       = "Immich Service Auth"
+  decision   = "non_identity"
+
+  include = [{
+    service_token = {
+      token_id = cloudflare_zero_trust_access_service_token.immich_mobile.id
+    }
+  }]
+}
+
 # Google Calendar Bot - 認証必須
 resource "cloudflare_zero_trust_access_application" "calendar_bot" {
   account_id                = var.cloudflare_account_id

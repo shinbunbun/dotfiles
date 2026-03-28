@@ -52,6 +52,9 @@ v: {
       nextcloud = {
         domain = v.assertString "cloudflare.desktop.nextcloud.domain" "nextcloud.shinbunbun.com";
       };
+      immich = {
+        domain = v.assertString "cloudflare.desktop.immich.domain" "immich.shinbunbun.com";
+      };
     };
   };
 }

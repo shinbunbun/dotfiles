@@ -160,6 +160,17 @@ resource "cloudflare_dns_record" "nextcloud" {
   comment = "Managed by Terraform - Nextcloud via desktop-services tunnel"
 }
 
+# Immich
+resource "cloudflare_dns_record" "immich" {
+  zone_id = var.cloudflare_zone_id
+  name    = "immich.${local.base_domain}"
+  content = local.desktop_tunnel_endpoint
+  type    = "CNAME"
+  ttl     = 1
+  proxied = true
+  comment = "Managed by Terraform - Immich via desktop-services tunnel"
+}
+
 # mixi2 Bot
 resource "cloudflare_dns_record" "mixi2_bot" {
   zone_id = var.cloudflare_zone_id
