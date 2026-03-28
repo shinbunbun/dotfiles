@@ -190,6 +190,8 @@ resource "authentik_provider_oauth2" "immich" {
   allowed_redirect_uris = [
     { matching_mode = "strict", url = "http://192.168.1.4:2283/auth/login" },
     { matching_mode = "strict", url = "http://192.168.1.4:2283/user-settings" },
+    { matching_mode = "strict", url = "https://immich.shinbunbun.com/auth/login" },
+    { matching_mode = "strict", url = "https://immich.shinbunbun.com/user-settings" },
     { matching_mode = "strict", url = "app.immich:///oauth-callback" },
   ]
   property_mappings = [

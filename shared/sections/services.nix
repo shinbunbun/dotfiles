@@ -54,6 +54,7 @@ v: {
   immich = {
     enable = v.assertBool "immich.enable" false;
     port = v.assertPort "immich.port" 2283;
+    domain = v.assertString "immich.domain" "immich.shinbunbun.com";
   };
 
   routerosBackup = {

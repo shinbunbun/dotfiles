@@ -102,6 +102,16 @@ in
               originServerName = "${tunnelConfig.nextcloud.domain}";
             };
           };
+
+          # Immich - Zero Trust Accessで認証必要（モバイルはService Token）
+          "${tunnelConfig.immich.domain}" = {
+            service = "http://localhost:${toString cfg.immich.port}";
+            originRequest = {
+              noTLSVerify = true;
+              httpHostHeader = "${tunnelConfig.immich.domain}";
+              originServerName = "${tunnelConfig.immich.domain}";
+            };
+          };
         };
       };
     };
