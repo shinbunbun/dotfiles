@@ -51,6 +51,13 @@ resource "authentik_application" "nextcloud" {
   policy_engine_mode = "any"
 }
 
+resource "authentik_application" "immich" {
+  name               = "Immich"
+  slug               = "immich"
+  protocol_provider  = authentik_provider_oauth2.immich.id
+  policy_engine_mode = "any"
+}
+
 resource "authentik_application" "wg_lease" {
   name               = "wg-lease"
   slug               = "wg-lease"

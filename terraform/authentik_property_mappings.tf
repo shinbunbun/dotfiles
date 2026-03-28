@@ -13,6 +13,17 @@ resource "authentik_property_mapping_provider_scope" "oidc_groups" {
   EOT
 }
 
+# Immich用: "Immich Admins" グループ所属ユーザーに admin ロールを付与
+resource "authentik_property_mapping_provider_scope" "immich_role" {
+  name       = "Immich Role"
+  scope_name = "immich"
+  expression = <<-EOT
+    return {
+      "immich_role": "admin" if request.user.ak_groups.filter(name="Immich Admins").exists() else "user"
+    }
+  EOT
+}
+
 # Nextcloud用: "Nextcloud Admins" → "admin" に変換し、Nextcloud組み込みadminグループと一致させる
 resource "authentik_property_mapping_provider_scope" "nextcloud_groups" {
   name       = "Nextcloud Groups"

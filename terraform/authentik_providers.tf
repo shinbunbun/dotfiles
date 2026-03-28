@@ -178,6 +178,37 @@ resource "authentik_provider_oauth2" "nextcloud" {
   }
 }
 
+# Immich OAuth2
+resource "authentik_provider_oauth2" "immich" {
+  name               = "Immich"
+  authorization_flow = data.authentik_flow.default_authorization_explicit_consent.id
+  invalidation_flow  = data.authentik_flow.default_provider_invalidation.id
+  client_type        = "confidential"
+  client_id          = var.immich_oauth_client_id
+  client_secret      = var.immich_oauth_client_secret
+  signing_key        = data.authentik_certificate_key_pair.es256_jwt_signing.id
+  allowed_redirect_uris = [
+    { matching_mode = "strict", url = "http://192.168.1.4:2283/auth/login" },
+    { matching_mode = "strict", url = "http://192.168.1.4:2283/user-settings" },
+    { matching_mode = "strict", url = "app.immich:///oauth-callback" },
+  ]
+  property_mappings = [
+    authentik_property_mapping_provider_scope.immich_role.id,
+    data.authentik_property_mapping_provider_scope.openid.id,
+    data.authentik_property_mapping_provider_scope.email.id,
+    data.authentik_property_mapping_provider_scope.profile.id,
+  ]
+  sub_mode                   = "hashed_user_id"
+  issuer_mode                = "per_provider"
+  include_claims_in_id_token = true
+  access_code_validity       = "minutes=1"
+  access_token_validity      = "minutes=5"
+  refresh_token_validity     = "days=30"
+  lifecycle {
+    ignore_changes = [logout_method, refresh_token_threshold]
+  }
+}
+
 # --- Proxy Provider ---
 
 # wg-lease Proxy Provider（Embedded Outpost経由）

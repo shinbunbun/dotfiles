@@ -133,6 +133,18 @@ variable "nextcloud_oauth_client_secret" {
   sensitive   = true
 }
 
+variable "immich_oauth_client_id" {
+  description = "Immich OAuth2 Client ID"
+  type        = string
+  sensitive   = true
+}
+
+variable "immich_oauth_client_secret" {
+  description = "Immich OAuth2 Client Secret"
+  type        = string
+  sensitive   = true
+}
+
 # --- OpenSearch ---
 variable "opensearch_url" {
   description = "OpenSearch URL"
