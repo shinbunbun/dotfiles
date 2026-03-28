@@ -39,3 +39,9 @@ resource "authentik_group" "nextcloud_admins" {
   is_superuser = false
   users        = [data.authentik_user.shinbunbun.id]
 }
+
+resource "authentik_group" "immich_admins" {
+  name         = "Immich Admins"
+  is_superuser = false
+  users        = [data.authentik_user.shinbunbun.id]
+}
