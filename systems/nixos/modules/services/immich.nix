@@ -11,15 +11,17 @@
   - ポートはデフォルト2283
   - mediaLocation はホスト固有設定で指定
 */
-{ lib, ... }:
+{
+  lib,
+  config,
+  ...
+}:
 let
   cfg = import ../../../../shared/config.nix;
-  enable = cfg.immich.enable;
 in
 {
-  config = lib.mkIf enable {
+  config = lib.mkIf config.services.immich.enable {
     services.immich = {
-      enable = true;
       port = cfg.immich.port;
       openFirewall = true;
     };
