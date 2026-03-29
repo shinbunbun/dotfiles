@@ -77,6 +77,7 @@ in
       "vnc-viewer" # VNCクライアント
       "1password"
       "vlc"
+      "balenaetcher" # USBブートメディア作成ツール
     ];
     masApps = {
       # Apple製アプリ
