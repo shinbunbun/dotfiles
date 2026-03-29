@@ -128,3 +128,22 @@ jobs:
       DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
       DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
       SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
+
+  deploy-g3pro:
+    name: Deploy to g3pro
+    needs: [build-nixos, notify-build-complete]
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/fix/deploy') && github.event_name == 'push' && !inputs.skip_deploy
+    uses: shinbunbun/nix-ci-workflows/.github/workflows/deploy-nix.yaml@main
+    with:
+      environment: production
+      deploy-target: ".#g3pro"
+      ssh-hostname: g3pro
+      ssh-host: "192.168.1.6"
+      needs-sops: true
+    secrets:
+      AUTHENTIK_CLIENT_ID: ${{ secrets.AUTHENTIK_CLIENT_ID }}
+      ATTIC_TOKEN: ${{ secrets.ATTIC_TOKEN }}
+      ATTIC_READ_TOKEN: ${{ secrets.ATTIC_READ_TOKEN }}
+      DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+      SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
