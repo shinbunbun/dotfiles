@@ -182,6 +182,14 @@ in
                   instance = cfg.networking.hosts.macmini.hostname;
                 };
               }
+              {
+                targets = [
+                  "${cfg.networking.hosts.g3pro.ip}:${toString cfg.monitoring.nodeExporter.port}"
+                ];
+                labels = {
+                  instance = cfg.networking.hosts.g3pro.hostname;
+                };
+              }
             ];
           }
           {

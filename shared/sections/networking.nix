@@ -19,6 +19,10 @@ v: {
         ip = v.assertIP "networking.hosts.macmini.ip" "192.168.1.5";
         hostname = v.assertString "networking.hosts.macmini.hostname" "shinbunbun-macmini";
       };
+      g3pro = {
+        ip = v.assertIP "networking.hosts.g3pro.ip" "192.168.1.6";
+        hostname = v.assertString "networking.hosts.g3pro.hostname" "g3pro";
+      };
     };
 
     interfaces = {
@@ -29,7 +33,7 @@ v: {
     allowedNetworks = [
       "192.168.1.0/24" # ローカルネットワーク1
       "192.168.11.0/24" # ローカルネットワーク2
-      "10.100.0.0/24" # WireGuardネットワーク
+      "10.66.66.0/24" # WireGuardネットワーク
     ];
 
     firewall = {

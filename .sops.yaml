@@ -3,6 +3,7 @@ keys:
   - &home_machine_user age1tuyn9u7qca3mpk082a94mnwpwgue7wlux2c7mruyxg7fz9y45qrqnqw3yx
   - &nixos_desktop_user age124zeln7fujjzwpaeq2lmg00r93t4kp7tea684yr85prk0zh9jvfqj247af
   - &macmini_user age1n9tqc8fc5cecey0ca4l2kj74arzl96rnj9kqu02x7amsw2g58erqdcxfpd
+  - &g3pro_user age1sad5k5y967aeq82y6nk5yuzc6cf2fpxxs3y7juf6n3jrcryutgpqwqtt79
 creation_rules:
   - path_regex: secrets/.*
     key_groups:
@@ -11,3 +12,4 @@ creation_rules:
       - age1tuyn9u7qca3mpk082a94mnwpwgue7wlux2c7mruyxg7fz9y45qrqnqw3yx
       - age124zeln7fujjzwpaeq2lmg00r93t4kp7tea684yr85prk0zh9jvfqj247af
       - age1n9tqc8fc5cecey0ca4l2kj74arzl96rnj9kqu02x7amsw2g58erqdcxfpd
+      - age1sad5k5y967aeq82y6nk5yuzc6cf2fpxxs3y7juf6n3jrcryutgpqwqtt79
