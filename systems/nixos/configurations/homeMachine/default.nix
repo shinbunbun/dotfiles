@@ -63,7 +63,16 @@ in
 
   # システム設定
   networking.hostName = cfg.networking.hosts.nixos.hostname;
+  networking.domain = cfg.networking.hosts.nixos.domain;
   system.stateVersion = cfg.system.nixosStateVersion;
+
+  # ネットワーク設定（homeMachine固有）
+  networking.useDHCP = false;
+  networking.interfaces.${cfg.networking.interfaces.primary}.useDHCP = true;
+  networking.interfaces.${cfg.networking.interfaces.wireless}.useDHCP = false;
+  networking.extraHosts = ''
+    ${cfg.networking.hosts.nixosDesktop.ip} ${cfg.networking.hosts.nixosDesktop.hostname}
+  '';
 
   # Nixpkgs設定
   nixpkgs.config.allowUnfree = true;

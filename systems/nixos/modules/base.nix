@@ -22,7 +22,7 @@ let
   configValues = import ../../../shared/config.nix;
 in
 {
-  system.stateVersion = configValues.system.nixosStateVersion;
+  # system.stateVersion は各ホストの default.nix で設定する（ホストごとに異なるため）
   system.autoUpgrade.enable = false;
   system.autoUpgrade.allowReboot = false;
 

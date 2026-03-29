@@ -19,6 +19,10 @@ v: {
         ip = v.assertIP "networking.hosts.macmini.ip" "192.168.1.5";
         hostname = v.assertString "networking.hosts.macmini.hostname" "shinbunbun-macmini";
       };
+      g3pro = {
+        ip = v.assertIP "networking.hosts.g3pro.ip" "192.168.1.6";
+        hostname = v.assertString "networking.hosts.g3pro.hostname" "g3pro";
+      };
     };
 
     interfaces = {

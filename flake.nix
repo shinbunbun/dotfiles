@@ -144,6 +144,13 @@
             ./systems/nixos/configurations/homeMachine/default.nix
           ];
         };
+        g3pro = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          specialArgs = { inherit inputs; };
+          modules = [
+            ./systems/nixos/configurations/g3pro/default.nix
+          ];
+        };
       };
 
       # Darwin設定
@@ -250,6 +257,19 @@
           profiles.system = {
             sshUser = "deploy"; # デプロイ専用ユーザー
             path = deploy-rs.lib.aarch64-darwin.activate.darwin self.darwinConfigurations.macmini;
+            user = "root";
+          };
+        };
+
+        g3pro = {
+          hostname = "g3pro"; # SSH config の Host名（LAN直接接続）
+          fastConnection = true; # LAN直接接続なのでtrue
+          interactiveSudo = false;
+          remoteBuild = true; # リモートマシンでビルド（deployユーザーはtrusted-user）
+
+          profiles.system = {
+            sshUser = "deploy"; # デプロイ専用ユーザー
+            path = deploy-rs.lib.x86_64-linux.activate.nixos self.nixosConfigurations.g3pro;
             user = "root";
           };
         };
