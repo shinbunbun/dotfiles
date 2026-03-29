@@ -136,23 +136,10 @@ resource "cloudflare_zero_trust_access_application" "opensearch_dashboards" {
   }]
 }
 
-# Nextcloud - 認証必須
-resource "cloudflare_zero_trust_access_application" "nextcloud" {
-  account_id                = var.cloudflare_account_id
-  name                      = "Nextcloud"
-  domain                    = local.desktop_services.nextcloud
-  type                      = "self_hosted"
-  session_duration          = "24h"
-  auto_redirect_to_identity = true
-  allowed_idps              = [var.identity_provider_id]
-  enable_binding_cookie     = false
-  options_preflight_bypass  = false
-
-  policies = [{
-    id         = cloudflare_zero_trust_access_policy.oidc_groups_allow.id
-    precedence = 1
-  }]
-}
+# Nextcloud: CloudFlare Access Applicationなし
+# Nextcloud自体がuser_oidc (Authentik SSO)で認証するため、
+# CloudFlare Accessの事前認証は不要。
+# モバイルアプリからの接続を可能にするため意図的に削除 (Issue #538)
 
 # Immich - ブラウザはOIDC認証、モバイルアプリはService Token認証
 resource "cloudflare_zero_trust_access_application" "immich" {
