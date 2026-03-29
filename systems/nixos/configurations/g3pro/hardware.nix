@@ -1,13 +1,10 @@
 /*
   ハードウェア設定 - g3pro (GMKTec G3 Pro)
 
-  TODO: 実機で nixos-generate-config を実行し、この内容を差し替えてください。
-  現在はプレースホルダーです。
-
   GMKTec G3 Pro スペック:
   - CPU: Intel N150 (Alder Lake-N)
   - GPU: Intel UHD Graphics
-  - NVMe SSD
+  - SATA SSD 238.5GB
 */
 {
   config,
@@ -27,8 +24,6 @@
   boot.initrd.availableKernelModules = [
     "xhci_pci"
     "ahci"
-    "nvme"
-    "usbhid"
     "usb_storage"
     "sd_mod"
   ];
@@ -36,22 +31,22 @@
   boot.kernelModules = [ "kvm-intel" ];
   boot.extraModulePackages = [ ];
 
-  # TODO: 実機の nixos-generate-config 出力で差し替え
   fileSystems."/" = {
-    device = "/dev/disk/by-uuid/PLACEHOLDER-ROOT-UUID";
+    device = "/dev/disk/by-uuid/d874cbeb-6b8c-4a65-9452-bc33be4b68ca";
     fsType = "ext4";
   };
 
   fileSystems."/boot" = {
-    device = "/dev/disk/by-uuid/PLACEHOLDER-BOOT-UUID";
+    device = "/dev/disk/by-uuid/A654-3D01";
     fsType = "vfat";
     options = [
-      "fmask=0077"
-      "dmask=0077"
+      "fmask=0022"
+      "dmask=0022"
     ];
   };
 
   swapDevices = [ ];
 
+  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 }
