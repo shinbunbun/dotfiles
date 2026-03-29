@@ -1,13 +1,13 @@
 /*
-  ネットワーク設定モジュール
+  共通ネットワーク設定モジュール
 
-  このモジュールは以下のネットワーク関連設定を提供します：
-  - ホスト名とドメイン名の設定
-  - ネットワークインターフェースの設定（有線・無線）
+  このモジュールは全NixOSホストで共通のネットワーク設定を提供します：
   - IPv6サポート
-  - ファイアウォール設定（TCP/UDPポート）
-  - systemd-resolvedによる名前解決
-  - 時刻同期（NTP）設定
+  - ファイアウォール設定（汎用ポート）
+  - Avahi mDNSサービス
+
+  ホスト固有の設定（hostname, domain, インターフェース, extraHosts）は
+  各ホストの default.nix で設定してください。
 
   config.nixの値を参照して設定を行います。
 */
@@ -22,20 +22,11 @@ let
   cfg = import ../../../shared/config.nix;
 in
 {
-  networking.hostName = cfg.networking.hosts.nixos.hostname;
-  networking.domain = cfg.networking.hosts.nixos.domain;
-  networking.useDHCP = false;
-  networking.interfaces.${cfg.networking.interfaces.primary}.useDHCP = true;
-  networking.interfaces.${cfg.networking.interfaces.wireless}.useDHCP = false;
   networking.enableIPv6 = true;
 
   networking.firewall.allowedTCPPorts = [
     cfg.networking.firewall.generalPort # General purpose
   ];
-
-  networking.extraHosts = ''
-    ${cfg.networking.hosts.nixosDesktop.ip} ${cfg.networking.hosts.nixosDesktop.hostname}
-  '';
 
   services.avahi = {
     enable = true;
