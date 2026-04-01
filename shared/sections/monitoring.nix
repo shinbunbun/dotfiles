@@ -40,7 +40,7 @@ v: {
     k3sMetrics = {
       kubeStateMetricsPort = v.assertPort "monitoring.k3sMetrics.kubeStateMetricsPort" 30080;
       kubeletPort = v.assertPort "monitoring.k3sMetrics.kubeletPort" 10250;
-      apiServerPort = v.assertPort "monitoring.k3sMetrics.apiServerPort" 6443;
+      apiServerPort = v.assertPort "monitoring.k3sMetrics.apiServerPort" 6444;
     };
 
     # Loki設定

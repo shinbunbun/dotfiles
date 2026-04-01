@@ -227,7 +227,7 @@ in
               }
             ];
           }
-          # k3s kubeletメトリクス
+          # k3s kubeletメトリクス（全ノード）
           {
             job_name = "k3s-kubelet";
             scheme = "https";
@@ -244,9 +244,25 @@ in
                   instance = cfg.networking.hosts.nixosDesktop.hostname;
                 };
               }
+              {
+                targets = [
+                  "192.168.1.3:${toString cfg.monitoring.k3sMetrics.kubeletPort}"
+                ];
+                labels = {
+                  instance = "${cfg.networking.hosts.nixos.hostname}.${cfg.networking.hosts.nixos.domain}";
+                };
+              }
+              {
+                targets = [
+                  "${cfg.networking.hosts.g3pro.ip}:${toString cfg.monitoring.k3sMetrics.kubeletPort}"
+                ];
+                labels = {
+                  instance = cfg.networking.hosts.g3pro.hostname;
+                };
+              }
             ];
           }
-          # k3s cAdvisorメトリクス（コンテナリソース使用量）
+          # k3s cAdvisorメトリクス（全ノード）
           {
             job_name = "k3s-cadvisor";
             scheme = "https";
@@ -264,9 +280,25 @@ in
                   instance = cfg.networking.hosts.nixosDesktop.hostname;
                 };
               }
+              {
+                targets = [
+                  "192.168.1.3:${toString cfg.monitoring.k3sMetrics.kubeletPort}"
+                ];
+                labels = {
+                  instance = "${cfg.networking.hosts.nixos.hostname}.${cfg.networking.hosts.nixos.domain}";
+                };
+              }
+              {
+                targets = [
+                  "${cfg.networking.hosts.g3pro.ip}:${toString cfg.monitoring.k3sMetrics.kubeletPort}"
+                ];
+                labels = {
+                  instance = cfg.networking.hosts.g3pro.hostname;
+                };
+              }
             ];
           }
-          # k3s API Serverメトリクス
+          # k3s API Serverメトリクス（全ノード）
           {
             job_name = "k3s-apiserver";
             scheme = "https";
@@ -277,10 +309,26 @@ in
             static_configs = [
               {
                 targets = [
-                  "${cfg.networking.hosts.nixosDesktop.ip}:${toString cfg.monitoring.k3sMetrics.apiServerPort}"
+                  "${cfg.networking.hosts.nixosDesktop.ip}:${toString cfg.k3s.cluster.apiBackendPort}"
                 ];
                 labels = {
                   instance = cfg.networking.hosts.nixosDesktop.hostname;
+                };
+              }
+              {
+                targets = [
+                  "192.168.1.3:${toString cfg.k3s.cluster.apiBackendPort}"
+                ];
+                labels = {
+                  instance = "${cfg.networking.hosts.nixos.hostname}.${cfg.networking.hosts.nixos.domain}";
+                };
+              }
+              {
+                targets = [
+                  "${cfg.networking.hosts.g3pro.ip}:${toString cfg.k3s.cluster.apiBackendPort}"
+                ];
+                labels = {
+                  instance = cfg.networking.hosts.g3pro.hostname;
                 };
               }
             ];

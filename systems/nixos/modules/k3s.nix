@@ -1,34 +1,25 @@
 /*
-  k3s（Lightweight Kubernetes）設定モジュール
+  k3s HAクラスタ設定モジュール
 
-  このモジュールはk3sを使用した軽量Kubernetesクラスタを提供します。
+  このモジュールは3ノードHA構成のk3sクラスタを提供します。
 
-  機能:
-  - k3sサーバーモード: 完全なKubernetesクラスタをホスト
-  - k3sエージェントモード: 既存のクラスタにワーカーノードとして参加
-  - containerdコンテナランタイム（Dockerとは独立して動作）
-  - Flannelネットワーキング（VXLAN）
-  - CoreDNS（DNSサービス）
-  - Traefik Ingressコントローラー（デフォルト）
+  コンポーネント:
+  - k3s server: embedded etcd による HAクラスタ（3ノード）
+  - HAProxy: API Server ロードバランシング（:6443 → :6444）
+  - keepalived: VRRP による API Server VIP 管理
+  - Cilium: CNI + kube-proxy代替 + BGP Service LB（別途Helmでインストール）
+  - DRBD: カーネルレベルストレージレプリケーション（Piraeus Operator経由で管理）
 
-  提供する設定:
-  - services.k3s.enable: k3sサービスの有効化
-  - services.k3s.role: "server"または"agent"
-  - services.k3s.clusterInit: 初回クラスタ初期化フラグ
-  - services.k3s.extraFlags: 追加のk3sフラグ
+  ネットワーク設計:
+  - API Server VIP: 192.168.1.254 (keepalived VRRP)
+  - Service VIP: 192.168.128.0/24 (Cilium BGP → RouterOS ECMP)
+  - Pod CIDR: 10.42.0.0/16 (Cilium IPAM)
 
   使用方法:
-  1. shared/config.nixでkubernetes.k3s.desktop.enableをtrueに設定
-  2. roleを"server"または"agent"に設定
-  3. サーバーモードの場合、clusterInitをtrueに設定
-  4. nixos-rebuildでシステムを再構築
-  5. /etc/rancher/k3s/k3s.yamlにkubeconfigが生成される
-
-  注意事項:
-  - k3sはDockerとは独立したcontainerdを使用
-  - 初回起動時に/var/lib/rancher/k3s/server/node-tokenが生成される
-  - KUBECONFIG環境変数は自動的に/etc/rancher/k3s/k3s.yamlに設定される
-  - ファイアウォールで必要なポート（6443, 8472等）を自動的に開放
+  1. 各ホストのNixOS設定でこのモジュールをimport
+  2. shared/config.nixでk3s設定を定義
+  3. nixos-rebuild switchで適用
+  4. 初回はnixos-desktopから起動し、他ノードが順次join
 */
 {
   config,
@@ -46,16 +37,34 @@ let
       cfg.k3s.desktop
     else if config.networking.hostName == cfg.networking.hosts.nixos.hostname then
       cfg.k3s.homeMachine
+    else if config.networking.hostName == cfg.networking.hosts.g3pro.hostname then
+      cfg.k3s.g3pro
     else
       { enable = false; };
 
   enable = k3sConfig.enable or false;
   role = k3sConfig.role or "server";
   clusterInit = k3sConfig.clusterInit or false;
-  extraFlags = k3sConfig.extraFlags or [ ];
+  keepalivedPriority = k3sConfig.keepalivedPriority or 50;
 
-  # 監視用RBACマニフェスト: Prometheus外部スクレイプ用のServiceAccount・ClusterRole・トークン
-  # k3s起動時に自動デプロイされ、長寿命トークンで認証する
+  clusterCfg = cfg.k3s.cluster;
+
+  # k3sフラグを結合（共通 + ノード固有 + HA固有）
+  haFlags = [
+    "--https-listen-port=${toString clusterCfg.apiBackendPort}"
+    "--tls-san=${clusterCfg.vip}"
+  ];
+
+  serverAddrFlags =
+    if clusterInit then
+      [ ]
+    else
+      [ "--server=https://${clusterCfg.vip}:${toString clusterCfg.apiPort}" ];
+
+  allExtraFlags =
+    cfg.k3s.commonExtraFlags ++ haFlags ++ serverAddrFlags ++ (k3sConfig.extraFlags or [ ]);
+
+  # 監視用RBACマニフェスト
   monitoringRbacConfig = pkgs.writeText "monitoring-rbac.yaml" ''
     apiVersion: v1
     kind: Namespace
@@ -122,8 +131,7 @@ let
     type: kubernetes.io/service-account-token
   '';
 
-  # Traefik HelmChartConfig: Hub機能とGateway API providerを無効化し、
-  # 不要なCRD watchersを削減してAPI serverの負荷を軽減する
+  # Traefik HelmChartConfig
   traefikConfig = pkgs.writeText "traefik-config.yaml" ''
     apiVersion: helm.cattle.io/v1
     kind: HelmChartConfig
@@ -138,6 +146,57 @@ let
           kubernetesGateway:
             enabled: false
   '';
+
+  # HAProxy設定
+  haproxyConfig = ''
+    global
+        log /dev/log local0
+        maxconn 2048
+
+    defaults
+        log     global
+        mode    tcp
+        option  tcplog
+        timeout connect 5s
+        timeout client  30s
+        timeout server  30s
+
+    frontend k8s-api
+        bind *:${toString clusterCfg.apiPort}
+        default_backend k8s-api-servers
+
+    backend k8s-api-servers
+        option httpchk GET /healthz
+        http-check expect status 200
+        balance roundrobin
+        server nixos-desktop ${cfg.networking.hosts.nixosDesktop.ip}:${toString clusterCfg.apiBackendPort} check check-ssl verify none inter 3s fall 3 rise 2
+        server homemachine 192.168.1.3:${toString clusterCfg.apiBackendPort} check check-ssl verify none inter 3s fall 3 rise 2
+        server g3pro ${cfg.networking.hosts.g3pro.ip}:${toString clusterCfg.apiBackendPort} check check-ssl verify none inter 3s fall 3 rise 2
+  '';
+
+  # keepalivedのユニキャストピア（自分以外のノード）
+  allNodeIPs = [
+    cfg.networking.hosts.nixosDesktop.ip
+    "192.168.1.3"
+    cfg.networking.hosts.g3pro.ip
+  ];
+  myIP =
+    if config.networking.hostName == cfg.networking.hosts.nixosDesktop.hostname then
+      cfg.networking.hosts.nixosDesktop.ip
+    else if config.networking.hostName == cfg.networking.hosts.nixos.hostname then
+      "192.168.1.3"
+    else
+      cfg.networking.hosts.g3pro.ip;
+  unicastPeers = builtins.filter (ip: ip != myIP) allNodeIPs;
+
+  # ネットワークインターフェース（ホストごとに異なる可能性）
+  keepalivedInterface =
+    if config.networking.hostName == cfg.networking.hosts.nixosDesktop.hostname then
+      "enp2s0"
+    else if config.networking.hostName == cfg.networking.hosts.nixos.hostname then
+      cfg.networking.interfaces.primary
+    else
+      "enp1s0";
 in
 {
   config = lib.mkIf enable {
@@ -145,25 +204,50 @@ in
     services.k3s = {
       enable = true;
       inherit role;
-
-      # サーバーモード: クラスタ初期化
       clusterInit = lib.mkIf (role == "server") clusterInit;
+      # clusterInit でないノードはトークンが必要
+      # sops.secrets."k3s_token" は dotfiles-private 側で定義する
+      tokenFile = lib.mkIf (!clusterInit) "/run/secrets/k3s_token";
+      extraFlags = lib.strings.concatStringsSep " " allExtraFlags;
+    };
 
-      # 追加フラグ
-      extraFlags = lib.strings.concatStringsSep " " extraFlags;
+    # SOPS シークレット（クラスタトークン）はdotfiles-privateで定義
+    # sops.secrets."k3s_token" は各ホストの設定で sopsFile を指定する必要がある
+
+    # HAProxy: API Server ロードバランシング
+    services.haproxy = {
+      enable = true;
+      config = haproxyConfig;
+    };
+
+    # keepalived: VRRP VIP 管理
+    services.keepalived = {
+      enable = true;
+      vrrpScripts.check-haproxy = {
+        script = "${pkgs.procps}/bin/pgrep -x haproxy";
+        interval = 2;
+        weight = 2;
+      };
+      vrrpInstances.k8s-api = {
+        interface = keepalivedInterface;
+        virtualRouterId = 51;
+        priority = keepalivedPriority;
+        virtualIps = [ { addr = "${clusterCfg.vip}/24"; } ];
+        trackScripts = [ "check-haproxy" ];
+        inherit unicastPeers;
+      };
     };
 
     # k3sマニフェストディレクトリに設定ファイルを自動配置
-    # k3sが起動時に自動デプロイする
     systemd.tmpfiles.rules = [
       "L+ /var/lib/rancher/k3s/server/manifests/traefik-config.yaml - - - - ${traefikConfig}"
       "L+ /var/lib/rancher/k3s/server/manifests/monitoring-rbac.yaml - - - - ${monitoringRbacConfig}"
     ];
 
     # ghcr.io認証用のregistries.yamlを動的生成するsystemdサービス
-    # k3sのcontainerdレベルでレジストリ認証を設定し、ImagePullSecretを不要にする
-    # SOPSシークレット定義はargocd.nixモジュールで行う
-    systemd.services.k3s-registries = {
+    # argocd/ghcr_pat シークレットは dotfiles-private の argocd.nix で定義されるため、
+    # 初期化ノード（nixos-desktop）でのみ有効
+    systemd.services.k3s-registries = lib.mkIf clusterInit {
       description = "k3s Container Registry Authentication Setup";
       before = [ "k3s.service" ];
       after = [ "sops-nix.service" ];
@@ -203,8 +287,6 @@ in
 
           chmod 0600 /etc/rancher/k3s/registries.yaml
 
-          # k3sが既に稼働中の場合、registries.yamlの変更を反映するため再起動
-          # --no-block: before=k3s.serviceとの循環待ちを防止
           if systemctl is-active --quiet k3s.service; then
             systemctl restart --no-block k3s.service
           fi
@@ -217,29 +299,41 @@ in
       kubectl
       kubernetes-helm
       stern
+      drbd
     ];
 
     # ファイアウォール設定
     networking.firewall = {
-      # k3sサーバーモード用ポート
-      allowedTCPPorts = lib.mkIf (role == "server") [
-        6443 # Kubernetes API Server
+      allowedTCPPorts = [
+        clusterCfg.apiPort # HAProxy フロントエンド
+        clusterCfg.apiBackendPort # k3s API Server バックエンド
         10250 # Kubelet metrics
-        cfg.monitoring.k3sMetrics.kubeStateMetricsPort # kube-state-metrics NodePort
+        4240 # Cilium health check
+        4244 # Hubble
+        179 # BGP (Cilium ↔ RouterOS)
+        3366 # LINSTOR Controller
+        3367 # LINSTOR Satellite
       ];
 
-      # k3s内部通信用ポート範囲
       allowedTCPPortRanges = [
         {
           from = 2379;
           to = 2380;
         } # etcd
+        {
+          from = 7000;
+          to = 8000;
+        } # DRBD レプリケーション
       ];
 
-      # Flannel VXLAN
       allowedUDPPorts = [
-        8472 # Flannel VXLAN
+        8472 # Cilium VXLAN
       ];
+
+      # VRRP プロトコル（keepalived）
+      extraCommands = ''
+        iptables -A INPUT -p vrrp -j ACCEPT
+      '';
     };
 
     # KUBECONFIG環境変数の設定
@@ -247,11 +341,21 @@ in
       KUBECONFIG = "/etc/rancher/k3s/k3s.yaml";
     };
 
-    # k3s用のカーネルモジュール
+    # DRBD カーネルモジュール
+    boot.extraModulePackages = with config.boot.kernelPackages; [ drbd ];
     boot.kernelModules = [
       "br_netfilter"
       "overlay"
+      "drbd"
+      # Cilium 用
+      "ip_tables"
+      "xt_socket"
+      "xt_mark"
     ];
+    boot.blacklistedKernelModules = [ "drbd_transport_rdma" ];
+
+    # LVM thin provisioning（Piraeus/LINSTOR用）
+    services.lvm.boot.thin.enable = true;
 
     # カーネルパラメータ（Kubernetes推奨設定）
     boot.kernel.sysctl = {
