@@ -75,6 +75,10 @@ let
       port = config.monitoring.k3sMetrics.apiServerPort;
     }
     {
+      name = "k3s.cluster.apiPort";
+      port = config.k3s.cluster.apiPort;
+    }
+    {
       name = "monitoring.loki";
       port = config.monitoring.loki.port;
     }
@@ -161,16 +165,8 @@ let
       message = "SSH port should not use the default port 22 for security reasons";
     }
     {
-      assertion =
-        config.k3s.desktop.enable
-        -> (config.k3s.desktop.role == "server" || config.k3s.desktop.role == "agent");
-      message = "k3s role must be either 'server' or 'agent'";
-    }
-    {
-      assertion =
-        config.k3s.desktop.role == "agent"
-        -> (builtins.hasAttr "serverAddr" config.k3s.desktop && config.k3s.desktop.serverAddr != "");
-      message = "k3s agent mode requires serverAddr to be set";
+      assertion = config.k3s.cluster.apiPort != config.k3s.cluster.apiBackendPort;
+      message = "k3s API port and backend port must be different (HAProxy frontend vs k3s backend)";
     }
   ];
 

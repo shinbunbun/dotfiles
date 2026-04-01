@@ -6,36 +6,70 @@
 */
 v: {
   k3s = {
-    # デスクトップ用k3s設定
+    # クラスタ共通設定
+    cluster = {
+      vip = v.assertIP "k3s.cluster.vip" "192.168.1.254";
+      apiPort = v.assertPort "k3s.cluster.apiPort" 6443;
+      apiBackendPort = v.assertPort "k3s.cluster.apiBackendPort" 6444;
+      serviceCIDR = v.assertCIDR "k3s.cluster.serviceCIDR" "192.168.128.0/24";
+      servicePool = v.assertString "k3s.cluster.servicePool" "192.168.128.100-192.168.128.200";
+      podCIDR = v.assertCIDR "k3s.cluster.podCIDR" "10.42.0.0/16";
+      bgp = {
+        localAS = v.assertPositiveInt "k3s.cluster.bgp.localAS" 65001;
+        peerAS = v.assertPositiveInt "k3s.cluster.bgp.peerAS" 65000;
+        peerAddress = v.assertIP "k3s.cluster.bgp.peerAddress" "192.168.1.1";
+      };
+    };
+
+    # 共通のk3sフラグ（Cilium用）
+    commonExtraFlags = [
+      "--flannel-backend=none"
+      "--disable-kube-proxy"
+      "--disable-network-policy"
+      "--disable=servicelb"
+      "--write-kubeconfig-mode=0644"
+    ];
+
+    # nixos-desktop: 初期化ノード
     desktop = {
       enable = v.assertBool "k3s.desktop.enable" true;
       role = v.assertEnum "k3s.desktop.role" "server" [
         "server"
         "agent"
       ];
-
-      # サーバー設定
       clusterInit = v.assertBool "k3s.desktop.clusterInit" true;
-
-      # 追加フラグ
+      keepalivedPriority = v.assertPositiveInt "k3s.desktop.keepalivedPriority" 150;
       extraFlags = [
-        "--flannel-backend=vxlan"
-        "--write-kubeconfig-mode=0644"
         "--node-ip=192.168.1.4"
-        # kubelet: cadvisorの統計収集間隔を延長（デフォルト10s → 30s）
         "--kubelet-arg=housekeeping-interval=30s"
-        # NetworkPolicyコントローラ（kube-router）を無効化
-        # 3秒ごとのmetrics tickループを停止させる
-        "--disable-network-policy"
       ];
     };
 
-    # 将来のhomeMachine用設定（現時点では無効）
+    # homeMachine: 参加ノード
     homeMachine = {
-      enable = v.assertBool "k3s.homeMachine.enable" false;
-      role = v.assertEnum "k3s.homeMachine.role" "agent" [
+      enable = v.assertBool "k3s.homeMachine.enable" true;
+      role = v.assertEnum "k3s.homeMachine.role" "server" [
         "server"
         "agent"
+      ];
+      keepalivedPriority = v.assertPositiveInt "k3s.homeMachine.keepalivedPriority" 100;
+      extraFlags = [
+        "--node-ip=192.168.1.3"
+        "--kubelet-arg=housekeeping-interval=30s"
+      ];
+    };
+
+    # g3pro: 参加ノード
+    g3pro = {
+      enable = v.assertBool "k3s.g3pro.enable" true;
+      role = v.assertEnum "k3s.g3pro.role" "server" [
+        "server"
+        "agent"
+      ];
+      keepalivedPriority = v.assertPositiveInt "k3s.g3pro.keepalivedPriority" 50;
+      extraFlags = [
+        "--node-ip=192.168.1.6"
+        "--kubelet-arg=housekeeping-interval=30s"
       ];
     };
   };

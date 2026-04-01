@@ -50,6 +50,9 @@ in
     ../../modules/services/deploy-user.nix
     ../../modules/services/unified-cloudflare-tunnel.nix
 
+    # Kubernetes
+    ../../modules/k3s.nix
+
     # 外部モジュール
     inputs.attic.nixosModules.atticd
     inputs.home-manager.nixosModules.home-manager

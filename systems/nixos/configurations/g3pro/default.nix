@@ -48,6 +48,9 @@ in
     ../../modules/services/mosh.nix
     ../../modules/services/deploy-user.nix
 
+    # Kubernetes
+    ../../modules/k3s.nix
+
     # 外部モジュール
     inputs.home-manager.nixosModules.home-manager
     inputs.sops-nix.nixosModules.sops
