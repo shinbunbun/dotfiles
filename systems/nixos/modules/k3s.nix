@@ -299,7 +299,6 @@ in
       kubectl
       kubernetes-helm
       stern
-      drbd
     ];
 
     # ファイアウォール設定
@@ -341,18 +340,17 @@ in
       KUBECONFIG = "/etc/rancher/k3s/k3s.yaml";
     };
 
-    # DRBD カーネルモジュール
-    boot.extraModulePackages = with config.boot.kernelPackages; [ drbd ];
+    # カーネルモジュール
+    # DRBD はPiraeus Operator の Module Loader が管理する
+    # （nixpkgs の DRBD 9.2.16 は Linux 6.19+ で未対応のため、ホスト側ビルドは行わない）
     boot.kernelModules = [
       "br_netfilter"
       "overlay"
-      "drbd"
       # Cilium 用
       "ip_tables"
       "xt_socket"
       "xt_mark"
     ];
-    boot.blacklistedKernelModules = [ "drbd_transport_rdma" ];
 
     # LVM thin provisioning（Piraeus/LINSTOR用）
     services.lvm.boot.thin.enable = true;
