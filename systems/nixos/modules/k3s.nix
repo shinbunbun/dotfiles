@@ -375,7 +375,12 @@ in
       ];
 
       # Cilium/k3s 関連のインターフェースを信頼
-      trustedInterfaces = [ "cilium_host" "cilium_net" "cilium_vxlan" "lxc+" ];
+      trustedInterfaces = [
+        "cilium_host"
+        "cilium_net"
+        "cilium_vxlan"
+        "lxc+"
+      ];
 
       # Cilium: rpfilter を loose に（Pod からの返信パケットが DROP されるのを防ぐ）
       checkReversePath = "loose";
