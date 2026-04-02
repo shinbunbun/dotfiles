@@ -131,6 +131,42 @@ let
     type: kubernetes.io/service-account-token
   '';
 
+  # Cilium HelmChart（k3s が自動デプロイ）
+  ciliumChart = pkgs.writeText "cilium-chart.yaml" ''
+    apiVersion: helm.cattle.io/v1
+    kind: HelmChart
+    metadata:
+      name: cilium
+      namespace: kube-system
+    spec:
+      repo: https://helm.cilium.io/
+      chart: cilium
+      version: "1.17.3"
+      targetNamespace: kube-system
+      bootstrap: true
+      valuesContent: |-
+        kubeProxyReplacement: true
+        k8sServiceHost: 127.0.0.1
+        k8sServicePort: ${toString clusterCfg.apiBackendPort}
+        routingMode: native
+        ipv4NativeRoutingCIDR: "${clusterCfg.podCIDR}"
+        autoDirectNodeRoutes: true
+        bpf:
+          masquerade: true
+        ipam:
+          operator:
+            clusterPoolIPv4PodCIDRList:
+              - "${clusterCfg.podCIDR}"
+        bgpControlPlane:
+          enabled: true
+        hubble:
+          enabled: true
+          relay:
+            enabled: true
+          ui:
+            enabled: true
+  '';
+
   # Traefik HelmChartConfig
   traefikConfig = pkgs.writeText "traefik-config.yaml" ''
     apiVersion: helm.cattle.io/v1
@@ -166,12 +202,12 @@ let
         default_backend k8s-api-servers
 
     backend k8s-api-servers
-        option httpchk GET /healthz
-        http-check expect status 200
+        option tcp-check
         balance roundrobin
-        server nixos-desktop ${cfg.networking.hosts.nixosDesktop.ip}:${toString clusterCfg.apiBackendPort} check check-ssl verify none inter 3s fall 3 rise 2
-        server homemachine 192.168.1.3:${toString clusterCfg.apiBackendPort} check check-ssl verify none inter 3s fall 3 rise 2
-        server g3pro ${cfg.networking.hosts.g3pro.ip}:${toString clusterCfg.apiBackendPort} check check-ssl verify none inter 3s fall 3 rise 2
+        default-server inter 3s fall 3 rise 2
+        server nixos-desktop ${cfg.networking.hosts.nixosDesktop.ip}:${toString clusterCfg.apiBackendPort} check
+        server homemachine 192.168.1.3:${toString clusterCfg.apiBackendPort} check
+        server g3pro ${cfg.networking.hosts.g3pro.ip}:${toString clusterCfg.apiBackendPort} check
   '';
 
   # keepalivedのユニキャストピア（自分以外のノード）
@@ -248,6 +284,7 @@ in
 
     # k3sマニフェストディレクトリに設定ファイルを自動配置
     systemd.tmpfiles.rules = [
+      "L+ /var/lib/rancher/k3s/server/manifests/cilium-chart.yaml - - - - ${ciliumChart}"
       "L+ /var/lib/rancher/k3s/server/manifests/traefik-config.yaml - - - - ${traefikConfig}"
       "L+ /var/lib/rancher/k3s/server/manifests/monitoring-rbac.yaml - - - - ${monitoringRbacConfig}"
     ];
@@ -337,9 +374,21 @@ in
         8472 # Cilium VXLAN
       ];
 
-      # VRRP プロトコル（keepalived）
+      # Cilium/k3s 関連のインターフェースを信頼
+      trustedInterfaces = [
+        "cilium_host"
+        "cilium_net"
+        "cilium_vxlan"
+        "lxc+"
+      ];
+
+      # Cilium: rpfilter を loose に（Pod からの返信パケットが DROP されるのを防ぐ）
+      checkReversePath = "loose";
+
+      # VRRP プロトコル（keepalived）+ Pod ネットワーク許可
       extraCommands = ''
         iptables -A INPUT -p vrrp -j ACCEPT
+        iptables -A INPUT -s ${clusterCfg.podCIDR} -j ACCEPT
       '';
     };
 
