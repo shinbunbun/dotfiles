@@ -189,14 +189,14 @@ let
       cfg.networking.hosts.g3pro.ip;
   unicastPeers = builtins.filter (ip: ip != myIP) allNodeIPs;
 
-  # ネットワークインターフェース（ホストごとに異なる可能性）
+  # ネットワークインターフェース（ホストごとに異なる）
   keepalivedInterface =
     if config.networking.hostName == cfg.networking.hosts.nixosDesktop.hostname then
-      "enp2s0"
+      "enp6s0f0"
     else if config.networking.hostName == cfg.networking.hosts.nixos.hostname then
       cfg.networking.interfaces.primary
     else
-      "enp1s0";
+      "enp1s0"; # g3pro（実機セットアップ時に要確認）
 in
 {
   config = lib.mkIf enable {
@@ -221,12 +221,20 @@ in
     };
 
     # keepalived: VRRP VIP 管理
+    # keepalived_script ユーザー（vrrpScripts 実行用）
+    users.users.keepalived_script = {
+      isSystemUser = true;
+      group = "keepalived_script";
+    };
+    users.groups.keepalived_script = { };
+
     services.keepalived = {
       enable = true;
       vrrpScripts.check-haproxy = {
         script = "${pkgs.procps}/bin/pgrep -x haproxy";
         interval = 2;
         weight = 2;
+        user = "keepalived_script";
       };
       vrrpInstances.k8s-api = {
         interface = keepalivedInterface;
