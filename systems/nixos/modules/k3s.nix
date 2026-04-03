@@ -25,6 +25,7 @@
   config,
   pkgs,
   lib,
+  inputs,
   ...
 }:
 
@@ -241,14 +242,14 @@ in
       enable = true;
       inherit role;
       clusterInit = lib.mkIf (role == "server") clusterInit;
-      # clusterInit でないノードはトークンが必要
-      # sops.secrets."k3s_token" は dotfiles-private 側で定義する
-      tokenFile = lib.mkIf (!clusterInit) "/run/secrets/k3s_token";
+      tokenFile = lib.mkIf (!clusterInit) config.sops.secrets."k3s_token".path;
       extraFlags = lib.strings.concatStringsSep " " allExtraFlags;
     };
 
-    # SOPS シークレット（クラスタトークン）はdotfiles-privateで定義
-    # sops.secrets."k3s_token" は各ホストの設定で sopsFile を指定する必要がある
+    # SOPS シークレット（クラスタトークン — join ノード用）
+    sops.secrets."k3s_token" = lib.mkIf (!clusterInit) {
+      sopsFile = "${inputs.self}/secrets/k3s.yaml";
+    };
 
     # HAProxy: API Server ロードバランシング
     services.haproxy = {
