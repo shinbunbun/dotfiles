@@ -410,8 +410,6 @@ in
     };
 
     # カーネルモジュール
-    # DRBD はPiraeus Operator の Module Loader が管理する
-    # （nixpkgs の DRBD 9.2.16 は Linux 6.19+ で未対応のため、ホスト側ビルドは行わない）
     boot.kernelModules = [
       "br_netfilter"
       "overlay"
@@ -421,7 +419,15 @@ in
       "xt_mark"
       # LVM thin provisioning 用（LINSTOR/Piraeus）
       "dm-thin-pool"
+      # DRBD 9（Piraeus/LINSTOR 用）
+      # ホスト側でプリロードし、Piraeus の drbd-module-loader はビルドをスキップする
+      "drbd"
     ];
+
+    # DRBD 9 out-of-tree モジュール（Piraeus/LINSTOR 用）
+    # in-tree の DRBD 8.4.11 ではなく out-of-tree の 9.2.x を使用
+    # depmod は updates/ を kernel/ より優先するため、9.x が自動的に選択される
+    boot.extraModulePackages = with config.boot.kernelPackages; [ drbd ];
 
     # LVM thin provisioning（Piraeus/LINSTOR用）
     services.lvm.boot.thin.enable = true;

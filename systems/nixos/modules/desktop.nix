@@ -63,6 +63,7 @@
     };
   };
 
-  # 最新カーネルの使用
-  boot.kernelPackages = pkgs.linuxPackages_latest;
+  # デフォルトカーネル（linuxPackages）を使用
+  # DRBD 9.2.x が linuxPackages_latest（6.19+）でビルド不可のため統一
+  boot.kernelPackages = pkgs.linuxPackages;
 }
