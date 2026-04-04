@@ -13,6 +13,7 @@ v: {
       apiBackendPort = v.assertPort "k3s.cluster.apiBackendPort" 6444;
       serviceCIDR = v.assertCIDR "k3s.cluster.serviceCIDR" "192.168.128.0/24";
       servicePool = v.assertString "k3s.cluster.servicePool" "192.168.128.100-192.168.128.200";
+      traefikVIP = v.assertIP "k3s.cluster.traefikVIP" "192.168.128.10";
       podCIDR = v.assertCIDR "k3s.cluster.podCIDR" "10.42.0.0/16";
       bgp = {
         localAS = v.assertPositiveInt "k3s.cluster.bgp.localAS" 65001;
