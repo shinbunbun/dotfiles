@@ -48,6 +48,14 @@ let
   clusterInit = k3sConfig.clusterInit or false;
   keepalivedPriority = k3sConfig.keepalivedPriority or 50;
 
+  # LINSTOR ストレージ設定
+  linstorCfg = cfg.k3s.linstor;
+  linstorNodeCfg = k3sConfig.linstor or { };
+  loopFile = linstorNodeCfg.loopFile or "/var/lib/linstor-loop.img";
+  loopSize = linstorNodeCfg.loopSize or "50G";
+  vgName = linstorCfg.vgName;
+  thinPoolName = linstorCfg.thinPoolName;
+
   clusterCfg = cfg.k3s.cluster;
 
   # k3sフラグを結合（共通 + ノード固有 + HA固有）
@@ -415,6 +423,78 @@ in
 
     # LVM thin provisioning（Piraeus/LINSTOR用）
     services.lvm.boot.thin.enable = true;
+
+    # LINSTOR ストレージ用 loop device + LVM thin pool セットアップ
+    #
+    # 各ノードの空きディスク領域にファイルベースの loop device を作成し、
+    # その上に LVM VG + thin pool を構築する。Piraeus satellite が
+    # このストレージプールを使用して DRBD ボリュームを管理する。
+    # k3s 起動前に完了させる必要がある。
+    systemd.services.linstor-loop-setup = {
+      description = "LINSTOR loop device and LVM thin pool setup";
+      wantedBy = [ "multi-user.target" ];
+      before = [ "k3s.service" ];
+      after = [
+        "local-fs.target"
+        "lvm2-monitor.service"
+      ];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+      };
+      path = with pkgs; [
+        util-linux
+        lvm2
+        coreutils
+      ];
+      script = ''
+        set -euo pipefail
+
+        LOOP_FILE="${loopFile}"
+        LOOP_SIZE="${loopSize}"
+        VG_NAME="${vgName}"
+        TP_NAME="${thinPoolName}"
+
+        # loop ファイル作成（存在しない場合のみ）
+        if [ ! -f "$LOOP_FILE" ]; then
+          echo "Creating loop file: $LOOP_FILE ($LOOP_SIZE)"
+          truncate -s "$LOOP_SIZE" "$LOOP_FILE"
+        fi
+
+        # 既に loop device がアタッチされているか確認
+        LOOP_DEV=$(losetup -j "$LOOP_FILE" | head -1 | cut -d: -f1)
+        if [ -z "$LOOP_DEV" ]; then
+          echo "Attaching loop device for $LOOP_FILE"
+          LOOP_DEV=$(losetup --show -f "$LOOP_FILE")
+          echo "Attached as $LOOP_DEV"
+        else
+          echo "Already attached: $LOOP_DEV"
+        fi
+
+        # LVM PV 作成（未作成の場合のみ）
+        if ! pvs "$LOOP_DEV" &>/dev/null; then
+          echo "Creating PV on $LOOP_DEV"
+          pvcreate "$LOOP_DEV"
+        fi
+
+        # VG 作成（未作成の場合のみ）
+        if ! vgs "$VG_NAME" &>/dev/null; then
+          echo "Creating VG: $VG_NAME"
+          vgcreate "$VG_NAME" "$LOOP_DEV"
+        else
+          # VG が非アクティブの場合にアクティベート
+          vgchange -ay "$VG_NAME"
+        fi
+
+        # Thin pool 作成（未作成の場合のみ）
+        if ! lvs "$VG_NAME/$TP_NAME" &>/dev/null; then
+          echo "Creating thin pool: $VG_NAME/$TP_NAME"
+          lvcreate -l 100%FREE -T "$VG_NAME/$TP_NAME"
+        fi
+
+        echo "LINSTOR storage ready: $VG_NAME/$TP_NAME on $LOOP_DEV"
+      '';
+    };
 
     # カーネルパラメータ（Kubernetes推奨設定）
     boot.kernel.sysctl = {
