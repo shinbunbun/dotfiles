@@ -65,7 +65,7 @@ in
 
           # Google Calendar Bot - Zero Trust Accessで認証必要
           "${tunnelConfig.calendarBot.domain}" = {
-            service = "http://localhost:80"; # Traefik (k8s)
+            service = "http://${cfg.k3s.cluster.traefikVIP}:80"; # Traefik LB VIP (k8s)
             originRequest = {
               noTLSVerify = true;
               httpHostHeader = "${tunnelConfig.calendarBot.domain}";
@@ -75,7 +75,7 @@ in
 
           # mixi2 Bot - Webhook受信用
           "${tunnelConfig.mixi2Bot.domain}" = {
-            service = "http://localhost:80"; # Traefik (k8s)
+            service = "http://${cfg.k3s.cluster.traefikVIP}:80"; # Traefik LB VIP (k8s)
             originRequest = {
               noTLSVerify = true;
               httpHostHeader = "${tunnelConfig.mixi2Bot.domain}";
@@ -85,7 +85,7 @@ in
 
           # ArgoCD - Zero Trust Accessで認証必要
           "${tunnelConfig.argocd.domain}" = {
-            service = "http://localhost:80"; # Traefik
+            service = "http://${cfg.k3s.cluster.traefikVIP}:80"; # Traefik LB VIP
             originRequest = {
               noTLSVerify = true;
               httpHostHeader = "${tunnelConfig.argocd.domain}";

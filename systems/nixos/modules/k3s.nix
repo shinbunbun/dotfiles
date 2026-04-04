@@ -182,6 +182,9 @@ let
         providers:
           kubernetesGateway:
             enabled: false
+        service:
+          annotations:
+            io.cilium/lb-ipam-ips: "${clusterCfg.traefikVIP}"
   '';
 
   # HAProxy設定
