@@ -31,6 +31,12 @@ v: {
       "--write-kubeconfig-mode=0644"
     ];
 
+    # LINSTOR ストレージ共通設定
+    linstor = {
+      vgName = v.assertString "k3s.linstor.vgName" "vg_linstor";
+      thinPoolName = v.assertString "k3s.linstor.thinPoolName" "thinpool";
+    };
+
     # nixos-desktop: 初期化ノード
     desktop = {
       enable = v.assertBool "k3s.desktop.enable" true;
@@ -44,6 +50,10 @@ v: {
         "--node-ip=192.168.1.4"
         "--kubelet-arg=housekeeping-interval=30s"
       ];
+      linstor = {
+        loopFile = v.assertPath "k3s.desktop.linstor.loopFile" "/mnt/storage/linstor-loop.img";
+        loopSize = v.assertString "k3s.desktop.linstor.loopSize" "100G";
+      };
     };
 
     # homeMachine: 参加ノード
@@ -58,6 +68,10 @@ v: {
         "--node-ip=192.168.1.3"
         "--kubelet-arg=housekeeping-interval=30s"
       ];
+      linstor = {
+        loopFile = v.assertPath "k3s.homeMachine.linstor.loopFile" "/var/lib/linstor-loop.img";
+        loopSize = v.assertString "k3s.homeMachine.linstor.loopSize" "50G";
+      };
     };
 
     # g3pro: 参加ノード
@@ -72,6 +86,10 @@ v: {
         "--node-ip=192.168.1.6"
         "--kubelet-arg=housekeeping-interval=30s"
       ];
+      linstor = {
+        loopFile = v.assertPath "k3s.g3pro.linstor.loopFile" "/var/lib/linstor-loop.img";
+        loopSize = v.assertString "k3s.g3pro.linstor.loopSize" "50G";
+      };
     };
   };
 
