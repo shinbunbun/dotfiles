@@ -419,6 +419,8 @@ in
       "ip_tables"
       "xt_socket"
       "xt_mark"
+      # LVM thin provisioning 用（LINSTOR/Piraeus）
+      "dm-thin-pool"
     ];
 
     # LVM thin provisioning（Piraeus/LINSTOR用）
@@ -437,6 +439,7 @@ in
       after = [
         "local-fs.target"
         "lvm2-monitor.service"
+        "systemd-modules-load.service"
       ];
       serviceConfig = {
         Type = "oneshot";
