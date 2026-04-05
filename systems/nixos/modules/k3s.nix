@@ -240,11 +240,11 @@ let
   # ネットワークインターフェース（ホストごとに異なる）
   keepalivedInterface =
     if config.networking.hostName == cfg.networking.hosts.nixosDesktop.hostname then
-      "enp6s0f0"
+      cfg.networking.interfaces.nixosDesktop.primary
     else if config.networking.hostName == cfg.networking.hosts.nixos.hostname then
-      cfg.networking.interfaces.primary
+      cfg.networking.interfaces.homeMachine.primary
     else
-      "enp1s0"; # g3pro（実機セットアップ時に要確認）
+      cfg.networking.interfaces.g3pro.primary;
 in
 {
   config = lib.mkIf enable {
