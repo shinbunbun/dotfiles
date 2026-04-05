@@ -83,10 +83,6 @@ let
       port = config.monitoring.loki.port;
     }
     {
-      name = "couchdb";
-      port = config.couchdb.port;
-    }
-    {
       name = "management.cockpit";
       port = config.management.cockpit.port;
     }
