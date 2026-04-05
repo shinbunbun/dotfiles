@@ -227,6 +227,7 @@ resource "authentik_provider_proxy" "wg_lease" {
     data.authentik_property_mapping_provider_scope.email.id,
     data.authentik_property_mapping_provider_scope.profile.id,
     data.authentik_property_mapping_provider_scope.proxy.id,
+    data.authentik_property_mapping_provider_scope.entitlements.id,
   ]
   access_token_validity        = "hours=24"
   refresh_token_validity       = "days=30"
