@@ -1,20 +1,10 @@
 /*
   サービス設定セクション
 
-  CouchDB、ArgoCD、GitHub Container Registry、
+  ArgoCD、GitHub Container Registry、
   Authentik、RouterOSバックアップの設定を定義します。
 */
 v: {
-  couchdb = {
-    containerName = v.assertString "couchdb.containerName" "couchdb-obsidian";
-    port = v.assertPort "couchdb.port" 5984;
-    configPath = v.assertPath "couchdb.configPath" "/opt/couchdb/etc/local.d/10-jwt.ini";
-    jwt = {
-      rolesClaimPath = v.assertString "couchdb.jwt.rolesClaimPath" "groups";
-      allowedAlgorithms = v.assertString "couchdb.jwt.allowedAlgorithms" "ES256";
-    };
-  };
-
   argocd = {
     domain = v.assertString "argocd.domain" "argocd.shinbunbun.com";
     namespace = v.assertString "argocd.namespace" "argocd";

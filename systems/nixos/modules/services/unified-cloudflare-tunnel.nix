@@ -44,9 +44,9 @@ in
             originRequest.noTLSVerify = true;
           };
 
-          # Obsidian LiveSync - Zero Trust Accessで認証必要
+          # Obsidian LiveSync - k3s上で稼働、Traefik VIP経由
           "private-obsidian.${domain}" = {
-            service = "http://localhost:5984";
+            service = "http://${cfg.k3s.cluster.traefikVIP}";
             originRequest = {
               noTLSVerify = true;
               httpHostHeader = "private-obsidian.${domain}";

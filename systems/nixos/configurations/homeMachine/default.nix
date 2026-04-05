@@ -42,7 +42,6 @@ in
     # ../../modules/services/fluent-bit.nix          # nixos-observability に移行
     ../../modules/services/cockpit.nix
     ../../modules/services/ttyd.nix
-    ../../modules/services/obsidian-livesync.nix
     ../../modules/services/routeros-backup.nix
     ../../modules/services/attic.nix
     ../../modules/services/peer-issuer.nix
