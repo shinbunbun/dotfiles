@@ -40,7 +40,6 @@ in
     # ../../modules/services/alertmanager.nix        # nixos-observability に移行
     # ../../modules/services/loki.nix                # nixos-observability に移行
     # ../../modules/services/fluent-bit.nix          # nixos-observability に移行
-    # ../../modules/services/authentik.nix  # k3sに移行済み
     ../../modules/services/cockpit.nix
     ../../modules/services/ttyd.nix
     ../../modules/services/obsidian-livesync.nix
