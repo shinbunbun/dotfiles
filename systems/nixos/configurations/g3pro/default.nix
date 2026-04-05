@@ -64,8 +64,10 @@ in
   system.stateVersion = "25.11";
 
   # ネットワーク設定（g3pro固有）
-  # インターフェース名は実機セットアップ後に必要に応じて個別設定に変更
-  networking.useDHCP = true;
+  # グローバルDHCPを無効化し、物理インター��ェースのみDHCPを有効化
+  # （Cilium仮想インターフェースへのDHCPパケット送信を防止）
+  networking.useDHCP = false;
+  networking.interfaces.${cfg.networking.interfaces.g3pro.primary}.useDHCP = true;
   networking.extraHosts = ''
     ${cfg.networking.hosts.nixos.hostname}.${cfg.networking.hosts.nixos.domain} ${cfg.networking.hosts.nixos.hostname}
     ${cfg.networking.hosts.nixosDesktop.ip} ${cfg.networking.hosts.nixosDesktop.hostname}

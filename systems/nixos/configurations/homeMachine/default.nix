@@ -71,8 +71,8 @@ in
 
   # ネットワーク設定（homeMachine固有）
   networking.useDHCP = false;
-  networking.interfaces.${cfg.networking.interfaces.primary}.useDHCP = true;
-  networking.interfaces.${cfg.networking.interfaces.wireless}.useDHCP = false;
+  networking.interfaces.${cfg.networking.interfaces.homeMachine.primary}.useDHCP = true;
+  networking.interfaces.${cfg.networking.interfaces.homeMachine.wireless}.useDHCP = false;
   networking.extraHosts = ''
     ${cfg.networking.hosts.nixosDesktop.ip} ${cfg.networking.hosts.nixosDesktop.hostname}
   '';

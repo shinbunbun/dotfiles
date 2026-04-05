@@ -26,8 +26,16 @@ v: {
     };
 
     interfaces = {
-      primary = v.assertString "networking.interfaces.primary" "eno1";
-      wireless = v.assertString "networking.interfaces.wireless" "wlp1s0";
+      homeMachine = {
+        primary = v.assertString "networking.interfaces.homeMachine.primary" "eno1";
+        wireless = v.assertString "networking.interfaces.homeMachine.wireless" "wlp1s0";
+      };
+      nixosDesktop = {
+        primary = v.assertString "networking.interfaces.nixosDesktop.primary" "enp6s0f0";
+      };
+      g3pro = {
+        primary = v.assertString "networking.interfaces.g3pro.primary" "enp1s0";
+      };
     };
 
     allowedNetworks = [
