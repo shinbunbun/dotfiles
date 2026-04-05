@@ -32,9 +32,9 @@ in
         credentialsFile = config.sops.templates."cloudflare/tunnel-credentials.json".path;
 
         ingress = {
-          # Authentik (認証プロバイダー) - Zero Trust Accessで認証不要に設定
+          # Authentik (認証プロバイダー) - k3s上で稼働、Traefik VIP経由
           "auth.${domain}" = {
-            service = "http://localhost:9000";
+            service = "http://${cfg.k3s.cluster.traefikVIP}";
             originRequest.noTLSVerify = true;
           };
 
@@ -87,9 +87,9 @@ in
             };
           };
 
-          # peer-issuer (WireGuard peer動的発行API) - Authentik outpost経由で認証
+          # peer-issuer (WireGuard peer動的発行API) - k3s上のAuthentik Embedded Outpost経由
           "${cfg.peerIssuer.domain}" = {
-            service = "http://localhost:9000";
+            service = "http://${cfg.k3s.cluster.traefikVIP}";
             originRequest = {
               noTLSVerify = true;
             };
