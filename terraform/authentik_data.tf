@@ -23,6 +23,10 @@ data "authentik_property_mapping_provider_scope" "proxy" {
   managed = "goauthentik.io/providers/proxy/scope-proxy"
 }
 
+data "authentik_property_mapping_provider_scope" "entitlements" {
+  managed = "goauthentik.io/providers/oauth2/scope-entitlements"
+}
+
 # --- デフォルト署名証明書 ---
 data "authentik_certificate_key_pair" "default" {
   name = "authentik Self-signed Certificate"

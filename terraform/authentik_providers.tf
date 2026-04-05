@@ -227,12 +227,13 @@ resource "authentik_provider_proxy" "wg_lease" {
     data.authentik_property_mapping_provider_scope.email.id,
     data.authentik_property_mapping_provider_scope.profile.id,
     data.authentik_property_mapping_provider_scope.proxy.id,
+    data.authentik_property_mapping_provider_scope.entitlements.id,
   ]
   access_token_validity        = "hours=24"
   refresh_token_validity       = "days=30"
   internal_host_ssl_validation = true
   intercept_header_auth        = true
-  jwks_sources = [
-    authentik_source_oauth.github_actions_oidc.id,
+  jwt_federation_sources = [
+    authentik_source_oauth.github_actions_oidc.uuid,
   ]
 }
