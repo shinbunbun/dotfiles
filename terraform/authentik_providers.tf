@@ -233,7 +233,7 @@ resource "authentik_provider_proxy" "wg_lease" {
   refresh_token_validity       = "days=30"
   internal_host_ssl_validation = true
   intercept_header_auth        = true
-  jwks_sources = [
+  jwt_federation_sources = [
     authentik_source_oauth.github_actions_oidc.id,
   ]
 }
