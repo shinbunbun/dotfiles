@@ -234,6 +234,6 @@ resource "authentik_provider_proxy" "wg_lease" {
   internal_host_ssl_validation = true
   intercept_header_auth        = true
   jwt_federation_sources = [
-    authentik_source_oauth.github_actions_oidc.id,
+    authentik_source_oauth.github_actions_oidc.uuid,
   ]
 }
