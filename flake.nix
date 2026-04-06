@@ -78,12 +78,6 @@
       url = "github:zhaofengli/attic";
     };
 
-    # peer-issuer: WireGuard peer動的発行API
-    peer-issuer = {
-      url = "github:shinbunbun/peer-issuer";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     # claude-code: Claude Code CLIツール（Nix native binary）
     claude-code = {
       url = "github:sadjow/claude-code-nix";
@@ -105,7 +99,6 @@
       nixos-observability-config,
       deploy-rs,
       attic,
-      peer-issuer,
       claude-code,
       ...
     }@inputs:
@@ -216,7 +209,6 @@
           unified-cloudflare-tunnel = ./systems/nixos/modules/services/unified-cloudflare-tunnel.nix;
           desktop-cloudflare-tunnel = ./systems/nixos/modules/services/desktop-cloudflare-tunnel.nix;
           attic = ./systems/nixos/modules/services/attic.nix;
-          peer-issuer = ./systems/nixos/modules/services/peer-issuer.nix;
           deploy-user = ./systems/nixos/modules/services/deploy-user.nix;
           argocd = ./systems/nixos/modules/services/argocd.nix;
           mosh = ./systems/nixos/modules/services/mosh.nix;

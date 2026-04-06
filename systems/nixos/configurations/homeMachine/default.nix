@@ -43,7 +43,6 @@ in
     ../../modules/services/cockpit.nix
     ../../modules/services/routeros-backup.nix
     ../../modules/services/attic.nix
-    ../../modules/services/peer-issuer.nix
     ../../modules/services/deploy-user.nix
     ../../modules/services/unified-cloudflare-tunnel.nix
 
@@ -85,9 +84,6 @@ in
     enable = true;
     gitRepo = "git@github.com:shinbunbun/routeros-backups.git";
   };
-
-  # peer-issuer設定
-  services.peerIssuer.enable = true;
 
   # VS Code Server設定
   services.vscode-server.enable = true;
