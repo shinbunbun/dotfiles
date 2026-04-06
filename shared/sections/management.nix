@@ -1,7 +1,7 @@
 /*
   管理インターフェース設定セクション
 
-  Cockpit、ttyd、アクセス制限、Cloudflare Tunnelの設定を定義します。
+  Cockpit、アクセス制限、Cloudflare Tunnelの設定を定義します。
 */
 v: {
   management = {
@@ -10,14 +10,6 @@ v: {
       enable = v.assertBool "management.cockpit.enable" true;
       port = v.assertPort "management.cockpit.port" 9091;
       domain = v.assertString "management.cockpit.domain" "cockpit.shinbunbun.com";
-    };
-
-    # ttyd設定
-    ttyd = {
-      enable = v.assertBool "management.ttyd.enable" true;
-      port = v.assertPort "management.ttyd.port" 7681;
-      domain = v.assertString "management.ttyd.domain" "terminal.shinbunbun.com";
-      passwordFile = v.assertPath "management.ttyd.passwordFile" "/var/lib/ttyd/password";
     };
 
     # アクセス制限設定
@@ -36,9 +28,6 @@ v: {
     desktop = {
       cockpit = {
         domain = v.assertString "cloudflare.desktop.cockpit.domain" "desktop-cockpit.shinbunbun.com";
-      };
-      ttyd = {
-        domain = v.assertString "cloudflare.desktop.ttyd.domain" "desktop-terminal.shinbunbun.com";
       };
       calendarBot = {
         domain = v.assertString "cloudflare.desktop.calendarBot.domain" "calendar-bot.shinbunbun.com";

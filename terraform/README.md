@@ -162,14 +162,12 @@ terraform/
 | Grafana | ✓ | ✓ | OIDC認証 |
 | Obsidian LiveSync | ✓ | - | 直接認証 |
 | Cockpit | ✓ | ✓ | OIDC認証 |
-| ttyd | ✓ | ✓ | OIDC認証 |
 
 ### desktop-services (nixos-desktop)
 
 | サービス | DNS | Access App | 備考 |
 |---------|-----|-----------|------|
 | Cockpit | ✓ | ✓ | OIDC認証 |
-| ttyd | ✓ | ✓ | OIDC認証 |
 
 ## State管理
 

@@ -210,7 +210,6 @@
         # Service modules
         services = {
           cockpit = ./systems/nixos/modules/services/cockpit.nix;
-          ttyd = ./systems/nixos/modules/services/ttyd.nix;
           authentik = ./systems/nixos/modules/services/authentik.nix;
           obsidian-livesync = ./systems/nixos/modules/services/obsidian-livesync.nix;
           routeros-backup = ./systems/nixos/modules/services/routeros-backup.nix;
