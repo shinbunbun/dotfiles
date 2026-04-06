@@ -46,17 +46,6 @@ resource "cloudflare_dns_record" "home_cockpit" {
   comment = "Managed by Terraform - Cockpit (Home) via home-services tunnel"
 }
 
-# ttyd Terminal (homeMachine)
-resource "cloudflare_dns_record" "home_ttyd" {
-  zone_id = var.cloudflare_zone_id
-  name    = "terminal.${local.base_domain}"
-  content = local.home_tunnel_endpoint
-  type    = "CNAME"
-  ttl     = 1
-  proxied = true
-  comment = "Managed by Terraform - Terminal (Home) via home-services tunnel"
-}
-
 # Attic Binary Cache
 resource "cloudflare_dns_record" "attic" {
   zone_id = var.cloudflare_zone_id
@@ -103,17 +92,6 @@ resource "cloudflare_dns_record" "desktop_cockpit" {
   ttl     = 1
   proxied = true
   comment = "Managed by Terraform - Cockpit (Desktop) via desktop-services tunnel"
-}
-
-# ttyd Terminal (nixos-desktop)
-resource "cloudflare_dns_record" "desktop_ttyd" {
-  zone_id = var.cloudflare_zone_id
-  name    = "desktop-terminal.${local.base_domain}"
-  content = local.desktop_tunnel_endpoint
-  type    = "CNAME"
-  ttl     = 1
-  proxied = true
-  comment = "Managed by Terraform - Terminal (Desktop) via desktop-services tunnel"
 }
 
 # OpenSearch Dashboards

@@ -5,10 +5,8 @@ output "access_application_ids" {
     # home-services
     grafana      = cloudflare_zero_trust_access_application.grafana.id
     home_cockpit = cloudflare_zero_trust_access_application.home_cockpit.id
-    home_ttyd    = cloudflare_zero_trust_access_application.home_ttyd.id
     # desktop-services
     desktop_cockpit       = cloudflare_zero_trust_access_application.desktop_cockpit.id
-    desktop_ttyd          = cloudflare_zero_trust_access_application.desktop_ttyd.id
     opensearch_dashboards = cloudflare_zero_trust_access_application.opensearch_dashboards.id
     argocd                = cloudflare_zero_trust_access_application.argocd.id
     calendar_bot          = cloudflare_zero_trust_access_application.calendar_bot.id
@@ -39,10 +37,8 @@ output "dns_records" {
     grafana           = cloudflare_dns_record.grafana.name
     obsidian_livesync = cloudflare_dns_record.obsidian_livesync.name
     home_cockpit      = cloudflare_dns_record.home_cockpit.name
-    home_ttyd         = cloudflare_dns_record.home_ttyd.name
     # desktop-services
     desktop_cockpit       = cloudflare_dns_record.desktop_cockpit.name
-    desktop_ttyd          = cloudflare_dns_record.desktop_ttyd.name
     opensearch_dashboards = cloudflare_dns_record.opensearch_dashboards.name
     argocd                = cloudflare_dns_record.argocd.name
   }

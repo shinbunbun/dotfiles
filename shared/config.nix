@@ -87,10 +87,6 @@ let
       port = config.management.cockpit.port;
     }
     {
-      name = "management.ttyd";
-      port = config.management.ttyd.port;
-    }
-    {
       name = "opensearch";
       port = config.opensearch.port;
     }

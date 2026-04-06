@@ -63,17 +63,6 @@ in
             };
           };
 
-          # ttyd Terminal - Zero Trust Accessで認証必要
-          "terminal.${domain}" = {
-            service = "http://localhost:${toString cfg.management.ttyd.port}";
-            originRequest = {
-              noTLSVerify = true;
-              # WebSocket対応
-              httpHostHeader = "terminal.${domain}";
-              originServerName = "terminal.${domain}";
-            };
-          };
-
           # Attic Binary Cache
           "${cfg.attic.domain}" = {
             service = "http://localhost:${toString cfg.attic.port}";
