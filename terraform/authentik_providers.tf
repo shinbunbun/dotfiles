@@ -218,7 +218,7 @@ resource "authentik_provider_proxy" "wg_lease" {
   name               = "wg-lease-proxy"
   authorization_flow = data.authentik_flow.default_authorization_implicit_consent.id
   invalidation_flow  = data.authentik_flow.default_provider_invalidation.id
-  internal_host      = "http://192.168.1.3:8088"
+  internal_host      = "http://peer-issuer.peer-issuer.svc.cluster.local:8088"
   external_host      = "https://wg-lease.shinbunbun.com"
   mode               = "proxy"
   property_mappings = [
