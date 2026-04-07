@@ -205,7 +205,6 @@
           cockpit = ./systems/nixos/modules/services/cockpit.nix;
           authentik = ./systems/nixos/modules/services/authentik.nix;
           obsidian-livesync = ./systems/nixos/modules/services/obsidian-livesync.nix;
-          routeros-backup = ./systems/nixos/modules/services/routeros-backup.nix;
           unified-cloudflare-tunnel = ./systems/nixos/modules/services/unified-cloudflare-tunnel.nix;
           desktop-cloudflare-tunnel = ./systems/nixos/modules/services/desktop-cloudflare-tunnel.nix;
           attic = ./systems/nixos/modules/services/attic.nix;

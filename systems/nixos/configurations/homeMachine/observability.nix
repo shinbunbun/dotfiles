@@ -204,7 +204,7 @@ in
             job_name = "routeros";
             static_configs = [
               {
-                targets = [ cfg.routerosBackup.routerIP ];
+                targets = [ cfg.networking.hosts.router.ip ];
               }
             ];
             metrics_path = "/snmp";

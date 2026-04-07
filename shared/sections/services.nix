@@ -46,18 +46,4 @@ v: {
     port = v.assertPort "immich.port" 2283;
     domain = v.assertString "immich.domain" "immich.shinbunbun.com";
   };
-
-  routerosBackup = {
-    routerIP = v.assertIP "routerosBackup.routerIP" "192.168.1.1";
-    routerUser = v.assertString "routerosBackup.routerUser" "admin";
-    sshKeyPath = v.assertPath "routerosBackup.sshKeyPath" "/home/bunbun/.ssh/id_ed25519";
-    backupDir = v.assertPath "routerosBackup.backupDir" "/var/lib/routeros-backup";
-    git = {
-      userName = v.assertString "routerosBackup.git.userName" "RouterOS Backup Service";
-      userEmail = v.assertEmail "routerosBackup.git.userEmail" "routeros-backup@localhost";
-    };
-    # リトライ設定
-    maxRetries = v.assertPositiveInt "routerosBackup.maxRetries" 3;
-    retryDelay = v.assertPositiveInt "routerosBackup.retryDelay" 30;
-  };
 }
