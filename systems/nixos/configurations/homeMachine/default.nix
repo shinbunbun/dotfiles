@@ -41,7 +41,6 @@ in
     # ../../modules/services/loki.nix                # nixos-observability に移行
     # ../../modules/services/fluent-bit.nix          # nixos-observability に移行
     ../../modules/services/cockpit.nix
-    ../../modules/services/routeros-backup.nix
     ../../modules/services/attic.nix
     ../../modules/services/deploy-user.nix
     ../../modules/services/unified-cloudflare-tunnel.nix
@@ -78,12 +77,6 @@ in
   nixpkgs.overlays = [
     inputs.claude-code.overlays.default
   ];
-
-  # RouterOSバックアップ設定
-  services.routerosBackup = {
-    enable = true;
-    gitRepo = "git@github.com:shinbunbun/routeros-backups.git";
-  };
 
   # VS Code Server設定
   services.vscode-server.enable = true;

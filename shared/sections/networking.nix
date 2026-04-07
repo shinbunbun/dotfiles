@@ -23,6 +23,10 @@ v: {
         ip = v.assertIP "networking.hosts.g3pro.ip" "192.168.1.6";
         hostname = v.assertString "networking.hosts.g3pro.hostname" "g3pro";
       };
+      router = {
+        ip = v.assertIP "networking.hosts.router.ip" "192.168.1.1";
+        hostname = v.assertString "networking.hosts.router.hostname" "router";
+      };
     };
 
     interfaces = {
