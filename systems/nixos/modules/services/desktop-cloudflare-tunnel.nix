@@ -42,9 +42,9 @@ in
             };
           };
 
-          # OpenSearch Dashboards - Zero Trust Accessで認証必要
+          # OpenSearch Dashboards - k3s上で稼働、Traefik VIP経由
           "${cfg.opensearchDashboards.domain}" = {
-            service = "http://localhost:${toString cfg.opensearchDashboards.port}";
+            service = "http://${cfg.k3s.cluster.traefikVIP}:80";
             originRequest = {
               noTLSVerify = true;
               httpHostHeader = "${cfg.opensearchDashboards.domain}";
