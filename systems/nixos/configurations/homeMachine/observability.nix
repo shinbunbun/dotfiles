@@ -3,12 +3,14 @@
 
   このファイルは nixos-observability モジュールを使用した監視スタックの設定を定義します：
   - Prometheus: メトリクス収集
-  - Grafana: 可視化とダッシュボード
   - Node Exporter: システムメトリクス
   - SNMP Exporter: RouterOS 監視
   - Loki: ログ集約
   - Alertmanager: アラート管理
   - Fluent Bit: ログ収集
+
+  可視化（Grafana）は k3s クラスタ (k8s-apps/infrastructure/grafana) に
+  移管済み。NixOS 側ではサーバをホストしない。
 */
 {
   config,
@@ -334,23 +336,6 @@ in
         configFile = inputs.nixos-observability-config.assets.snmpConfig;
       };
 
-      # Grafana は k3s 上の HA Grafana (k8s-apps/infrastructure/grafana) に移行済み。
-      # Cloudflare Tunnel も Traefik VIP に向き先を切替 (unified-cloudflare-tunnel.nix)。
-      # NixOS 側ではサービスを無効化する (切り戻しが必要なら本 PR を revert)。
-      grafana.enable = false;
-
-      # データソース設定
-      datasources = {
-        prometheus = {
-          enable = true;
-          isDefault = true;
-        };
-
-        loki = {
-          enable = true;
-          url = "http://localhost:${toString cfg.monitoring.loki.port}";
-        };
-      };
     };
   };
 }

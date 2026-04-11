@@ -1,8 +1,12 @@
 /*
   監視システム設定セクション
 
-  Prometheus、Node Exporter、Grafana、Alertmanager、
+  Prometheus、Node Exporter、Alertmanager、
   SNMP Exporter、k3sメトリクス、Lokiの設定を定義します。
+
+  Grafana 本体の設定値は持ちません（k3s クラスタに移管済み）。
+  外部公開 URL としての domain だけが externalUrl / Cloudflare Tunnel で
+  参照されるため保持しています。
 */
 v: {
   monitoring = {
@@ -19,9 +23,8 @@ v: {
       port = v.assertPort "monitoring.nodeExporter.port" 9100;
     };
 
-    # Grafana設定
+    # Grafana設定 (k3s 上の外部 URL のみ保持、本体は k3s クラスタでホスト)
     grafana = {
-      port = v.assertPort "monitoring.grafana.port" 3000;
       domain = v.assertString "monitoring.grafana.domain" "grafana.shinbunbun.com";
     };
 
