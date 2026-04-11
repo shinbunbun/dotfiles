@@ -38,10 +38,13 @@ in
             originRequest.noTLSVerify = true;
           };
 
-          # Grafana - Zero Trust Accessで認証必要
+          # Grafana - k3s上で稼働、Traefik VIP経由。Zero Trust Accessで認証必要
           "${cfg.monitoring.grafana.domain}" = {
-            service = "http://localhost:${toString cfg.monitoring.grafana.port}";
-            originRequest.noTLSVerify = true;
+            service = "http://${cfg.k3s.cluster.traefikVIP}";
+            originRequest = {
+              noTLSVerify = true;
+              httpHostHeader = cfg.monitoring.grafana.domain;
+            };
           };
 
           # Obsidian LiveSync - k3s上で稼働、Traefik VIP経由
