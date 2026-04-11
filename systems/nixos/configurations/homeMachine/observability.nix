@@ -364,8 +364,12 @@ in
       };
 
       # Grafana設定
+      # k3s 上の HA Grafana (k8s-apps/infrastructure/grafana) に移行済み。
+      # Cloudflare Tunnel も Traefik VIP に向き先を切替 (unified-cloudflare-tunnel.nix)。
+      # 切り戻しの容易性を保つため、port/domain/oauth 等の設定値と SOPS secret 参照は
+      # そのまま残す (enable = false の間は monitoring.nix 側 mkIf で未評価)。
       grafana = {
-        enable = true;
+        enable = false;
         port = cfg.monitoring.grafana.port;
         domain = cfg.monitoring.grafana.domain;
         secretKeyFile = config.sops.secrets."grafana/secret_key".path;
