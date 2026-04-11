@@ -265,8 +265,18 @@
         };
       };
 
-      # deploy-rs checks
-      checks."x86_64-linux" = deploy-rs.lib.x86_64-linux.deployChecks self.deploy;
-      checks."aarch64-darwin" = deploy-rs.lib.aarch64-darwin.deployChecks self.deploy;
+      # deploy-rs checks（各プラットフォームに対応するノードのみに限定）
+      checks."x86_64-linux" = deploy-rs.lib.x86_64-linux.deployChecks {
+        nodes = nixpkgs.lib.filterAttrs (
+          name: _:
+          builtins.elem name [
+            "homeMachine"
+            "g3pro"
+          ]
+        ) self.deploy.nodes;
+      };
+      checks."aarch64-darwin" = deploy-rs.lib.aarch64-darwin.deployChecks {
+        nodes = nixpkgs.lib.filterAttrs (name: _: builtins.elem name [ "macmini" ]) self.deploy.nodes;
+      };
     };
 }
