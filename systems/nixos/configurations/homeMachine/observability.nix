@@ -28,39 +28,10 @@ let
 in
 {
   # SOPS設定
+  # Grafana 関連 secrets は k8s-apps/apps/grafana-config/secrets/ (KSOPS) に移管済み。
+  # ここで grafana user/group を参照する secrets を残すと services.grafana.enable=false で
+  # grafana user 自体が自動削除された時に sops-install-secrets が owner lookup で失敗する。
   sops = {
-    # Grafana OAuth
-    secrets."grafana/oauth_client_id" = {
-      sopsFile = "${inputs.self}/secrets/grafana.yaml";
-      owner = "grafana";
-      group = "grafana";
-      mode = "0400";
-    };
-
-    secrets."grafana/oauth_client_secret" = {
-      sopsFile = "${inputs.self}/secrets/grafana.yaml";
-      owner = "grafana";
-      group = "grafana";
-      mode = "0400";
-    };
-
-    secrets."grafana/secret_key" = {
-      sopsFile = "${inputs.self}/secrets/grafana.yaml";
-      owner = "grafana";
-      group = "grafana";
-      mode = "0400";
-    };
-
-    templates."grafana/oauth-env" = {
-      content = ''
-        GRAFANA_OAUTH_CLIENT_ID=${config.sops.placeholder."grafana/oauth_client_id"}
-        GRAFANA_OAUTH_CLIENT_SECRET=${config.sops.placeholder."grafana/oauth_client_secret"}
-      '';
-      owner = "grafana";
-      group = "grafana";
-      mode = "0400";
-    };
-
     # Alertmanager Discord
     secrets."alertmanager/discord_webhook_url" = {
       key = "discord/webhook_url";
@@ -363,34 +334,10 @@ in
         configFile = inputs.nixos-observability-config.assets.snmpConfig;
       };
 
-      # Grafana設定
-      # k3s 上の HA Grafana (k8s-apps/infrastructure/grafana) に移行済み。
+      # Grafana は k3s 上の HA Grafana (k8s-apps/infrastructure/grafana) に移行済み。
       # Cloudflare Tunnel も Traefik VIP に向き先を切替 (unified-cloudflare-tunnel.nix)。
-      # 切り戻しの容易性を保つため、port/domain/oauth 等の設定値と SOPS secret 参照は
-      # そのまま残す (enable = false の間は monitoring.nix 側 mkIf で未評価)。
-      grafana = {
-        enable = false;
-        port = cfg.monitoring.grafana.port;
-        domain = cfg.monitoring.grafana.domain;
-        secretKeyFile = config.sops.secrets."grafana/secret_key".path;
-
-        oauth = {
-          enable = true;
-          name = "Authentik";
-          environmentFile = config.sops.templates."grafana/oauth-env".path;
-          authUrl = "${cfg.authentik.baseUrl}/application/o/authorize/";
-          tokenUrl = "${cfg.authentik.baseUrl}/application/o/token/";
-          apiUrl = "${cfg.authentik.baseUrl}/application/o/userinfo/";
-          scopes = "openid email profile groups";
-          roleAttributePath = "contains(groups[*], 'Grafana Admins') && 'Admin' || contains(groups[*], 'Grafana Editors') && 'Editor' || 'Viewer'";
-          autoLogin = true;
-        };
-
-        dashboards = {
-          enable = true;
-          path = inputs.nixos-observability-config.assets.dashboards;
-        };
-      };
+      # NixOS 側ではサービスを無効化する (切り戻しが必要なら本 PR を revert)。
+      grafana.enable = false;
 
       # データソース設定
       datasources = {
