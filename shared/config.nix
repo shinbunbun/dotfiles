@@ -51,10 +51,6 @@ let
       port = config.monitoring.nodeExporter.port;
     }
     {
-      name = "monitoring.grafana";
-      port = config.monitoring.grafana.port;
-    }
-    {
       name = "monitoring.alertmanager";
       port = config.monitoring.alertmanager.port;
     }
