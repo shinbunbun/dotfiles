@@ -17,11 +17,11 @@ resource "cloudflare_dns_record" "authentik" {
 resource "cloudflare_dns_record" "grafana" {
   zone_id = var.cloudflare_zone_id
   name    = "grafana.${local.base_domain}"
-  content = local.home_tunnel_endpoint
+  content = local.k3s_tunnel_endpoint
   type    = "CNAME"
   ttl     = 1
   proxied = true
-  comment = "Managed by Terraform - Grafana via home-services tunnel"
+  comment = "Managed by Terraform - Grafana via k3s-services tunnel"
 }
 
 # Obsidian LiveSync
