@@ -68,6 +68,7 @@ pkgs.mkShell {
       export TF_VAR_cloudflare_account_id=$(sops -d --extract '["cloudflare"]["account-id"]' secrets/cloudflare.yaml 2>/dev/null)
       export TF_VAR_home_tunnel_id=$(sops -d --extract '["cloudflare"]["tunnel-id"]' secrets/cloudflare.yaml 2>/dev/null)
       export TF_VAR_desktop_tunnel_id=$(sops -d --extract '["cloudflare"]["desktop-tunnel-id"]' secrets/cloudflare.yaml 2>/dev/null)
+      export TF_VAR_k3s_tunnel_id=$(sops -d --extract '["cloudflare"]["k3s-tunnel-id"]' secrets/cloudflare.yaml 2>/dev/null)
       export TF_VAR_identity_provider_id=$(sops -d --extract '["cloudflare"]["identity-provider-id"]' secrets/cloudflare.yaml 2>/dev/null)
 
       if [ -n "$CLOUDFLARE_API_TOKEN" ]; then

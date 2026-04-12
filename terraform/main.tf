@@ -42,4 +42,5 @@ locals {
   # トンネルへのCNAMEレコードは <tunnel-id>.cfargotunnel.com を指す
   home_tunnel_endpoint    = "${var.home_tunnel_id}.cfargotunnel.com"
   desktop_tunnel_endpoint = "${var.desktop_tunnel_id}.cfargotunnel.com"
+  k3s_tunnel_endpoint     = "${var.k3s_tunnel_id}.cfargotunnel.com"
 }
