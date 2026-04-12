@@ -6,11 +6,11 @@
 resource "cloudflare_dns_record" "authentik" {
   zone_id = var.cloudflare_zone_id
   name    = "auth.${local.base_domain}"
-  content = local.home_tunnel_endpoint
+  content = local.k3s_tunnel_endpoint
   type    = "CNAME"
   ttl     = 1
   proxied = true
-  comment = "Managed by Terraform - Authentik (IdP) via home-services tunnel"
+  comment = "Managed by Terraform - Authentik (IdP) via k3s-services tunnel"
 }
 
 # Grafana
@@ -28,11 +28,11 @@ resource "cloudflare_dns_record" "grafana" {
 resource "cloudflare_dns_record" "obsidian_livesync" {
   zone_id = var.cloudflare_zone_id
   name    = "private-obsidian.${local.base_domain}"
-  content = local.home_tunnel_endpoint
+  content = local.k3s_tunnel_endpoint
   type    = "CNAME"
   ttl     = 1
   proxied = true
-  comment = "Managed by Terraform - Obsidian LiveSync via home-services tunnel"
+  comment = "Managed by Terraform - Obsidian LiveSync via k3s-services tunnel"
 }
 
 # Cockpit (homeMachine)
@@ -61,11 +61,11 @@ resource "cloudflare_dns_record" "attic" {
 resource "cloudflare_dns_record" "peer_issuer" {
   zone_id = var.cloudflare_zone_id
   name    = "wg-lease.${local.base_domain}"
-  content = local.home_tunnel_endpoint
+  content = local.k3s_tunnel_endpoint
   type    = "CNAME"
   ttl     = 1
   proxied = true
-  comment = "Managed by Terraform - peer-issuer via home-services tunnel"
+  comment = "Managed by Terraform - peer-issuer via k3s-services tunnel"
 }
 
 # SSH for CI/CD deployment
@@ -98,33 +98,33 @@ resource "cloudflare_dns_record" "desktop_cockpit" {
 resource "cloudflare_dns_record" "opensearch_dashboards" {
   zone_id = var.cloudflare_zone_id
   name    = "opensearch.${local.base_domain}"
-  content = local.desktop_tunnel_endpoint
+  content = local.k3s_tunnel_endpoint
   type    = "CNAME"
   ttl     = 1
   proxied = true
-  comment = "Managed by Terraform - OpenSearch Dashboards via desktop-services tunnel"
+  comment = "Managed by Terraform - OpenSearch Dashboards via k3s-services tunnel"
 }
 
 # ArgoCD
 resource "cloudflare_dns_record" "argocd" {
   zone_id = var.cloudflare_zone_id
   name    = "argocd.${local.base_domain}"
-  content = local.desktop_tunnel_endpoint
+  content = local.k3s_tunnel_endpoint
   type    = "CNAME"
   ttl     = 1
   proxied = true
-  comment = "Managed by Terraform - ArgoCD via desktop-services tunnel"
+  comment = "Managed by Terraform - ArgoCD via k3s-services tunnel"
 }
 
 # Google Calendar Bot
 resource "cloudflare_dns_record" "calendar_bot" {
   zone_id = var.cloudflare_zone_id
   name    = "calendar-bot.${local.base_domain}"
-  content = local.desktop_tunnel_endpoint
+  content = local.k3s_tunnel_endpoint
   type    = "CNAME"
   ttl     = 1
   proxied = true
-  comment = "Managed by Terraform - Google Calendar Bot via desktop-services tunnel"
+  comment = "Managed by Terraform - Google Calendar Bot via k3s-services tunnel"
 }
 
 # Nextcloud
@@ -153,9 +153,9 @@ resource "cloudflare_dns_record" "immich" {
 resource "cloudflare_dns_record" "mixi2_bot" {
   zone_id = var.cloudflare_zone_id
   name    = "mixi2-bot.${local.base_domain}"
-  content = local.desktop_tunnel_endpoint
+  content = local.k3s_tunnel_endpoint
   type    = "CNAME"
   ttl     = 1
   proxied = true
-  comment = "Managed by Terraform - mixi2 Bot via desktop-services tunnel"
+  comment = "Managed by Terraform - mixi2 Bot via k3s-services tunnel"
 }
