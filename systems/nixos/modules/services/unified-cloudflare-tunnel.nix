@@ -1,15 +1,13 @@
 /*
-  統合Cloudflare Tunnel設定
+  Cloudflare Tunnel設定（homeMachine ローカルサービス向け）
 
   機能:
-  - すべてのサービスを1つのトンネルで管理
-  - 各サービスへのルーティング設定
+  - homeMachine のローカルサービスへのトンネルアクセス
   - SOPS統合による認証情報管理
 
   注意:
-  - Cloudflare Zero Trust Accessの認証ポリシーは
-    別途Cloudflareダッシュボードまたは
-    Terraformで設定する必要があります
+  - k3s 上のアプリ（grafana, authentik 等）は k3s 内の cloudflared で処理される
+  - このモジュールは localhost サービス専用
 */
 {
   config,
@@ -32,30 +30,6 @@ in
         credentialsFile = config.sops.templates."cloudflare/tunnel-credentials.json".path;
 
         ingress = {
-          # Authentik (認証プロバイダー) - k3s上で稼働、Traefik VIP経由
-          "auth.${domain}" = {
-            service = "http://${cfg.k3s.cluster.traefikVIP}";
-            originRequest.noTLSVerify = true;
-          };
-
-          # Grafana - k3s上で稼働、Traefik VIP経由。Zero Trust Accessで認証必要
-          "${cfg.monitoring.grafana.domain}" = {
-            service = "http://${cfg.k3s.cluster.traefikVIP}";
-            originRequest = {
-              noTLSVerify = true;
-              httpHostHeader = cfg.monitoring.grafana.domain;
-            };
-          };
-
-          # Obsidian LiveSync - k3s上で稼働、Traefik VIP経由
-          "private-obsidian.${domain}" = {
-            service = "http://${cfg.k3s.cluster.traefikVIP}";
-            originRequest = {
-              noTLSVerify = true;
-              httpHostHeader = "private-obsidian.${domain}";
-            };
-          };
-
           # Cockpit - Zero Trust Accessで認証必要
           "cockpit.${domain}" = {
             service = "http://localhost:${toString cfg.management.cockpit.port}";
@@ -76,14 +50,6 @@ in
               # 大きなファイルのアップロード用にタイムアウトを延長
               connectTimeout = "5m";
               noHappyEyeballs = true;
-            };
-          };
-
-          # peer-issuer (WireGuard peer動的発行API) - k3s上のAuthentik Embedded Outpost経由
-          "${cfg.peerIssuer.domain}" = {
-            service = "http://${cfg.k3s.cluster.traefikVIP}";
-            originRequest = {
-              noTLSVerify = true;
             };
           };
 
