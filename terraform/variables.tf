@@ -28,6 +28,11 @@ variable "desktop_tunnel_id" {
   type        = string
 }
 
+variable "k3s_tunnel_id" {
+  description = "Cloudflare Tunnel ID for k3s-services (k3s-internal cloudflared)"
+  type        = string
+}
+
 # 認証プロバイダー設定
 variable "identity_provider_id" {
   description = "Identity Provider ID for Cloudflare Access (Authentikなど)"

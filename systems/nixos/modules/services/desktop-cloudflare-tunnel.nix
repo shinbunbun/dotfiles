@@ -1,15 +1,13 @@
 /*
-  nixos-desktop用Cloudflare Tunnel設定
+  nixos-desktop用Cloudflare Tunnel設定（ローカルサービス向け）
 
   機能:
-  - nixos-desktop専用のトンネル設定
-  - Cockpit、OpenSearch Dashboards、ArgoCDをCloudflare経由で公開
+  - nixos-desktop のローカルサービスへのトンネルアクセス
   - SOPS統合による認証情報管理
 
   注意:
-  - Cloudflare Zero Trust Accessの認証ポリシーは
-    別途Cloudflareダッシュボードまたは
-    Terraformで設定する必要があります
+  - k3s 上のアプリ（argocd, opensearch 等）は k3s 内の cloudflared で処理される
+  - このモジュールは localhost サービス専用
 */
 {
   config,
@@ -39,46 +37,6 @@ in
               noTLSVerify = true;
               httpHostHeader = "${tunnelConfig.cockpit.domain}";
               originServerName = "${tunnelConfig.cockpit.domain}";
-            };
-          };
-
-          # OpenSearch Dashboards - k3s上で稼働、Traefik VIP経由
-          "${cfg.opensearchDashboards.domain}" = {
-            service = "http://${cfg.k3s.cluster.traefikVIP}:80";
-            originRequest = {
-              noTLSVerify = true;
-              httpHostHeader = "${cfg.opensearchDashboards.domain}";
-              originServerName = "${cfg.opensearchDashboards.domain}";
-            };
-          };
-
-          # Google Calendar Bot - Zero Trust Accessで認証必要
-          "${tunnelConfig.calendarBot.domain}" = {
-            service = "http://${cfg.k3s.cluster.traefikVIP}:80"; # Traefik LB VIP (k8s)
-            originRequest = {
-              noTLSVerify = true;
-              httpHostHeader = "${tunnelConfig.calendarBot.domain}";
-              originServerName = "${tunnelConfig.calendarBot.domain}";
-            };
-          };
-
-          # mixi2 Bot - Webhook受信用
-          "${tunnelConfig.mixi2Bot.domain}" = {
-            service = "http://${cfg.k3s.cluster.traefikVIP}:80"; # Traefik LB VIP (k8s)
-            originRequest = {
-              noTLSVerify = true;
-              httpHostHeader = "${tunnelConfig.mixi2Bot.domain}";
-              originServerName = "${tunnelConfig.mixi2Bot.domain}";
-            };
-          };
-
-          # ArgoCD - Zero Trust Accessで認証必要
-          "${tunnelConfig.argocd.domain}" = {
-            service = "http://${cfg.k3s.cluster.traefikVIP}:80"; # Traefik LB VIP
-            originRequest = {
-              noTLSVerify = true;
-              httpHostHeader = "${tunnelConfig.argocd.domain}";
-              originServerName = "${tunnelConfig.argocd.domain}";
             };
           };
 

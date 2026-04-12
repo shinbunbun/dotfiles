@@ -176,25 +176,6 @@ let
             enabled: true
   '';
 
-  # Traefik HelmChartConfig
-  traefikConfig = pkgs.writeText "traefik-config.yaml" ''
-    apiVersion: helm.cattle.io/v1
-    kind: HelmChartConfig
-    metadata:
-      name: traefik
-      namespace: kube-system
-    spec:
-      valuesContent: |-
-        hub:
-          enabled: false
-        providers:
-          kubernetesGateway:
-            enabled: false
-        service:
-          annotations:
-            io.cilium/lb-ipam-ips: "${clusterCfg.traefikVIP}"
-  '';
-
   # HAProxy設定
   haproxyConfig = ''
     global
@@ -297,7 +278,6 @@ in
     # k3sマニフェストディレクトリに設定ファイルを自動配置
     systemd.tmpfiles.rules = [
       "L+ /var/lib/rancher/k3s/server/manifests/cilium-chart.yaml - - - - ${ciliumChart}"
-      "L+ /var/lib/rancher/k3s/server/manifests/traefik-config.yaml - - - - ${traefikConfig}"
       "L+ /var/lib/rancher/k3s/server/manifests/monitoring-rbac.yaml - - - - ${monitoringRbacConfig}"
     ];
 

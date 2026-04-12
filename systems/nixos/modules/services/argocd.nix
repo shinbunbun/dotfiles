@@ -180,7 +180,6 @@ let
 
   # Nix store に保存するマニフェストファイル
   helmChartFile = pkgs.writeText "argocd-helmchart.yaml" helmChartManifest;
-  ingressRouteFile = pkgs.writeText "argocd-ingress.yaml" ingressRouteManifest;
 
   # HelmChart CRD マニフェスト
   helmChartManifest = ''
@@ -199,23 +198,6 @@ let
         ${builtins.replaceStrings [ "\n" ] [ "\n        " ] helmValues}
   '';
 
-  # Traefik IngressRoute マニフェスト
-  ingressRouteManifest = ''
-    apiVersion: traefik.io/v1alpha1
-    kind: IngressRoute
-    metadata:
-      name: argocd-server
-      namespace: ${argocdCfg.namespace}
-    spec:
-      entryPoints:
-        - web
-      routes:
-        - match: Host(`${argocdCfg.domain}`)
-          kind: Rule
-          services:
-            - name: argocd-server
-              port: 80
-  '';
 in
 {
 
@@ -293,10 +275,9 @@ in
           sleep 5
         done
 
-        # HelmChart CRD と IngressRoute を kubectl apply で適用
-        echo "Applying ArgoCD HelmChart and IngressRoute manifests..."
+        # HelmChart CRD を kubectl apply で適用
+        echo "Applying ArgoCD HelmChart manifest..."
         kubectl apply -f ${helmChartFile}
-        kubectl apply -f ${ingressRouteFile}
 
         # ArgoCD namespace が作成されるまで待機
         echo "Waiting for ArgoCD namespace..."

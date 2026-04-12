@@ -28,6 +28,7 @@ v: {
       "--disable-kube-proxy"
       "--disable-network-policy"
       "--disable=servicelb"
+      "--disable=traefik"
       "--write-kubeconfig-mode=0644"
     ];
 
