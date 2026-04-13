@@ -28,9 +28,10 @@ v: {
       domain = v.assertString "monitoring.grafana.domain" "grafana.shinbunbun.com";
     };
 
-    # Alertmanager設定
+    # Alertmanager設定 (k3s 上の VMAlertmanager に移管済み、LAN VIP 経由でアクセス)
     alertmanager = {
       port = v.assertPort "monitoring.alertmanager.port" 9093;
+      vip = v.assertString "monitoring.alertmanager.vip" "192.168.128.13";
     };
 
     # SNMP Exporter設定

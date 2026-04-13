@@ -2,15 +2,13 @@
   オブザーバビリティ設定 - homeMachine
 
   このファイルは nixos-observability モジュールを使用した監視スタックの設定を定義します：
-  - Prometheus: メトリクス収集
   - Node Exporter: システムメトリクス
-  - SNMP Exporter: RouterOS 監視
   - Loki: ログ集約
-  - Alertmanager: アラート管理
   - Fluent Bit: ログ収集
 
-  可視化（Grafana）は k3s クラスタ (k8s-apps/infrastructure/grafana) に
-  移管済み。NixOS 側ではサーバをホストしない。
+  Prometheus, Alertmanager, SNMP Exporter は k3s クラスタ (k8s-apps) の
+  VictoriaMetrics スタックに移管済み。
+  可視化（Grafana）も k3s クラスタ (k8s-apps/infrastructure/grafana) に移管済み。
 */
 {
   config,
@@ -29,67 +27,8 @@ let
   };
 in
 {
-  # SOPS設定
-  # Grafana 関連 secrets は k8s-apps/apps/grafana-config/secrets/ (KSOPS) に移管済み。
-  # ここで grafana user/group を参照する secrets を残すと services.grafana.enable=false で
-  # grafana user 自体が自動削除された時に sops-install-secrets が owner lookup で失敗する。
-  sops = {
-    # Alertmanager Discord
-    secrets."alertmanager/discord_webhook_url" = {
-      key = "discord/webhook_url";
-      sopsFile = "${inputs.self}/secrets/alertmanager.yaml";
-      owner = "prometheus";
-      group = "prometheus";
-      mode = "0400";
-    };
-
-    secrets."alertmanager/discord_user_id" = {
-      key = "discord/user_id";
-      sopsFile = "${inputs.self}/secrets/alertmanager.yaml";
-      owner = "prometheus";
-      group = "prometheus";
-      mode = "0400";
-    };
-
-    templates."alertmanager/env" = {
-      content = ''
-        DISCORD_WEBHOOK_URL=${config.sops.placeholder."alertmanager/discord_webhook_url"}
-        DISCORD_USER_ID=${config.sops.placeholder."alertmanager/discord_user_id"}
-      '';
-      path = "/run/secrets/rendered/alertmanager/env";
-      owner = "prometheus";
-      group = "prometheus";
-      mode = "0400";
-    };
-
-    # k3s監視用トークン
-    secrets."k3s/monitoring_token" = {
-      key = "k3s_monitoring_token";
-      sopsFile = "${inputs.self}/secrets/monitoring.yaml";
-      owner = "prometheus";
-      group = "prometheus";
-      mode = "0400";
-    };
-  };
-
-  # bearer_token_fileがSOPSで管理され、ビルド時には存在しないためチェックを無効化
-  services.prometheus.checkConfig = false;
-
   # オブザーバビリティ設定（nixos-observability）
   services.observability = {
-    # Alertmanager設定
-    alertmanager = {
-      enable = true;
-      port = cfg.monitoring.alertmanager.port;
-      discord.webhookUrlFile = config.sops.templates."alertmanager/env".path;
-
-      # アラートルールを読み込み
-      alertRules = import inputs.nixos-observability-config.assets.alertRules;
-
-      prometheusUrl = "localhost:${toString cfg.monitoring.alertmanager.port}";
-      externalUrl = "https://${cfg.monitoring.grafana.domain}";
-    };
-
     # Fluent Bit設定
     fluentBit = {
       enable = true;
@@ -108,234 +47,23 @@ in
       ingestionRateLimit = cfg.monitoring.loki.ingestionRateLimit;
       ingestionBurstSize = cfg.monitoring.loki.ingestionBurstSize;
       chunkTargetSize = cfg.monitoring.loki.chunkTargetSize;
-      alertmanagerUrl = "http://localhost:${toString cfg.monitoring.alertmanager.port}";
+      alertmanagerUrl = "http://${cfg.monitoring.alertmanager.vip}:${toString cfg.monitoring.alertmanager.port}";
       rulesFile = inputs.nixos-observability-config.assets.lokiRules;
       externalUrl = "https://${cfg.monitoring.grafana.domain}";
     };
 
-    # Monitoring設定
+    # Monitoring設定（Node Exporter のみ有効化）
     monitoring = {
       enable = true;
 
-      # Prometheus設定
-      prometheus = {
-        enable = true;
-        port = cfg.monitoring.prometheus.port;
-        retentionDays = cfg.monitoring.prometheus.retentionDays;
-        scrapeInterval = cfg.monitoring.prometheus.scrapeInterval;
-        evaluationInterval = cfg.monitoring.prometheus.evaluationInterval;
-        externalUrl = "https://${cfg.monitoring.grafana.domain}";
-
-        # macOS メモリメトリクスを Linux 互換名にリマップする recording rules
-        recordingRules = import inputs.nixos-observability-config.assets.recordingRules;
-
-        scrapeConfigs = [
-          {
-            job_name = "node";
-            static_configs = [
-              {
-                targets = [ "localhost:${toString cfg.monitoring.nodeExporter.port}" ];
-                labels = {
-                  instance = "${cfg.networking.hosts.nixos.hostname}.${cfg.networking.hosts.nixos.domain}";
-                };
-              }
-              {
-                targets = [
-                  "${cfg.networking.hosts.nixosDesktop.ip}:${toString cfg.monitoring.nodeExporter.port}"
-                ];
-                labels = {
-                  instance = cfg.networking.hosts.nixosDesktop.hostname;
-                };
-              }
-              {
-                targets = [
-                  "${cfg.networking.hosts.macmini.ip}:${toString cfg.monitoring.nodeExporter.port}"
-                ];
-                labels = {
-                  instance = cfg.networking.hosts.macmini.hostname;
-                };
-              }
-              {
-                targets = [
-                  "${cfg.networking.hosts.g3pro.ip}:${toString cfg.monitoring.nodeExporter.port}"
-                ];
-                labels = {
-                  instance = cfg.networking.hosts.g3pro.hostname;
-                };
-              }
-            ];
-          }
-          {
-            job_name = "prometheus";
-            static_configs = [
-              {
-                targets = [ "localhost:${toString cfg.monitoring.prometheus.port}" ];
-              }
-            ];
-          }
-          {
-            job_name = "routeros";
-            static_configs = [
-              {
-                targets = [ cfg.networking.hosts.router.ip ];
-              }
-            ];
-            metrics_path = "/snmp";
-            params = {
-              module = [ "mikrotik" ];
-              auth = [ "public_v2" ];
-            };
-            relabel_configs = [
-              {
-                source_labels = [ "__address__" ];
-                target_label = "__param_target";
-              }
-              {
-                source_labels = [ "__param_target" ];
-                target_label = "instance";
-              }
-              {
-                target_label = "__address__";
-                replacement = "localhost:${toString cfg.monitoring.snmpExporter.port}";
-              }
-            ];
-          }
-          # k3s kubeletメトリクス（全ノード）
-          {
-            job_name = "k3s-kubelet";
-            scheme = "https";
-            tls_config = {
-              insecure_skip_verify = true;
-            };
-            bearer_token_file = config.sops.secrets."k3s/monitoring_token".path;
-            static_configs = [
-              {
-                targets = [
-                  "${cfg.networking.hosts.nixosDesktop.ip}:${toString cfg.monitoring.k3sMetrics.kubeletPort}"
-                ];
-                labels = {
-                  instance = cfg.networking.hosts.nixosDesktop.hostname;
-                };
-              }
-              {
-                targets = [
-                  "192.168.1.3:${toString cfg.monitoring.k3sMetrics.kubeletPort}"
-                ];
-                labels = {
-                  instance = "${cfg.networking.hosts.nixos.hostname}.${cfg.networking.hosts.nixos.domain}";
-                };
-              }
-              {
-                targets = [
-                  "${cfg.networking.hosts.g3pro.ip}:${toString cfg.monitoring.k3sMetrics.kubeletPort}"
-                ];
-                labels = {
-                  instance = cfg.networking.hosts.g3pro.hostname;
-                };
-              }
-            ];
-          }
-          # k3s cAdvisorメトリクス（全ノード）
-          {
-            job_name = "k3s-cadvisor";
-            scheme = "https";
-            tls_config = {
-              insecure_skip_verify = true;
-            };
-            bearer_token_file = config.sops.secrets."k3s/monitoring_token".path;
-            metrics_path = "/metrics/cadvisor";
-            static_configs = [
-              {
-                targets = [
-                  "${cfg.networking.hosts.nixosDesktop.ip}:${toString cfg.monitoring.k3sMetrics.kubeletPort}"
-                ];
-                labels = {
-                  instance = cfg.networking.hosts.nixosDesktop.hostname;
-                };
-              }
-              {
-                targets = [
-                  "192.168.1.3:${toString cfg.monitoring.k3sMetrics.kubeletPort}"
-                ];
-                labels = {
-                  instance = "${cfg.networking.hosts.nixos.hostname}.${cfg.networking.hosts.nixos.domain}";
-                };
-              }
-              {
-                targets = [
-                  "${cfg.networking.hosts.g3pro.ip}:${toString cfg.monitoring.k3sMetrics.kubeletPort}"
-                ];
-                labels = {
-                  instance = cfg.networking.hosts.g3pro.hostname;
-                };
-              }
-            ];
-          }
-          # k3s API Serverメトリクス（全ノード）
-          {
-            job_name = "k3s-apiserver";
-            scheme = "https";
-            tls_config = {
-              insecure_skip_verify = true;
-            };
-            bearer_token_file = config.sops.secrets."k3s/monitoring_token".path;
-            static_configs = [
-              {
-                targets = [
-                  "${cfg.networking.hosts.nixosDesktop.ip}:${toString cfg.k3s.cluster.apiBackendPort}"
-                ];
-                labels = {
-                  instance = cfg.networking.hosts.nixosDesktop.hostname;
-                };
-              }
-              {
-                targets = [
-                  "192.168.1.3:${toString cfg.k3s.cluster.apiBackendPort}"
-                ];
-                labels = {
-                  instance = "${cfg.networking.hosts.nixos.hostname}.${cfg.networking.hosts.nixos.domain}";
-                };
-              }
-              {
-                targets = [
-                  "${cfg.networking.hosts.g3pro.ip}:${toString cfg.k3s.cluster.apiBackendPort}"
-                ];
-                labels = {
-                  instance = cfg.networking.hosts.g3pro.hostname;
-                };
-              }
-            ];
-          }
-          # kube-state-metricsメトリクス（クラスタオブジェクト状態）
-          {
-            job_name = "kube-state-metrics";
-            static_configs = [
-              {
-                targets = [
-                  "${cfg.networking.hosts.nixosDesktop.ip}:${toString cfg.monitoring.k3sMetrics.kubeStateMetricsPort}"
-                ];
-                labels = {
-                  instance = cfg.networking.hosts.nixosDesktop.hostname;
-                };
-              }
-            ];
-          }
-        ];
-      };
+      prometheus.enable = false;
+      snmpExporter.enable = false;
 
       # Node Exporter設定
       nodeExporter = {
         enable = true;
         port = cfg.monitoring.nodeExporter.port;
       };
-
-      # SNMP Exporter設定
-      snmpExporter = {
-        enable = true;
-        port = cfg.monitoring.snmpExporter.port;
-        configFile = inputs.nixos-observability-config.assets.snmpConfig;
-      };
-
     };
   };
 }
