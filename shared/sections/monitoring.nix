@@ -1,23 +1,17 @@
 /*
   監視システム設定セクション
 
-  Prometheus、Node Exporter、Alertmanager、
-  SNMP Exporter、k3sメトリクス、Lokiの設定を定義します。
+  NixOS 側で使用する監視設定値を定義します：
+  - Node Exporter: 各ホストのシステムメトリクス公開
+  - Loki: ログ集約
+  - Grafana: 外部 URL のみ保持（本体は k3s クラスタ）
+  - Alertmanager: k3s VMAlertmanager への LAN VIP 参照情報のみ保持（Loki ruler 用）
 
-  Grafana 本体の設定値は持ちません（k3s クラスタに移管済み）。
-  外部公開 URL としての domain だけが externalUrl / Cloudflare Tunnel で
-  参照されるため保持しています。
+  Prometheus / SNMP Exporter / k3sメトリクス設定は
+  k3s クラスタの VictoriaMetrics スタック (k8s-apps) に移管済み。
 */
 v: {
   monitoring = {
-    # Prometheus設定
-    prometheus = {
-      port = v.assertPort "monitoring.prometheus.port" 9090;
-      retentionDays = v.assertPositiveInt "monitoring.prometheus.retentionDays" 30;
-      scrapeInterval = v.assertString "monitoring.prometheus.scrapeInterval" "15s";
-      evaluationInterval = v.assertString "monitoring.prometheus.evaluationInterval" "15s";
-    };
-
     # Node Exporter設定
     nodeExporter = {
       port = v.assertPort "monitoring.nodeExporter.port" 9100;
@@ -28,23 +22,10 @@ v: {
       domain = v.assertString "monitoring.grafana.domain" "grafana.shinbunbun.com";
     };
 
-    # Alertmanager設定 (k3s 上の VMAlertmanager に移管済み、LAN VIP 経由でアクセス)
+    # Alertmanager設定 (k3s 上の VMAlertmanager を LAN VIP 経由で参照、Loki ruler が使用)
     alertmanager = {
       port = v.assertPort "monitoring.alertmanager.port" 9093;
       vip = v.assertString "monitoring.alertmanager.vip" "192.168.128.13";
-    };
-
-    # SNMP Exporter設定
-    snmpExporter = {
-      port = v.assertPort "monitoring.snmpExporter.port" 9116;
-      communityString = v.assertString "monitoring.snmpExporter.communityString" "prometheus";
-    };
-
-    # k3sメトリクス設定
-    k3sMetrics = {
-      kubeStateMetricsPort = v.assertPort "monitoring.k3sMetrics.kubeStateMetricsPort" 30080;
-      kubeletPort = v.assertPort "monitoring.k3sMetrics.kubeletPort" 10250;
-      apiServerPort = v.assertPort "monitoring.k3sMetrics.apiServerPort" 6444;
     };
 
     # Loki設定
