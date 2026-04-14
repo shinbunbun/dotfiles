@@ -43,32 +43,12 @@ let
       port = config.networking.firewall.nfsPort;
     }
     {
-      name = "monitoring.prometheus";
-      port = config.monitoring.prometheus.port;
-    }
-    {
       name = "monitoring.nodeExporter";
       port = config.monitoring.nodeExporter.port;
     }
     {
       name = "monitoring.alertmanager";
       port = config.monitoring.alertmanager.port;
-    }
-    {
-      name = "monitoring.snmpExporter";
-      port = config.monitoring.snmpExporter.port;
-    }
-    {
-      name = "monitoring.k3sMetrics.kubeStateMetrics";
-      port = config.monitoring.k3sMetrics.kubeStateMetricsPort;
-    }
-    {
-      name = "monitoring.k3sMetrics.kubelet";
-      port = config.monitoring.k3sMetrics.kubeletPort;
-    }
-    {
-      name = "monitoring.k3sMetrics.apiServer";
-      port = config.monitoring.k3sMetrics.apiServerPort;
     }
     {
       name = "k3s.cluster.apiPort";

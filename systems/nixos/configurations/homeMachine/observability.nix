@@ -52,14 +52,10 @@ in
       externalUrl = "https://${cfg.monitoring.grafana.domain}";
     };
 
-    # Monitoring設定（Node Exporter のみ有効化）
+    # Monitoring設定（Node Exporter のみ）
     monitoring = {
       enable = true;
 
-      prometheus.enable = false;
-      snmpExporter.enable = false;
-
-      # Node Exporter設定
       nodeExporter = {
         enable = true;
         port = cfg.monitoring.nodeExporter.port;
