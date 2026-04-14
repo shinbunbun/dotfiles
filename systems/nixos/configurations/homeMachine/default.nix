@@ -54,7 +54,6 @@ in
     inputs.sops-nix.nixosModules.sops
     inputs.vscode-server.nixosModules.default
     inputs.nixos-observability.nixosModules.monitoring
-    inputs.nixos-observability.nixosModules.alertmanager
     inputs.nixos-observability.nixosModules.loki
     inputs.nixos-observability.nixosModules.fluentBit
   ];
