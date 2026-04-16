@@ -54,7 +54,7 @@ in
     inputs.sops-nix.nixosModules.sops
     inputs.vscode-server.nixosModules.default
     inputs.nixos-observability.nixosModules.monitoring
-    inputs.nixos-observability.nixosModules.loki
+    # nixos-observability.nixosModules.loki は k3s に移行したため削除
     inputs.nixos-observability.nixosModules.fluentBit
   ];
 
