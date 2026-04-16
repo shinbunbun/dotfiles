@@ -30,6 +30,10 @@ v: {
 
     # Loki設定
     loki = {
+      # Fluent Bit クライアントの送信先ホスト。
+      # k3s 移行後は loki-lan Service (Cilium LB IPAM 固定 VIP) を指す。
+      # NixOS 側の旧 Loki サービス (homeMachine) は Phase 5 で停止予定。
+      host = v.assertString "monitoring.loki.host" "192.168.128.14";
       port = v.assertPort "monitoring.loki.port" 3100;
       retentionDays = v.assertPositiveInt "monitoring.loki.retentionDays" 30;
       ingestionRateLimit = v.assertPositiveInt "monitoring.loki.ingestionRateLimit" 52428800; # 50MB/s
