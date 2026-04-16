@@ -3,12 +3,12 @@
 
   このファイルは nixos-observability モジュールを使用した監視スタックの設定を定義します：
   - Node Exporter: システムメトリクス
-  - Loki: ログ集約
-  - Fluent Bit: ログ収集
+  - Fluent Bit: ログ収集 (k3s 上の Loki へ送信)
 
   Prometheus, Alertmanager, SNMP Exporter は k3s クラスタ (k8s-apps) の
   VictoriaMetrics スタックに移管済み。
   可視化（Grafana）も k3s クラスタ (k8s-apps/infrastructure/grafana) に移管済み。
+  Loki も k3s クラスタ (k8s-apps/infrastructure/loki) に移管済み。
 */
 {
   config,
@@ -36,20 +36,6 @@ in
       configFile = fluentBitConfigs.main;
       firewallPorts = [ cfg.fluentBit.syslogPort ]; # syslog UDP port
       openFirewall = true;
-    };
-
-    # Loki設定
-    loki = {
-      enable = true;
-      port = cfg.monitoring.loki.port;
-      dataDir = cfg.monitoring.loki.dataDir;
-      retentionDays = cfg.monitoring.loki.retentionDays;
-      ingestionRateLimit = cfg.monitoring.loki.ingestionRateLimit;
-      ingestionBurstSize = cfg.monitoring.loki.ingestionBurstSize;
-      chunkTargetSize = cfg.monitoring.loki.chunkTargetSize;
-      alertmanagerUrl = "http://${cfg.monitoring.alertmanager.vip}:${toString cfg.monitoring.alertmanager.port}";
-      rulesFile = inputs.nixos-observability-config.assets.lokiRules;
-      externalUrl = "https://${cfg.monitoring.grafana.domain}";
     };
 
     # Monitoring設定（Node Exporter のみ）
