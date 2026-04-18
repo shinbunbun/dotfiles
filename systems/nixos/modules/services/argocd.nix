@@ -51,6 +51,19 @@ let
     # ArgoCD Server 設定
     server = {
       extraArgs = [ "--insecure" ]; # Traefik が TLS 終端するため
+      # Prometheus メトリクス Service (argocd-server-metrics :8083) を有効化
+      # VictoriaMetrics VMAgent が VMServiceScrape 経由で収集する
+      metrics.enabled = true;
+    };
+
+    # Application Controller のメトリクス Service (argocd-metrics :8082) を有効化
+    controller = {
+      metrics.enabled = true;
+    };
+
+    # ApplicationSet Controller のメトリクス (Service のメトリクス port 8080) を有効化
+    applicationSet = {
+      metrics.enabled = true;
     };
 
     # ArgoCD Config (argocd-cm ConfigMap)
@@ -118,6 +131,9 @@ let
 
     # repo-server に KSOPS プラグインと Age 鍵を追加
     repoServer = {
+      # repo-server のメトリクス (Service のメトリクス port 8084) を有効化
+      metrics.enabled = true;
+
       # KSOPS バイナリをインストールする init container
       initContainers = [
         {
