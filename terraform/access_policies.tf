@@ -24,6 +24,24 @@ resource "cloudflare_zero_trust_access_application" "grafana" {
   }]
 }
 
+# Hubble UI - 認証必須（Hubble UI 自体は認証なしのため Cloudflare Access で保護）
+resource "cloudflare_zero_trust_access_application" "hubble" {
+  account_id                = var.cloudflare_account_id
+  name                      = "Hubble"
+  domain                    = local.home_services.hubble
+  type                      = "self_hosted"
+  session_duration          = "24h"
+  auto_redirect_to_identity = true
+  allowed_idps              = [var.identity_provider_id]
+  enable_binding_cookie     = false
+  options_preflight_bypass  = false
+
+  policies = [{
+    id         = cloudflare_zero_trust_access_policy.oidc_groups_allow.id
+    precedence = 1
+  }]
+}
+
 # Cockpit (homeMachine) - 認証必須
 resource "cloudflare_zero_trust_access_application" "home_cockpit" {
   account_id                = var.cloudflare_account_id
