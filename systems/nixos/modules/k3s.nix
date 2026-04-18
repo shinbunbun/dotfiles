@@ -170,8 +170,22 @@ let
           enabled: true
         hubble:
           enabled: true
+          metrics:
+            enabled:
+              - dns
+              - drop
+              - tcp
+              - flow
+              - port-distribution
+              - icmp
+              - httpV2:exemplars=true;labelsContext=source_ip,source_namespace,source_workload,destination_ip,destination_namespace,destination_workload,traffic_direction
+            enableOpenMetrics: true
+            serviceMonitor:
+              enabled: false
           relay:
             enabled: true
+            prometheus:
+              enabled: true
           ui:
             enabled: true
   '';
