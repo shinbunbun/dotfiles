@@ -20,6 +20,7 @@ v: {
         peerAS = v.assertPositiveInt "k3s.cluster.bgp.peerAS" 65000;
         peerAddress = v.assertIP "k3s.cluster.bgp.peerAddress" "192.168.1.1";
       };
+      ciliumVersion = v.assertString "k3s.cluster.ciliumVersion" "1.19.3";
     };
 
     # 共通のk3sフラグ（Cilium用）
