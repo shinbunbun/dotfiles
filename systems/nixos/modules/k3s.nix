@@ -150,7 +150,7 @@ let
     spec:
       repo: https://helm.cilium.io/
       chart: cilium
-      version: "1.17.3"
+      version: "${clusterCfg.ciliumVersion}"
       targetNamespace: kube-system
       bootstrap: true
       valuesContent: |-
