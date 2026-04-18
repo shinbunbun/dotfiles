@@ -168,6 +168,8 @@ let
               - "${clusterCfg.podCIDR}"
         bgpControlPlane:
           enabled: true
+        prometheus:
+          enabled: true
         hubble:
           enabled: true
           metrics:
