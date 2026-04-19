@@ -150,6 +150,18 @@ variable "immich_oauth_client_secret" {
   sensitive   = true
 }
 
+variable "scanopy_oauth_client_id" {
+  description = "Scanopy OAuth2 Client ID"
+  type        = string
+  sensitive   = true
+}
+
+variable "scanopy_oauth_client_secret" {
+  description = "Scanopy OAuth2 Client Secret"
+  type        = string
+  sensitive   = true
+}
+
 # --- OpenSearch ---
 variable "opensearch_url" {
   description = "OpenSearch URL"
