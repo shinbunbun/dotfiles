@@ -64,3 +64,11 @@ resource "authentik_application" "wg_lease" {
   protocol_provider  = authentik_provider_proxy.wg_lease.id
   policy_engine_mode = "any"
 }
+
+resource "authentik_application" "scanopy" {
+  name               = "Scanopy"
+  slug               = "scanopy"
+  protocol_provider  = authentik_provider_oauth2.scanopy.id
+  meta_launch_url    = "https://scanopy.shinbunbun.com"
+  policy_engine_mode = "any"
+}

@@ -35,6 +35,17 @@ resource "cloudflare_dns_record" "hubble" {
   comment = "Managed by Terraform - Hubble UI via k3s-services tunnel"
 }
 
+# Scanopy (network topology diagram)
+resource "cloudflare_dns_record" "scanopy" {
+  zone_id = var.cloudflare_zone_id
+  name    = "scanopy.${local.base_domain}"
+  content = local.k3s_tunnel_endpoint
+  type    = "CNAME"
+  ttl     = 1
+  proxied = true
+  comment = "Managed by Terraform - Scanopy via k3s-services tunnel"
+}
+
 # Obsidian LiveSync
 resource "cloudflare_dns_record" "obsidian_livesync" {
   zone_id = var.cloudflare_zone_id
