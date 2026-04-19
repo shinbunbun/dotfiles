@@ -7,8 +7,15 @@
   - k3s server: embedded etcd による HAクラスタ（3ノード）
   - HAProxy: API Server ロードバランシング（:6443 → :6444）
   - keepalived: VRRP による API Server VIP 管理
-  - Cilium: CNI + kube-proxy代替 + BGP Service LB（別途Helmでインストール）
+  - Cilium: CNI + kube-proxy代替 + BGP Service LB（k8s-apps の ArgoCD Application で管理）
   - DRBD: カーネルレベルストレージレプリケーション（Piraeus Operator経由で管理）
+
+  新規クラスタ初期化時の Cilium bootstrap:
+  - ArgoCD は Cilium が動いていないと pod を schedule できないため、
+    クラスタ初回起動時のみ手動で Cilium をインストールする必要がある
+  - 手順: `helm install cilium cilium/cilium --version <ver> -n kube-system -f <values>`
+  - ArgoCD が起動したら application `cilium` が ServerSideApply で既存リソースを adopt し、
+    以降の管理は ArgoCD に引き継がれる
 
   ネットワーク設計:
   - API Server VIP: 192.168.1.254 (keepalived VRRP)
@@ -140,58 +147,6 @@ let
     type: kubernetes.io/service-account-token
   '';
 
-  # Cilium HelmChart（k3s が自動デプロイ）
-  ciliumChart = pkgs.writeText "cilium-chart.yaml" ''
-    apiVersion: helm.cattle.io/v1
-    kind: HelmChart
-    metadata:
-      name: cilium
-      namespace: kube-system
-    spec:
-      repo: https://helm.cilium.io/
-      chart: cilium
-      version: "${clusterCfg.ciliumVersion}"
-      targetNamespace: kube-system
-      bootstrap: true
-      valuesContent: |-
-        kubeProxyReplacement: true
-        k8sServiceHost: 127.0.0.1
-        k8sServicePort: ${toString clusterCfg.apiBackendPort}
-        routingMode: native
-        ipv4NativeRoutingCIDR: "${clusterCfg.podCIDR}"
-        autoDirectNodeRoutes: true
-        bpf:
-          masquerade: true
-        ipam:
-          operator:
-            clusterPoolIPv4PodCIDRList:
-              - "${clusterCfg.podCIDR}"
-        bgpControlPlane:
-          enabled: true
-        prometheus:
-          enabled: true
-        hubble:
-          enabled: true
-          metrics:
-            enabled:
-              - dns
-              - drop
-              - tcp
-              - flow
-              - port-distribution
-              - icmp
-              - httpV2:exemplars=true;labelsContext=source_ip,source_namespace,source_workload,destination_ip,destination_namespace,destination_workload,traffic_direction
-            enableOpenMetrics: true
-            serviceMonitor:
-              enabled: false
-          relay:
-            enabled: true
-            prometheus:
-              enabled: true
-          ui:
-            enabled: true
-  '';
-
   # HAProxy設定
   haproxyConfig = ''
     global
@@ -292,8 +247,9 @@ in
     };
 
     # k3sマニフェストディレクトリに設定ファイルを自動配置
+    # Cilium は ArgoCD で管理するため、ここでは配置しない
+    # （新規クラスタ初期化時のみ手動で helm install が必要。モジュール冒頭コメント参照）
     systemd.tmpfiles.rules = [
-      "L+ /var/lib/rancher/k3s/server/manifests/cilium-chart.yaml - - - - ${ciliumChart}"
       "L+ /var/lib/rancher/k3s/server/manifests/monitoring-rbac.yaml - - - - ${monitoringRbacConfig}"
     ];
 
