@@ -26,6 +26,7 @@ locals {
     grafana = "grafana.${local.base_domain}"
     cockpit = "cockpit.${local.base_domain}"
     hubble  = "hubble.${local.base_domain}"
+    scanopy = "scanopy.${local.base_domain}"
   }
 
   # desktop-services (nixos-desktop) のドメイン
