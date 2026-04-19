@@ -221,7 +221,7 @@ resource "authentik_provider_oauth2" "scanopy" {
   client_secret      = var.scanopy_oauth_client_secret
   signing_key        = data.authentik_certificate_key_pair.es256_jwt_signing.id
   allowed_redirect_uris = [
-    { matching_mode = "strict", url = "https://scanopy.shinbunbun.com/oauth/callback" },
+    { matching_mode = "strict", url = "https://scanopy.shinbunbun.com/api/auth/oidc/authentik/callback" },
   ]
   property_mappings = [
     data.authentik_property_mapping_provider_scope.openid.id,
