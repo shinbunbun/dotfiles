@@ -63,6 +63,7 @@ v: {
     ignoreNetworks = v.assertListOf "fail2ban.ignoreNetworks" [
       "192.168.11.0/24"
       "163.143.0.0/16"
+      "10.66.66.0/24" # WireGuardクライアントを除外（fail2banループ防止）
     ] v.assertCIDR;
   };
 
