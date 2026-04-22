@@ -83,6 +83,10 @@ let
       port = config.fluentBit.syslogPort;
     }
     {
+      name = "fluentBit.vector";
+      port = config.fluentBit.vectorPort;
+    }
+    {
       name = "attic";
       port = config.attic.port;
     }

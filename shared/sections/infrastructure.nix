@@ -203,5 +203,11 @@ v: {
     opensearchHost = v.assertIP "fluentBit.opensearchHost" "192.168.1.4";
     opensearchPort = v.assertPort "fluentBit.opensearchPort" 9200;
     k3sPodLogDir = v.assertPath "fluentBit.k3sPodLogDir" "/var/log/pods";
+    # Phase 2e で OpenSearch を撤去する際に false にして OUTPUT を無効化する
+    enableOpenSearch = v.assertBool "fluentBit.enableOpenSearch" true;
+    # Vector (log-archiver-vector) の Fluent Forward エンドポイント。
+    # k3s 上の Cilium LB IPAM で固定 VIP (LAN) が割当てられている。
+    vectorHost = v.assertIP "fluentBit.vectorHost" "192.168.128.17";
+    vectorPort = v.assertPort "fluentBit.vectorPort" 24224;
   };
 }
