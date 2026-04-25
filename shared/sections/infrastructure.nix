@@ -1,8 +1,7 @@
 /*
   インフラストラクチャ設定セクション
 
-  k3s、NFS、Atticバイナリキャッシュ、peer-issuer、
-  OpenSearch、OpenSearch Dashboards、Fluent Bitの設定を定義します。
+  k3s、NFS、Atticバイナリキャッシュ、peer-issuer、Fluent Bitの設定を定義します。
 */
 v: {
   k3s = {
@@ -164,47 +163,10 @@ v: {
     stateDirectory = v.assertPath "peerIssuer.stateDirectory" "/var/lib/peer-issuer";
   };
 
-  opensearch = {
-    # サーバー設定
-    port = v.assertPort "opensearch.port" 9200;
-    transportPort = v.assertPort "opensearch.transportPort" 9300;
-    dataDir = v.assertPath "opensearch.dataDir" "/var/lib/opensearch";
-
-    # メモリ設定（ヒープ4GB + Off-heap用4GB = 合計8GB）
-    heapSize = v.assertString "opensearch.heapSize" "4g";
-    maxMemory = v.assertPositiveInt "opensearch.maxMemory" 8589934592; # 4GB heap + 4GB off-heap = 8GB
-
-    # クラスター設定
-    clusterName = v.assertString "opensearch.clusterName" "shinbunbun-logs";
-    nodeName = v.assertString "opensearch.nodeName" "nixos-desktop";
-
-    # インデックス設定
-    numberOfShards = v.assertPositiveInt "opensearch.numberOfShards" 1; # 単一ノードのため
-    numberOfReplicas = v.assertNonNegativeInt "opensearch.numberOfReplicas" 0; # レプリカ不要
-
-    # セキュリティ設定
-    enableSecurity = v.assertBool "opensearch.enableSecurity" true;
-    allowedNetworks = v.assertListOf "opensearch.allowedNetworks" [
-      "192.168.1.0/24"
-      "192.168.11.0/24"
-      "10.66.66.0/24" # WireGuard
-    ] v.assertCIDR;
-  };
-
-  opensearchDashboards = {
-    port = v.assertPort "opensearchDashboards.port" 5601;
-    domain = v.assertString "opensearchDashboards.domain" "opensearch.shinbunbun.com";
-    opensearchUrl = v.assertString "opensearchDashboards.opensearchUrl" "http://192.168.1.4:9200";
-  };
-
   fluentBit = {
     port = v.assertPort "fluentBit.port" 2020;
     syslogPort = v.assertPort "fluentBit.syslogPort" 514;
-    opensearchHost = v.assertIP "fluentBit.opensearchHost" "192.168.1.4";
-    opensearchPort = v.assertPort "fluentBit.opensearchPort" 9200;
     k3sPodLogDir = v.assertPath "fluentBit.k3sPodLogDir" "/var/log/pods";
-    # OpenSearch 撤去 Phase B: default false で OUTPUT を無効化済み。本体撤去後に option ごと削除予定。
-    enableOpenSearch = v.assertBool "fluentBit.enableOpenSearch" false;
     # Vector (log-archiver-vector) の Fluent Forward エンドポイント。
     # k3s 上の Cilium LB IPAM で固定 VIP (LAN) が割当てられている。
     vectorHost = v.assertIP "fluentBit.vectorHost" "192.168.128.17";

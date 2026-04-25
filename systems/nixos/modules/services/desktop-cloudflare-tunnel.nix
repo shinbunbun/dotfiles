@@ -6,7 +6,7 @@
   - SOPS統合による認証情報管理
 
   注意:
-  - k3s 上のアプリ（argocd, opensearch 等）は k3s 内の cloudflared で処理される
+  - k3s 上のアプリ（argocd 等）は k3s 内の cloudflared で処理される
   - このモジュールは localhost サービス専用
 */
 {
