@@ -3,7 +3,7 @@
 
   このファイルはg3proの監視設定を定義します：
   - Node Exporter: システムメトリクスの公開（homeMachineのPrometheusがスクレイプ）
-  - Fluent Bit: systemd-journalログをhomeMachineのLoki/OpenSearchへ転送
+  - Fluent Bit: systemd-journalログを Loki / Vector (k3s) へ転送
 
   Fluent Bitは nixos-observability-config の generator を使用し、
   homeMachineと同じフォーマットでログを転送します。
@@ -52,7 +52,7 @@ in
   };
 
   # Fluent Bit設定（nixos-observability モジュール経由）
-  # systemd-journal → Loki + OpenSearch へログ転送
+  # systemd-journal → Loki + Vector (k3s) へログ転送
   # syslog入力も含まれるが、RouterOSからの送信がないためidle
   services.observability.fluentBit = {
     enable = true;

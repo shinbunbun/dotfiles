@@ -63,18 +63,6 @@ let
       port = config.management.cockpit.port;
     }
     {
-      name = "opensearch";
-      port = config.opensearch.port;
-    }
-    {
-      name = "opensearch.transport";
-      port = config.opensearch.transportPort;
-    }
-    {
-      name = "opensearchDashboards";
-      port = config.opensearchDashboards.port;
-    }
-    {
       name = "fluentBit";
       port = config.fluentBit.port;
     }

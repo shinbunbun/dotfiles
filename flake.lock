@@ -295,11 +295,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1776381333,
-        "narHash": "sha256-9VRe2KZFnLbXeOIdZL+Y10g2SH/R+nFapedcCnQV3yE=",
+        "lastModified": 1777094382,
+        "narHash": "sha256-L2QkmL6D1m2ylKu8RdhLx3ALhReDtdaNkiFmCNoI1rU=",
         "owner": "shinbunbun",
         "repo": "nixos-observability",
-        "rev": "31109ce28bec5631dc85e76fc0699dc6f672c341",
+        "rev": "2fe2014b1fd526b9ef79aef8895fe8dedeb0a119",
         "type": "github"
       },
       "original": {
@@ -315,11 +315,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1776907157,
-        "narHash": "sha256-oOUdHOvRWCiQKfuQERJ5ZxNncUdLHOIsHBopkfUvpLM=",
+        "lastModified": 1777094401,
+        "narHash": "sha256-KiS/30qRTu1ZWCX3iHeEV9igambnjysR4lKOCo92+QE=",
         "owner": "shinbunbun",
         "repo": "nixos-observability-config",
-        "rev": "26c7a530ec78af856f7ee0f3a78baaa8672461fa",
+        "rev": "490b92e180ed05d44179459d37db8e3f7e29a7d8",
         "type": "github"
       },
       "original": {

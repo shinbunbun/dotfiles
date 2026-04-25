@@ -8,7 +8,7 @@
   1. macos-log-stream: macOS Unified Logging Systemの log stream 出力をファイルに書き出す
      - 起動時に前回停止時刻からのログをキャッチアップ（欠落ゼロ設計）
      - リアルタイムストリーミングで /var/log/macos-unified.log にアペンド
-  2. fluent-bit: /var/log/macos-unified.log を tail input で読み取り、Loki/OpenSearchに転送
+  2. fluent-bit: /var/log/macos-unified.log を tail input で読み取り、Loki / Vector (k3s) に転送
   3. macos-log-rotate: 日次ログローテーション（3日保持、gzip圧縮）
 */
 {
