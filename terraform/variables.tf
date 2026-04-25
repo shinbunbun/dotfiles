@@ -102,18 +102,6 @@ variable "couchdb_oauth_client_secret" {
   sensitive   = true
 }
 
-variable "opensearch_oauth_client_id" {
-  description = "OpenSearch Dashboards OAuth2 Client ID"
-  type        = string
-  sensitive   = true
-}
-
-variable "opensearch_oauth_client_secret" {
-  description = "OpenSearch Dashboards OAuth2 Client Secret"
-  type        = string
-  sensitive   = true
-}
-
 variable "argocd_oauth_client_id" {
   description = "ArgoCD OAuth2 Client ID"
   type        = string
@@ -160,11 +148,4 @@ variable "scanopy_oauth_client_secret" {
   description = "Scanopy OAuth2 Client Secret"
   type        = string
   sensitive   = true
-}
-
-# --- OpenSearch ---
-variable "opensearch_url" {
-  description = "OpenSearch URL"
-  type        = string
-  default     = "http://192.168.1.4:9200"
 }

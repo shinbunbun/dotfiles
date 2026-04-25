@@ -27,14 +27,6 @@ resource "authentik_application" "grafana" {
   policy_engine_mode = "any"
 }
 
-resource "authentik_application" "opensearch_dashboards" {
-  name               = "OpenSearch Dashboards"
-  slug               = "opensearch-dashboards"
-  protocol_provider  = authentik_provider_oauth2.opensearch_dashboards.id
-  meta_launch_url    = "https://opensearch.shinbunbun.com"
-  policy_engine_mode = "any"
-}
-
 resource "authentik_application" "argocd" {
   name               = "ArgoCD"
   slug               = "argocd"

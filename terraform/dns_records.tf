@@ -116,17 +116,6 @@ resource "cloudflare_dns_record" "desktop_cockpit" {
   comment = "Managed by Terraform - Cockpit (Desktop) via desktop-services tunnel"
 }
 
-# OpenSearch Dashboards
-resource "cloudflare_dns_record" "opensearch_dashboards" {
-  zone_id = var.cloudflare_zone_id
-  name    = "opensearch.${local.base_domain}"
-  content = local.k3s_tunnel_endpoint
-  type    = "CNAME"
-  ttl     = 1
-  proxied = true
-  comment = "Managed by Terraform - OpenSearch Dashboards via k3s-services tunnel"
-}
-
 # ArgoCD
 resource "cloudflare_dns_record" "argocd" {
   zone_id = var.cloudflare_zone_id
