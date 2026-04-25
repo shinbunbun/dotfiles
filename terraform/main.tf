@@ -9,13 +9,6 @@ provider "authentik" {
   token = var.authentik_api_token
 }
 
-# OpenSearch Provider設定
-provider "opensearch" {
-  url               = var.opensearch_url
-  healthcheck       = true
-  sign_aws_requests = false
-}
-
 # ローカル変数でドメイン情報を定義
 locals {
   # ベースドメイン
@@ -31,13 +24,12 @@ locals {
 
   # desktop-services (nixos-desktop) のドメイン
   desktop_services = {
-    cockpit               = "desktop-cockpit.${local.base_domain}"
-    opensearch_dashboards = "opensearch.${local.base_domain}"
-    calendar_bot          = "calendar-bot.${local.base_domain}"
-    mixi2_bot             = "mixi2-bot.${local.base_domain}"
-    argocd                = "argocd.${local.base_domain}"
-    nextcloud             = "nextcloud.${local.base_domain}"
-    immich                = "immich.${local.base_domain}"
+    cockpit      = "desktop-cockpit.${local.base_domain}"
+    calendar_bot = "calendar-bot.${local.base_domain}"
+    mixi2_bot    = "mixi2-bot.${local.base_domain}"
+    argocd       = "argocd.${local.base_domain}"
+    nextcloud    = "nextcloud.${local.base_domain}"
+    immich       = "immich.${local.base_domain}"
   }
 
   # Cloudflare Tunnel エンドポイント

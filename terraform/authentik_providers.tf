@@ -93,33 +93,6 @@ resource "authentik_provider_oauth2" "grafana" {
   }
 }
 
-# OpenSearch Dashboards OAuth2
-resource "authentik_provider_oauth2" "opensearch_dashboards" {
-  name               = "OpenSearch Dashboards"
-  authorization_flow = data.authentik_flow.default_authorization_implicit_consent.id
-  invalidation_flow  = data.authentik_flow.default_provider_invalidation.id
-  client_type        = "confidential"
-  client_id          = var.opensearch_oauth_client_id
-  client_secret      = var.opensearch_oauth_client_secret
-  allowed_redirect_uris = [
-    { matching_mode = "strict", url = "https://opensearch.shinbunbun.com/auth/openid/login" }
-  ]
-  property_mappings = [
-    data.authentik_property_mapping_provider_scope.openid.id,
-    data.authentik_property_mapping_provider_scope.email.id,
-    data.authentik_property_mapping_provider_scope.profile.id,
-  ]
-  sub_mode                   = "hashed_user_id"
-  issuer_mode                = "per_provider"
-  include_claims_in_id_token = true
-  access_code_validity       = "minutes=1"
-  access_token_validity      = "minutes=5"
-  refresh_token_validity     = "days=30"
-  lifecycle {
-    ignore_changes = [logout_method, refresh_token_threshold]
-  }
-}
-
 # ArgoCD OAuth2
 resource "authentik_provider_oauth2" "argocd" {
   name               = "ArgoCD"

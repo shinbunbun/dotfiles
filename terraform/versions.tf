@@ -10,9 +10,5 @@ terraform {
       source  = "goauthentik/authentik"
       version = "~> 2025.12"
     }
-    opensearch = {
-      source  = "opensearch-project/opensearch"
-      version = "~> 2.3"
-    }
   }
 }
