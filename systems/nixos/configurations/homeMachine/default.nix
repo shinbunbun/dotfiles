@@ -24,6 +24,7 @@ in
 
     # ホスト固有の設定
     ./observability.nix
+    ./github-runner.nix
 
     # 基本モジュール
     ../../modules/base.nix
