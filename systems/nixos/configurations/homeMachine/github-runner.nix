@@ -12,17 +12,23 @@
   - ラベルは旧 runner と同一 (`nixos`, `x86_64-linux`) のため workflow 側変更は不要
   - Attic キャッシュ (192.168.1.3:8080) は同一ホスト上にあり、ビルドキャッシュは局所的
 
-  リソース分離方針:
+  リソース分離方針 (homeMachine: 4 cores / 15.5 GB RAM、Grafana 実測ベース):
     homeMachine は k3s control plane / Attic / CNPG / observability などの
     本番サービスを多数抱えているため、runner の CPU / IO / メモリ消費が
     他サービスを圧迫しないよう cgroup レベルで明示的に絞る。
-    - CPUWeight=50 / IOWeight=50: default 100 に対し半分。アイドル時はフルに
-      CPU / IO を使えるが、k3s 等が要求した瞬間に譲る
-    - MemoryHigh=12G / MemoryMax=16G: ソフト+ハードの 2 段
+    24h メモリピーク ~8G / load1 ピーク 9.04 を踏まえ、2 コア + 4G 程度の
+    予算を runner に割り当てる方針。
+    - MemoryMax=4G / MemoryHigh=3G: 4 GB ハード上限 + 3 GB ソフト上限。
+      残り ~12 GB は他サービスとカーネル page cache 用に確保
+    - CPUQuota=200%: 4 cores のうち最大 2 cores を absolute 上限。
+      アイドル時に全コアを食い潰すのを防ぐ
+    - CPUWeight=50: default 100 に対し半分。競合時はさらに譲る
+    - IOWeight=50: 同上、Attic / CNPG WAL flush への波及抑制
     - Nice=10: best-effort スケジュール優先度を下げる
-    - TasksMax=4096: fork bomb 抑止
-    - NIX_CONFIG の cores=4 / max-jobs=2: nix-daemon 経由のビルド本体は
-      runner 外の cgroup で走るため、クライアント側で並列度を絞る hint
+    - TasksMax=2048: fork bomb 抑止
+    - NIX_CONFIG の cores=2 / max-jobs=1: nix-daemon 経由のビルド本体は
+      runner 外の cgroup で走るため、クライアント側 hint で並列度を絞る
+      (1 derivation あたり 2 コアまで、同時 1 derivation のみ)
 */
 {
   config,
@@ -63,24 +69,27 @@
     extraEnvironment = {
       NIX_CONFIG = ''
         experimental-features = nix-command flakes
-        cores = 4
-        max-jobs = 2
+        cores = 2
+        max-jobs = 1
       '';
     };
     serviceOverrides = {
-      # メモリ
-      MemoryMax = "16G";
-      MemoryHigh = "12G";
+      # メモリ (homeMachine 15.5 GB 中 4 GB を runner に割当)
+      MemoryMax = "4G";
+      MemoryHigh = "3G";
 
-      # CPU / IO は他サービスに譲るよう default の半分
+      # CPU (4 cores 中 2 cores を absolute 上限、競合時はさらに譲る)
+      CPUQuota = "200%";
       CPUWeight = 50;
+
+      # IO は proportional yield のみ
       IOWeight = 50;
 
       # スケジュール優先度
       Nice = 10;
 
       # fork bomb / 暴走対策
-      TasksMax = 4096;
+      TasksMax = 2048;
     };
   };
 }
