@@ -153,8 +153,14 @@
           specialArgs = { inherit inputs; };
           modules = [
             ./systems/darwin/configurations/macbook/default.nix
-            # terraform Darwin strip ハング回避（overlays/terraform-darwin.nix 参照）
-            { nixpkgs.overlays = [ (import ./overlays/terraform-darwin.nix) ]; }
+            {
+              nixpkgs.overlays = [
+                # terraform Darwin strip ハング回避（overlays/terraform-darwin.nix 参照）
+                (import ./overlays/terraform-darwin.nix)
+                # direnv の checkPhase が macos-latest CI で hang する問題を回避
+                (import ./overlays/direnv-darwin-skip-check.nix)
+              ];
+            }
           ];
         };
         macmini = nix-darwin.lib.darwinSystem {
@@ -168,6 +174,8 @@
                 (import ./overlays/mlx-metal.nix)
                 # terraform Darwin strip ハング回避（overlays/terraform-darwin.nix 参照）
                 (import ./overlays/terraform-darwin.nix)
+                # direnv の checkPhase が macos-latest CI で hang する問題を回避
+                (import ./overlays/direnv-darwin-skip-check.nix)
               ];
             }
           ];
