@@ -153,6 +153,8 @@
           specialArgs = { inherit inputs; };
           modules = [
             ./systems/darwin/configurations/macbook/default.nix
+            # terraform Darwin strip ハング回避（overlays/terraform-darwin.nix 参照）
+            { nixpkgs.overlays = [ (import ./overlays/terraform-darwin.nix) ]; }
           ];
         };
         macmini = nix-darwin.lib.darwinSystem {
@@ -160,8 +162,14 @@
           specialArgs = { inherit inputs; };
           modules = [
             ./systems/darwin/configurations/macmini/default.nix
-            # MLX Metal GPU有効化（PyPI wheelベース）
-            { nixpkgs.overlays = [ (import ./overlays/mlx-metal.nix) ]; }
+            {
+              nixpkgs.overlays = [
+                # MLX Metal GPU有効化（PyPI wheelベース）
+                (import ./overlays/mlx-metal.nix)
+                # terraform Darwin strip ハング回避（overlays/terraform-darwin.nix 参照）
+                (import ./overlays/terraform-darwin.nix)
+              ];
+            }
           ];
         };
       };
