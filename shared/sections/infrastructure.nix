@@ -172,7 +172,23 @@ v: {
     k3sPodLogDir = v.assertPath "fluentBit.k3sPodLogDir" "/var/log/pods";
     # Vector (log-archiver-vector) の Fluent Forward エンドポイント。
     # k3s 上の Cilium LB IPAM で固定 VIP (LAN) が割当てられている。
+    # vectorHost/vectorPort は単一 LB (vector-lan, .17) を指す後方互換用。
+    # vectorUpstreams が設定されていれば Fluent Bit は Upstream round-robin
+    # モードで動作し、両 Pod 単位 LB (vector-lan-0=.18 / vector-lan-1=.19)
+    # に flush 単位で均等分散する (Cilium LB の永続接続偏在を回避)。
     vectorHost = v.assertIP "fluentBit.vectorHost" "192.168.128.17";
     vectorPort = v.assertPort "fluentBit.vectorPort" 24224;
+    vectorUpstreams = [
+      {
+        name = "vector-0";
+        host = v.assertIP "fluentBit.vectorUpstreams[0].host" "192.168.128.18";
+        port = v.assertPort "fluentBit.vectorUpstreams[0].port" 24224;
+      }
+      {
+        name = "vector-1";
+        host = v.assertIP "fluentBit.vectorUpstreams[1].host" "192.168.128.19";
+        port = v.assertPort "fluentBit.vectorUpstreams[1].port" 24224;
+      }
+    ];
   };
 }
