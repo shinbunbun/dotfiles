@@ -10,6 +10,11 @@
   - Cilium: CNI + kube-proxy代替 + BGP Service LB（k8s-apps の ArgoCD Application で管理）
   - DRBD: カーネルレベルストレージレプリケーション（Piraeus Operator経由で管理）
 
+  CoreDNS HA:
+  - k3s 1.25.5+ は CoreDNS Deployment の replicas を hardcode しないため、`kubectl scale` の値が永続化される
+  - clusterInit ノード上で systemd-coredns-scale が k3s 起動後に冪等な scale を実行
+  - k3s 公式マニフェストは既に topologySpreadConstraints (hostname maxSkew=1 DoNotSchedule) を持つので別ノードに分散される
+
   新規クラスタ初期化時の Cilium bootstrap:
   - ArgoCD は Cilium が動いていないと pod を schedule できないため、
     クラスタ初回起動時のみ手動で Cilium をインストールする必要がある
@@ -300,6 +305,41 @@ in
             systemctl restart --no-block k3s.service
           fi
         '';
+    };
+
+    # CoreDNS HA: clusterInit ノードで k3s 起動後に replicas を冪等に scale する
+    # k3s 1.25.5+ (PR #6552) は CoreDNS Deployment の replicas を hardcode しないため、
+    # kubectl scale の値は再起動後も保持される。boot 毎にこのユニットが reconcile する
+    systemd.services.k3s-coredns-scale = lib.mkIf clusterInit {
+      description = "Persist CoreDNS replicas across k3s restarts";
+      after = [ "k3s.service" ];
+      wants = [ "k3s.service" ];
+      wantedBy = [ "multi-user.target" ];
+
+      path = [
+        pkgs.k3s
+        pkgs.coreutils
+      ];
+
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        Restart = "on-failure";
+        RestartSec = "30s";
+        TimeoutStartSec = "600";
+      };
+
+      script = ''
+        export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+        until k3s kubectl cluster-info >/dev/null 2>&1; do
+          sleep 5
+        done
+        until k3s kubectl -n kube-system get deploy coredns >/dev/null 2>&1; do
+          sleep 5
+        done
+        k3s kubectl -n kube-system scale deploy/coredns \
+          --replicas=${toString clusterCfg.coredns.replicas}
+      '';
     };
 
     # k3sツールとkubectl等をシステムパスに追加
