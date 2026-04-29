@@ -134,6 +134,16 @@ let
       # repo-server のメトリクス (Service のメトリクス port 8084) を有効化
       metrics.enabled = true;
 
+      # BestEffort QoS 脱却（Burstable へ）+ probe タイムアウト緩和
+      # 値は shared/sections/services.nix の argocd.repoServer に集約
+      resources = argocdCfg.repoServer.resources;
+      livenessProbe = {
+        timeoutSeconds = argocdCfg.repoServer.livenessProbeTimeoutSeconds;
+      };
+      readinessProbe = {
+        timeoutSeconds = argocdCfg.repoServer.readinessProbeTimeoutSeconds;
+      };
+
       # KSOPS バイナリをインストールする init container
       initContainers = [
         {
