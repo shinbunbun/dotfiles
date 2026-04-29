@@ -14,6 +14,9 @@ v: {
       servicePool = v.assertString "k3s.cluster.servicePool" "192.168.128.100-192.168.128.200";
       traefikVIP = v.assertIP "k3s.cluster.traefikVIP" "192.168.128.10";
       podCIDR = v.assertCIDR "k3s.cluster.podCIDR" "10.42.0.0/16";
+      coredns = {
+        replicas = v.assertPositiveInt "k3s.cluster.coredns.replicas" 2;
+      };
       bgp = {
         localAS = v.assertPositiveInt "k3s.cluster.bgp.localAS" 65001;
         peerAS = v.assertPositiveInt "k3s.cluster.bgp.peerAS" 65000;
