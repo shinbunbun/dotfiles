@@ -30,7 +30,7 @@ lib.optionalAttrs isDarwinAarch64 {
 
       mlx =
         let
-          version = "0.30.5";
+          version = "0.31.2";
           platform = "macosx_14_0_arm64";
 
           # Metal GPUバックエンド（libmlx.dylibを含む）
@@ -46,7 +46,7 @@ lib.optionalAttrs isDarwinAarch64 {
               inherit platform;
               python = "py3";
               dist = "py3";
-              hash = "sha256-+Ch9AgQXAjGu/aCwOsuztUM2hIvoPnkW1+8Y1E4jWTo=";
+              hash = "sha256-slOFvO4Y/BlAkiVbi1O5o9hInrZQ5ZFg8bV6rdB6otw=";
             };
 
             dontStrip = true;
@@ -66,7 +66,7 @@ lib.optionalAttrs isDarwinAarch64 {
             python = "cp313";
             dist = "cp313";
             abi = "cp313";
-            hash = "sha256-H9k8495WsBaZ3BipZzyJUQ8XchJfxI9jhdyma+NFAPw=";
+            hash = "sha256-Gz+w3alVsNVSzle91vQrMwmrIbBn5AWH1oSEQ9MH6R8=";
           };
 
           nativeBuildInputs = [ prev.fixDarwinDylibNames ];
