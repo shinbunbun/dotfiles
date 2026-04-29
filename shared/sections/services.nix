@@ -13,6 +13,27 @@ v: {
     ksopsImage = v.assertString "argocd.ksopsImage" "viaductoss/ksops:v4.3.2";
     # k8s専用Age公開鍵（Secret暗号化用、秘密鍵はArgoCD repo-serverのみ保持）
     k8sAgePublicKey = v.assertString "argocd.k8sAgePublicKey" "age1jfkfpwsze8rj0pnzmachzwpqaqk594s7qkazucavues4g499waeqwdkac4";
+
+    # repo-server のリソース要求/上限と probe タイムアウト
+    # BestEffort QoS だとノード逼迫時にスケジューリング優先度が最低となり、
+    # gRPC ヘルスチェック goroutine の wakeup が probe timeoutSeconds を超えて
+    # "Error serving health check request / context canceled" が散発する。
+    # CPU は throttling を避けるため limit を設けず requests のみ指定する。
+    repoServer = {
+      resources = {
+        requests = {
+          cpu = v.assertString "argocd.repoServer.resources.requests.cpu" "100m";
+          memory = v.assertString "argocd.repoServer.resources.requests.memory" "256Mi";
+        };
+        limits = {
+          memory = v.assertString "argocd.repoServer.resources.limits.memory" "512Mi";
+        };
+      };
+      # kubelet probe のタイムアウト秒数（argo-cd Helm chart のデフォルトは
+      # 短く、git fetch 等で一時的に goroutine が遅延すると簡単に超過するため緩和）
+      livenessProbeTimeoutSeconds = v.assertPositiveInt "argocd.repoServer.livenessProbeTimeoutSeconds" 10;
+      readinessProbeTimeoutSeconds = v.assertPositiveInt "argocd.repoServer.readinessProbeTimeoutSeconds" 10;
+    };
   };
 
   ghcr = {
