@@ -9,7 +9,7 @@ resource "authentik_property_mapping_provider_scope" "oidc_groups" {
   name       = "OIDC Groups"
   scope_name = "groups"
   expression = <<-EOT
-    return {"groups": [group.name for group in user.ak_groups.all()]}
+    return {"groups": [group.name for group in user.groups.all()]}
   EOT
 }
 
@@ -19,7 +19,7 @@ resource "authentik_property_mapping_provider_scope" "immich_role" {
   scope_name = "immich"
   expression = <<-EOT
     return {
-      "immich_role": "admin" if request.user.ak_groups.filter(name="Immich Admins").exists() else "user"
+      "immich_role": "admin" if request.user.groups.filter(name="Immich Admins").exists() else "user"
     }
   EOT
 }
@@ -32,6 +32,6 @@ resource "authentik_property_mapping_provider_scope" "nextcloud_groups" {
     group_mapping = {
         "Nextcloud Admins": "admin",
     }
-    return {"groups": [group_mapping.get(group.name, group.name) for group in user.ak_groups.all()]}
+    return {"groups": [group_mapping.get(group.name, group.name) for group in user.groups.all()]}
   EOT
 }
