@@ -149,3 +149,15 @@ variable "scanopy_oauth_client_secret" {
   type        = string
   sensitive   = true
 }
+
+variable "openwebui_oauth_client_id" {
+  description = "Open WebUI OAuth2 Client ID"
+  type        = string
+  sensitive   = true
+}
+
+variable "openwebui_oauth_client_secret" {
+  description = "Open WebUI OAuth2 Client Secret"
+  type        = string
+  sensitive   = true
+}
