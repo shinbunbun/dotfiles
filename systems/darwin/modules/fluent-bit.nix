@@ -125,6 +125,12 @@ in
       RunAtLoad = true;
       StandardOutPath = "/var/log/fluent-bit.log";
       StandardErrorPath = "/var/log/fluent-bit.error.log";
+      SoftResourceLimits = {
+        NumberOfFiles = cfg.fluentBit.darwinFileLimit;
+      };
+      HardResourceLimits = {
+        NumberOfFiles = cfg.fluentBit.darwinFileLimit;
+      };
     };
   };
 
