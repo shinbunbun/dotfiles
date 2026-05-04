@@ -60,6 +60,24 @@ resource "cloudflare_zero_trust_access_application" "scanopy" {
   }]
 }
 
+# Open WebUI - 認証必須（OpenWebUI 自体も Authentik OIDC 連携するが二重防御として Cloudflare Access でも保護）
+resource "cloudflare_zero_trust_access_application" "openwebui" {
+  account_id                = var.cloudflare_account_id
+  name                      = "Open WebUI"
+  domain                    = local.home_services.openwebui
+  type                      = "self_hosted"
+  session_duration          = "24h"
+  auto_redirect_to_identity = true
+  allowed_idps              = [var.identity_provider_id]
+  enable_binding_cookie     = false
+  options_preflight_bypass  = false
+
+  policies = [{
+    id         = cloudflare_zero_trust_access_policy.oidc_groups_allow.id
+    precedence = 1
+  }]
+}
+
 # Cockpit (homeMachine) - 認証必須
 resource "cloudflare_zero_trust_access_application" "home_cockpit" {
   account_id                = var.cloudflare_account_id

@@ -46,6 +46,17 @@ resource "cloudflare_dns_record" "scanopy" {
   comment = "Managed by Terraform - Scanopy via k3s-services tunnel"
 }
 
+# Open WebUI (macmini Qwen3.5 推論サーバ用 Web UI)
+resource "cloudflare_dns_record" "openwebui" {
+  zone_id = var.cloudflare_zone_id
+  name    = "chat.${local.base_domain}"
+  content = local.k3s_tunnel_endpoint
+  type    = "CNAME"
+  ttl     = 1
+  proxied = true
+  comment = "Managed by Terraform - Open WebUI via k3s-services tunnel"
+}
+
 # Obsidian LiveSync
 resource "cloudflare_dns_record" "obsidian_livesync" {
   zone_id = var.cloudflare_zone_id

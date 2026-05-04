@@ -64,3 +64,11 @@ resource "authentik_application" "scanopy" {
   meta_launch_url    = "https://scanopy.shinbunbun.com"
   policy_engine_mode = "any"
 }
+
+resource "authentik_application" "openwebui" {
+  name               = "Open WebUI"
+  slug               = "openwebui"
+  protocol_provider  = authentik_provider_oauth2.openwebui.id
+  meta_launch_url    = "https://chat.shinbunbun.com"
+  policy_engine_mode = "any"
+}
