@@ -190,5 +190,9 @@ v: {
         port = v.assertPort "fluentBit.vectorUpstreams[1].port" 24224;
       }
     ];
+    # macOS launchd の NumberOfFiles ソフト/ハードリミット。
+    # macOS デフォルト (256) では tail input + Workers 4 × 2 出力 + kqueue で
+    # 容易に上限到達し "Too many open files" で送信停止する事象が確認された。
+    darwinFileLimit = v.assertPositiveInt "fluentBit.darwinFileLimit" 65536;
   };
 }
