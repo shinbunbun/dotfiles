@@ -83,6 +83,10 @@ let
       port = config.mlxLm.port;
     }
     {
+      name = "llamaCpp";
+      port = config.llamaCpp.port;
+    }
+    {
       name = "peerIssuer";
       port = config.peerIssuer.listenPort;
     }
