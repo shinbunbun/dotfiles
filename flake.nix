@@ -231,6 +231,7 @@
           jellyfin = ./systems/nixos/modules/services/jellyfin.nix;
           nextcloud = ./systems/nixos/modules/services/nextcloud.nix;
           immich = ./systems/nixos/modules/services/immich.nix;
+          llamaCpp = ./systems/nixos/modules/services/llama-cpp.nix;
         };
       };
 

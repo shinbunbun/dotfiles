@@ -51,6 +51,21 @@ v: {
     port = v.assertPort "mlxLm.port" 8081;
   };
 
+  # llama.cpp ベースのローカル LLM 推論サーバ (services/llama-cpp.nix を参照)。
+  # Qwen3.6-35B-A3B のような MoE モデルを CPU オフロード推論する想定で、
+  # ホスト側 (dotfiles-private) で modelPath と enable を指定する。
+  llamaCpp = {
+    modelAlias = v.assertString "llamaCpp.modelAlias" "qwen3.6-35b-a3b";
+    port = v.assertPort "llamaCpp.port" 8082;
+    threads = v.assertPositiveInt "llamaCpp.threads" 8;
+    threadsBatch = v.assertPositiveInt "llamaCpp.threadsBatch" 16;
+    contextSize = v.assertPositiveInt "llamaCpp.contextSize" 32768;
+    parallelSlots = v.assertPositiveInt "llamaCpp.parallelSlots" 1;
+    # MoE expert FFN を CPU 強制する層数 (0 で無効化、Qwen3.6-35B-A3B は 40 層)
+    nCpuMoe = v.assertNonNegativeInt "llamaCpp.nCpuMoe" 40;
+    host = v.assertString "llamaCpp.host" "0.0.0.0";
+  };
+
   jellyfin = {
     enable = v.assertBool "jellyfin.enable" false;
     port = v.assertPort "jellyfin.port" 8096;
