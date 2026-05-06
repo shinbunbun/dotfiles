@@ -28,6 +28,13 @@ lib.optionalAttrs isDarwinAarch64 {
         dependencies = (old.dependencies or [ ]) ++ [ pfinal.sentencepiece ];
       });
 
+      # accelerate の test_env_var_device が torch.mps.set_device を参照するが、
+      # nixpkgs の torch 2.11.0 でこの属性が削除されているためテストが失敗する。
+      # mlx-lm 経由で依存に入っており、上流が修正されたら除外可能。
+      accelerate = pprev.accelerate.overridePythonAttrs (_old: {
+        doCheck = false;
+      });
+
       mlx =
         let
           version = "0.31.2";
