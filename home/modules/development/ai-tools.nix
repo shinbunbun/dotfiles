@@ -5,6 +5,8 @@
   - claude-code: Claudeの公式CLIツール
   - mcp-grafana: Grafana MCPサーバー（Claude CodeからGrafana/Loki/Prometheusへのクエリ実行用）
   - github-mcp-server: GitHub MCPサーバー（Claude CodeからGitHub APIへの直接アクセス用）
+  - uv: Python ツールランナー（mcp-server-motherduck を uvx で起動するため）
+  - duckdb: DuckDB CLI（Garage S3 上の Parquet ログアーカイブをローカルで動作確認するため）
 
   Claudeのグローバル設定ファイル（CLAUDE.md）も配置し、
   日本語での応答をデフォルト設定としています。
@@ -16,6 +18,8 @@
     [
       mcp-grafana
       github-mcp-server
+      uv
+      duckdb
     ]
     ++ lib.optionals stdenv.isLinux [
       claude-code
