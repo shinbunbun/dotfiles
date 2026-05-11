@@ -7,6 +7,7 @@
   - github-mcp-server: GitHub MCPサーバー（Claude CodeからGitHub APIへの直接アクセス用）
   - uv: Python ツールランナー（mcp-server-motherduck を uvx で起動するため）
   - duckdb: DuckDB CLI（Garage S3 上の Parquet ログアーカイブをローカルで動作確認するため）
+  - nodejs: Node.js ランタイム（argoproj-labs/mcp-for-argocd を npx で起動するため）
 
   Claudeのグローバル設定ファイル（CLAUDE.md）も配置し、
   日本語での応答をデフォルト設定としています。
@@ -20,6 +21,7 @@
       github-mcp-server
       uv
       duckdb
+      nodejs_22
     ]
     ++ lib.optionals stdenv.isLinux [
       claude-code
