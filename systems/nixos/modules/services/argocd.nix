@@ -9,7 +9,9 @@
   - ArgoCD Image Updater用ghcr.ioレジストリ認証シークレットの投入
   - KSOPS（Kustomize + SOPS）によるGitリポジトリ内暗号化Secret管理
   - Authentik OIDCによるSSO認証
-  - グループベースのRBAC（ArgoCD Admins / ArgoCD Users）
+  - グループベースのRBAC（ArgoCD Admins / ArgoCD Users / mcp）
+  - LAN 内 LoadBalancer Service（Cilium LB IPAM、固定 VIP）
+  - MCP for ArgoCD 用ローカル apiKey アカウント（mcp）
 
   KSOPS対応:
   - repo-serverにKSOPSプラグインをinitContainerでインストール
@@ -54,6 +56,17 @@ let
       # Prometheus メトリクス Service (argocd-server-metrics :8083) を有効化
       # VictoriaMetrics VMAgent が VMServiceScrape 経由で収集する
       metrics.enabled = true;
+
+      # LAN 内 LoadBalancer Service（Cilium LB IPAM、固定 VIP）
+      # 用途: MCP for ArgoCD など、Cloudflare Tunnel + Authentik OIDC を経由せず
+      # Bearer token のみで API を直叩きしたいクライアント向け。
+      # 外部 (Cloudflare Tunnel) 経路は従来通り argocd-server ClusterIP を使う。
+      service = {
+        type = "LoadBalancer";
+        annotations = {
+          "io.cilium/lb-ipam-ips" = argocdCfg.lanLoadBalancerIp;
+        };
+      };
     };
 
     # Application Controller のメトリクス Service (argocd-metrics :8082) を有効化
@@ -91,6 +104,14 @@ let
             "groups"
           ];
         };
+
+        # ローカル apiKey アカウント: MCP for ArgoCD (Claude Code) 用
+        # OIDC を介さず、長寿命 Bearer token で API を叩くためのサービスアカウント。
+        # トークン発行は `argocd account generate-token --account mcp` で 1 回行い、
+        # dotfiles-private の SOPS (secrets/argocd.yaml) に保管する想定。
+        # 権限は下の policy.csv の role:mcp で applications/projects の get/sync/action/
+        # create/update に限定（delete は意図的に付与しない）。
+        "accounts.mcp" = "apiKey";
       };
 
       # RBAC 設定
@@ -105,8 +126,20 @@ let
           p, role:app-manager, logs, get, */*, allow
           p, role:app-manager, exec, create, */*, allow
           p, role:app-manager, projects, get, *, allow
+
+          p, role:mcp, applications, get, */*, allow
+          p, role:mcp, applications, sync, */*, allow
+          p, role:mcp, applications, action/*, */*, allow
+          p, role:mcp, applications, create, */*, allow
+          p, role:mcp, applications, update, */*, allow
+          p, role:mcp, projects, get, *, allow
+          p, role:mcp, repositories, get, *, allow
+          p, role:mcp, clusters, get, *, allow
+          p, role:mcp, logs, get, */*, allow
+
           g, ArgoCD Admins, role:admin
           g, ArgoCD Users, role:app-manager
+          g, mcp, role:mcp
         '';
         "policy.default" = "role:readonly";
         "scopes" = "[groups]";
