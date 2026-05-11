@@ -13,6 +13,10 @@ v: {
     ksopsImage = v.assertString "argocd.ksopsImage" "viaductoss/ksops:v4.3.2";
     # k8s専用Age公開鍵（Secret暗号化用、秘密鍵はArgoCD repo-serverのみ保持）
     k8sAgePublicKey = v.assertString "argocd.k8sAgePublicKey" "age1jfkfpwsze8rj0pnzmachzwpqaqk594s7qkazucavues4g499waeqwdkac4";
+    # LAN 内 LoadBalancer Service の固定 VIP（Cilium LB IPAM、192.168.128.0/24 プールから割当）
+    # MCP for ArgoCD など、Cloudflare Tunnel/Authentik OIDC を経由せず Bearer token のみで
+    # API 直叩きしたいクライアント向け。`io.cilium/lb-ipam-ips` annotation で固定する。
+    lanLoadBalancerIp = v.assertString "argocd.lanLoadBalancerIp" "192.168.128.21";
 
     # repo-server のリソース要求/上限と probe タイムアウト
     # BestEffort QoS だとノード逼迫時にスケジューリング優先度が最低となり、
