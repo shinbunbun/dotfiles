@@ -396,9 +396,11 @@ in
           --dry-run=client -o yaml | kubectl apply -f -
 
         # MCP for ArgoCD クライアント (Claude Code) が読み取る Bearer token Secret。
-        # zsh init (home/modules/development/ai-tools.nix) が
+        # unified-dotfiles の .envrc が direnv 経由で
         # `kubectl get secret argocd-mcp-token -n argocd -o jsonpath='{.data.token}'`
-        # で取得して ARGOCD_API_TOKEN にエクスポートする。
+        # を実行し ARGOCD_API_TOKEN として export する。
+        # (Claude Code の Bash サブプロセスは shell snapshot 経由で interactive zsh
+        # を通らないため、zsh initExtra ではなく direnv による env 注入が必要)
         echo "Applying MCP API token..."
         kubectl -n ${argocdCfg.namespace} create secret generic argocd-mcp-token \
           --from-file=token=${mcpApiTokenPath} \
