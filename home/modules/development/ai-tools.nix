@@ -37,6 +37,13 @@
       export GARAGE_DUCKDB_KEY_ID="$(kubectl get secret grafana-duckdb-credentials -n grafana -o jsonpath='{.data.AWS_ACCESS_KEY_ID}' 2>/dev/null | base64 -d 2>/dev/null)"
       export GARAGE_DUCKDB_SECRET="$(kubectl get secret grafana-duckdb-credentials -n grafana -o jsonpath='{.data.AWS_SECRET_ACCESS_KEY}' 2>/dev/null | base64 -d 2>/dev/null)"
     fi
+    # MCP for ArgoCD (argoproj-labs/mcp-for-argocd) が ArgoCD API を Bearer token
+    # で叩くための長寿命 token。argocd namespace の argocd-mcp-token Secret
+    # (sops-nix 経由で投入、systems/nixos/modules/services/argocd.nix を参照)
+    # から読み取る。kubectl 不在 / 権限なしの環境では何もしない。
+    if command -v kubectl &>/dev/null && kubectl auth can-i get secret/argocd-mcp-token -n argocd &>/dev/null; then
+      export ARGOCD_API_TOKEN="$(kubectl get secret argocd-mcp-token -n argocd -o jsonpath='{.data.token}' 2>/dev/null | base64 -d 2>/dev/null)"
+    fi
   '';
 
   home.file.".claude/CLAUDE.md" = {

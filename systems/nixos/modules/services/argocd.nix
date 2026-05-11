@@ -286,6 +286,17 @@ in
       group = "root";
       mode = "0400";
     };
+    # MCP for ArgoCD 用ローカル apiKey アカウント (mcp) の長寿命 Bearer token。
+    # 発行は適用後に手動で `argocd account generate-token --account mcp` を実行し、
+    # 出力文字列を dotfiles-private の secrets/argocd.yaml に SOPS 暗号化で保存する。
+    # 下の systemd.services.argocd-secrets が argocd namespace に
+    # Secret `argocd-mcp-token` (data.token) として投入する。
+    "argocd/mcp_api_token" = {
+      sopsFile = "${inputs.self}/secrets/argocd.yaml";
+      owner = "root";
+      group = "root";
+      mode = "0400";
+    };
     # k8s専用Age秘密鍵（KSOPS復号用、ArgoCD repo-serverに投入）
     "k8s/age_key" = {
       sopsFile = "${inputs.self}/secrets/k8s-age-key.yaml";
@@ -322,6 +333,7 @@ in
         oidcClientSecretPath = config.sops.secrets."argocd/oidc_client_secret".path;
         deployKeyPath = config.sops.secrets."argocd/github_deploy_key".path;
         ghcrPatPath = config.sops.secrets."argocd/ghcr_pat".path;
+        mcpApiTokenPath = config.sops.secrets."argocd/mcp_api_token".path;
         k8sAgeKeyPath = config.sops.secrets."k8s/age_key".path;
         ghcrUsername = cfg.ghcr.username;
       in
@@ -381,6 +393,15 @@ in
         GHCR_PAT=$(cat ${ghcrPatPath})
         kubectl -n ${argocdCfg.namespace} create secret generic argocd-image-updater-ghcr-credentials \
           --from-literal=credentials="${ghcrUsername}:$GHCR_PAT" \
+          --dry-run=client -o yaml | kubectl apply -f -
+
+        # MCP for ArgoCD クライアント (Claude Code) が読み取る Bearer token Secret。
+        # zsh init (home/modules/development/ai-tools.nix) が
+        # `kubectl get secret argocd-mcp-token -n argocd -o jsonpath='{.data.token}'`
+        # で取得して ARGOCD_API_TOKEN にエクスポートする。
+        echo "Applying MCP API token..."
+        kubectl -n ${argocdCfg.namespace} create secret generic argocd-mcp-token \
+          --from-file=token=${mcpApiTokenPath} \
           --dry-run=client -o yaml | kubectl apply -f -
 
         # ArgoCD Server を再起動して OIDC 設定を反映
