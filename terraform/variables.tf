@@ -150,18 +150,6 @@ variable "scanopy_oauth_client_secret" {
   sensitive   = true
 }
 
-variable "openwebui_oauth_client_id" {
-  description = "Open WebUI OAuth2 Client ID"
-  type        = string
-  sensitive   = true
-}
-
-variable "openwebui_oauth_client_secret" {
-  description = "Open WebUI OAuth2 Client Secret"
-  type        = string
-  sensitive   = true
-}
-
 variable "librechat_oauth_client_id" {
   description = "LibreChat OAuth2 Client ID"
   type        = string
