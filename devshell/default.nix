@@ -119,9 +119,6 @@ pkgs.mkShell {
       export TF_VAR_scanopy_oauth_client_id=$(sops -d --extract '["scanopy"]["oauth_client_id"]' secrets/authentik-terraform.yaml 2>/dev/null)
       export TF_VAR_scanopy_oauth_client_secret=$(sops -d --extract '["scanopy"]["oauth_client_secret"]' secrets/authentik-terraform.yaml 2>/dev/null)
       [ -n "$TF_VAR_scanopy_oauth_client_id" ] && echo "✓ Scanopy OAuth secrets loaded"
-      export TF_VAR_openwebui_oauth_client_id=$(sops -d --extract '["openwebui"]["oauth_client_id"]' secrets/authentik-terraform.yaml 2>/dev/null)
-      export TF_VAR_openwebui_oauth_client_secret=$(sops -d --extract '["openwebui"]["oauth_client_secret"]' secrets/authentik-terraform.yaml 2>/dev/null)
-      [ -n "$TF_VAR_openwebui_oauth_client_id" ] && echo "✓ Open WebUI OAuth secrets loaded"
       export TF_VAR_librechat_oauth_client_id=$(sops -d --extract '["librechat"]["oauth_client_id"]' secrets/authentik-terraform.yaml 2>/dev/null)
       export TF_VAR_librechat_oauth_client_secret=$(sops -d --extract '["librechat"]["oauth_client_secret"]' secrets/authentik-terraform.yaml 2>/dev/null)
       [ -n "$TF_VAR_librechat_oauth_client_id" ] && echo "✓ LibreChat OAuth secrets loaded"
