@@ -6,7 +6,6 @@
   - Traefik IngressRouteによるHTTPルーティング
   - SOPS統合によるOIDCクレデンシャルの安全な管理
   - GitHub Deploy Keyの自動投入（k8s-appsリポジトリアクセス用）
-  - ArgoCD Image Updater用ghcr.ioレジストリ認証シークレットの投入
   - KSOPS（Kustomize + SOPS）によるGitリポジトリ内暗号化Secret管理
   - Authentik OIDCによるSSO認証
   - グループベースのRBAC（ArgoCD Admins / ArgoCD Users / mcp）
@@ -20,7 +19,7 @@
 
   使用方法:
   1. dotfiles-privateのnixos-desktop設定でこのモジュールをimport
-  2. secrets/argocd.yamlにOIDCクレデンシャル、Deploy Key、ghcr PATを設定
+  2. secrets/argocd.yamlにOIDCクレデンシャル、Deploy Key、ghcr PAT（k3sノード認証用）を設定
   3. secrets/k8s-age-key.yamlにk8s専用Age秘密鍵をSOPS暗号化して保存
   4. nixos-rebuildでデプロイ
   5. https://argocd.shinbunbun.com でアクセス
@@ -321,9 +320,7 @@ in
         oidcClientIdPath = config.sops.secrets."argocd/oidc_client_id".path;
         oidcClientSecretPath = config.sops.secrets."argocd/oidc_client_secret".path;
         deployKeyPath = config.sops.secrets."argocd/github_deploy_key".path;
-        ghcrPatPath = config.sops.secrets."argocd/ghcr_pat".path;
         k8sAgeKeyPath = config.sops.secrets."k8s/age_key".path;
-        ghcrUsername = cfg.ghcr.username;
       in
       ''
         export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
@@ -374,13 +371,6 @@ in
         echo "Applying k8s Age key for KSOPS..."
         kubectl -n ${argocdCfg.namespace} create secret generic sops-age-key \
           --from-file=keys.txt=${k8sAgeKeyPath} \
-          --dry-run=client -o yaml | kubectl apply -f -
-
-        # Image Updater 用 ghcr.io レジストリ認証シークレット
-        echo "Applying Image Updater ghcr.io credentials..."
-        GHCR_PAT=$(cat ${ghcrPatPath})
-        kubectl -n ${argocdCfg.namespace} create secret generic argocd-image-updater-ghcr-credentials \
-          --from-literal=credentials="${ghcrUsername}:$GHCR_PAT" \
           --dry-run=client -o yaml | kubectl apply -f -
 
         # ArgoCD Server を再起動して OIDC 設定を反映
