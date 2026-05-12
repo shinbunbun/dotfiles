@@ -161,3 +161,15 @@ variable "openwebui_oauth_client_secret" {
   type        = string
   sensitive   = true
 }
+
+variable "librechat_oauth_client_id" {
+  description = "LibreChat OAuth2 Client ID"
+  type        = string
+  sensitive   = true
+}
+
+variable "librechat_oauth_client_secret" {
+  description = "LibreChat OAuth2 Client Secret"
+  type        = string
+  sensitive   = true
+}
