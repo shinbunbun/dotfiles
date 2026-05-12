@@ -72,3 +72,11 @@ resource "authentik_application" "openwebui" {
   meta_launch_url    = "https://chat.shinbunbun.com"
   policy_engine_mode = "any"
 }
+
+resource "authentik_application" "librechat" {
+  name               = "LibreChat"
+  slug               = "librechat"
+  protocol_provider  = authentik_provider_oauth2.librechat.id
+  meta_launch_url    = "https://chat.shinbunbun.com"
+  policy_engine_mode = "any"
+}
