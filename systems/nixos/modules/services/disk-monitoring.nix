@@ -71,7 +71,9 @@ let
           udev で `hdparm -B 254` を適用して APM を無効化する。
           USB-SATA HDD でデフォルト APM=128 によりヘッド退避が頻発し
           Load_Cycle_Count が過剰増加する問題を抑制するためのもの。
-          path は `/dev/sdX` 形式である必要がある (KERNEL match のため)。
+          path は `/dev/sd<letter>` 形式である必要がある (udev KERNEL match
+          が kernel name を期待するため)。symlink path (例: /dev/disk/by-id/...)
+          を渡すと udev rule が silent fail するので assertions で禁止している。
         '';
       };
     };
@@ -111,6 +113,18 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    # disableAPM=true の場合、udev KERNEL match のため path が /dev/sdX 形式である
+    # ことを強制する。symlink (/dev/disk/by-id/...) や NVMe (/dev/nvmeXnY) で
+    # disableAPM を指定すると udev rule が silent fail するので、ここで早期に
+    # 検出してビルドを失敗させる。
+    assertions = map (d: {
+      assertion = !d.disableAPM || (builtins.match "/dev/sd[a-z]+" d.path != null);
+      message =
+        "services.disk-monitoring: disableAPM=true は path が /dev/sd<letter> 形式の "
+        + "場合のみ有効です (got \"${d.path}\")。APM 無効化 udev rule の KERNEL match "
+        + "が kernel name を要求するため、symlink path や NVMe では機能しません。";
+    }) cfg.devices;
+
     services.smartd = {
       enable = true;
       autodetect = false;
