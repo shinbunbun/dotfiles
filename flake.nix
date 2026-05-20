@@ -237,6 +237,7 @@
           nextcloud = ./systems/nixos/modules/services/nextcloud.nix;
           immich = ./systems/nixos/modules/services/immich.nix;
           llamaCpp = ./systems/nixos/modules/services/llama-cpp.nix;
+          disk-monitoring = ./systems/nixos/modules/services/disk-monitoring.nix;
         };
       };
 

@@ -18,6 +18,11 @@ v: {
       port = v.assertPort "monitoring.nodeExporter.port" 9100;
     };
 
+    # smartctl Exporter 設定 (ディスク SMART メトリクス公開)
+    smartctlExporter = {
+      port = v.assertPort "monitoring.smartctlExporter.port" 9633;
+    };
+
     # Grafana設定 (k3s 上の外部 URL のみ保持、本体は k3s クラスタでホスト)
     grafana = {
       domain = v.assertString "monitoring.grafana.domain" "grafana.shinbunbun.com";

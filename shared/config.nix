@@ -47,6 +47,10 @@ let
       port = config.monitoring.nodeExporter.port;
     }
     {
+      name = "monitoring.smartctlExporter";
+      port = config.monitoring.smartctlExporter.port;
+    }
+    {
       name = "monitoring.alertmanager";
       port = config.monitoring.alertmanager.port;
     }
