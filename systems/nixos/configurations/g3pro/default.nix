@@ -35,6 +35,10 @@ in
 
     # ホスト固有の設定
     ./observability.nix
+    ./disk-monitoring.nix
+
+    # disk-monitoring 共通モジュール (services.disk-monitoring を提供)
+    ../../modules/services/disk-monitoring.nix
 
     # 基本モジュール
     ../../modules/base.nix
