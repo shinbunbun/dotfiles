@@ -502,6 +502,14 @@ in
       "net.bridge.bridge-nf-call-iptables" = 1;
       "net.bridge.bridge-nf-call-ip6tables" = 1;
       "net.ipv4.ip_forward" = 1;
+      # Pyroscope eBPF profiler が /proc/kallsyms から kernel symbol を解決して
+      # flame graph に kernel frame (entry_SYSCALL_64 等) を表示するために必要。
+      # k8s-apps/infrastructure/alloy-profiles の pyroscope.ebpf component が
+      # collect_kernel_profile: true (default) で kernel stack を採取する際、
+      # kptr_restrict=1/2 では kallsyms のアドレスが 0 になり symbol 解決不可。
+      # LAN-only + single-user 環境前提で KASLR 無効化リスクは許容。
+      # Issue: shinbunbun/dotfiles#699
+      "kernel.kptr_restrict" = 0;
     };
   };
 }
