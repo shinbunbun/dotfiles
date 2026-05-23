@@ -52,7 +52,7 @@
     ];
     replace = true;
     ephemeral = true;
-    nodeRuntimes = [ "node20" ];
+    nodeRuntimes = [ "node24" ];
     extraPackages = with pkgs; [
       nix
       nixfmt-tree
