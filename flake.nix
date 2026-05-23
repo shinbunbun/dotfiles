@@ -162,8 +162,6 @@
                 (import ./overlays/mlx-metal.nix)
                 # terraform Darwin strip ハング回避（overlays/terraform-darwin.nix 参照）
                 (import ./overlays/terraform-darwin.nix)
-                # direnv の checkPhase が macos-latest CI で hang する問題を回避
-                (import ./overlays/direnv-darwin-skip-check.nix)
               ];
             }
           ];
@@ -179,8 +177,6 @@
                 (import ./overlays/mlx-metal.nix)
                 # terraform Darwin strip ハング回避（overlays/terraform-darwin.nix 参照）
                 (import ./overlays/terraform-darwin.nix)
-                # direnv の checkPhase が macos-latest CI で hang する問題を回避
-                (import ./overlays/direnv-darwin-skip-check.nix)
               ];
             }
           ];
