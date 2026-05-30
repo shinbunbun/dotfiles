@@ -120,12 +120,6 @@ in
     useGlobalPkgs = true;
     useUserPackages = true;
     extraSpecialArgs = { inherit inputs; };
-    users.${username} = {
-      imports = [ ../../../../home/profiles/shinbunbun ];
-
-      # macmini固有: ローカルLLM (mlx-lm) launchd agent を無効化
-      # 将来的に再有効化する場合はこの行を削除する
-      launchd.agents.mlx-lm-server.enable = lib.mkForce false;
-    };
+    users.${username} = import ../../../../home/profiles/shinbunbun;
   };
 }
