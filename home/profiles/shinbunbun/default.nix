@@ -22,7 +22,8 @@ in
     ../../modules/development/cloud-tools.nix
     ../../modules/development/development-tools.nix
     ../../modules/development/editors.nix
-    ../../modules/development/llm-tools.nix
+    # ローカル LLM (mlx-lm) は現在無効化中。再有効化する場合は以下のコメントを外す
+    # ../../modules/development/llm-tools.nix
 
     # シェルツール
     ../../modules/shell/shell-tools.nix
