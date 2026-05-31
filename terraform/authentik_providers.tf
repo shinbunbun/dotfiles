@@ -93,6 +93,36 @@ resource "authentik_provider_oauth2" "grafana" {
   }
 }
 
+# Argo Workflows OAuth2 (argo-server UI SSO、k8s-apps の infrastructure/argo-workflows
+# Helm chart 側で server.sso 設定)
+resource "authentik_provider_oauth2" "argo_workflows" {
+  name               = "Argo Workflows"
+  authorization_flow = data.authentik_flow.default_authorization_implicit_consent.id
+  invalidation_flow  = data.authentik_flow.default_provider_invalidation.id
+  client_type        = "confidential"
+  client_id          = var.argo_workflows_oauth_client_id
+  client_secret      = var.argo_workflows_oauth_client_secret
+  signing_key        = data.authentik_certificate_key_pair.es256_jwt_signing.id
+  allowed_redirect_uris = [
+    { matching_mode = "strict", url = "https://${local.desktop_services.argo_workflows}/oauth2/callback" }
+  ]
+  property_mappings = [
+    authentik_property_mapping_provider_scope.oidc_groups.id,
+    data.authentik_property_mapping_provider_scope.openid.id,
+    data.authentik_property_mapping_provider_scope.email.id,
+    data.authentik_property_mapping_provider_scope.profile.id,
+  ]
+  sub_mode                   = "hashed_user_id"
+  issuer_mode                = "per_provider"
+  include_claims_in_id_token = true
+  access_code_validity       = "minutes=1"
+  access_token_validity      = "minutes=5"
+  refresh_token_validity     = "days=30"
+  lifecycle {
+    ignore_changes = [logout_method, refresh_token_threshold]
+  }
+}
+
 # ArgoCD OAuth2
 resource "authentik_provider_oauth2" "argocd" {
   name               = "ArgoCD"

@@ -136,6 +136,24 @@ resource "cloudflare_zero_trust_access_application" "argocd" {
   }]
 }
 
+# Argo Workflows - 認証必須 (argocd と同パターン、Cloudflare Access 前段 + argo-server SSO 後段の二重)
+resource "cloudflare_zero_trust_access_application" "argo_workflows" {
+  account_id                = var.cloudflare_account_id
+  name                      = "Argo Workflows"
+  domain                    = local.desktop_services.argo_workflows
+  type                      = "self_hosted"
+  session_duration          = "24h"
+  auto_redirect_to_identity = true
+  allowed_idps              = [var.identity_provider_id]
+  enable_binding_cookie     = false
+  options_preflight_bypass  = false
+
+  policies = [{
+    id         = cloudflare_zero_trust_access_policy.oidc_groups_allow.id
+    precedence = 1
+  }]
+}
+
 # Nextcloud: CloudFlare Access Applicationなし
 # Nextcloud自体がuser_oidc (Authentik SSO)で認証するため、
 # CloudFlare Accessの事前認証は不要。

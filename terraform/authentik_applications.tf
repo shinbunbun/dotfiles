@@ -35,6 +35,16 @@ resource "authentik_application" "argocd" {
   policy_engine_mode = "any"
 }
 
+# slug は argo-server SSO の issuer URL 末尾と一致必須:
+# https://auth.shinbunbun.com/application/o/argo-workflows/
+resource "authentik_application" "argo_workflows" {
+  name               = "Argo Workflows"
+  slug               = "argo-workflows"
+  protocol_provider  = authentik_provider_oauth2.argo_workflows.id
+  meta_launch_url    = "https://${local.desktop_services.argo_workflows}"
+  policy_engine_mode = "any"
+}
+
 resource "authentik_application" "nextcloud" {
   name               = "Nextcloud"
   slug               = "nextcloud"

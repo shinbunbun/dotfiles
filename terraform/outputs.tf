@@ -8,6 +8,7 @@ output "access_application_ids" {
     # desktop-services
     desktop_cockpit      = cloudflare_zero_trust_access_application.desktop_cockpit.id
     argocd               = cloudflare_zero_trust_access_application.argocd.id
+    argo_workflows       = cloudflare_zero_trust_access_application.argo_workflows.id
     calendar_bot         = cloudflare_zero_trust_access_application.calendar_bot.id
     calendar_bot_webhook = cloudflare_zero_trust_access_application.calendar_bot_webhook.id
     immich               = cloudflare_zero_trust_access_application.immich.id
@@ -39,6 +40,7 @@ output "dns_records" {
     # desktop-services
     desktop_cockpit = cloudflare_dns_record.desktop_cockpit.name
     argocd          = cloudflare_dns_record.argocd.name
+    argo_workflows  = cloudflare_dns_record.argo_workflows.name
   }
 }
 
@@ -60,5 +62,6 @@ output "authentik_applications" {
     grafana               = authentik_application.grafana.slug
     wg_lease              = authentik_application.wg_lease.slug
     argocd                = authentik_application.argocd.slug
+    argo_workflows        = authentik_application.argo_workflows.slug
   }
 }
