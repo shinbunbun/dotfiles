@@ -114,6 +114,18 @@ variable "argocd_oauth_client_secret" {
   sensitive   = true
 }
 
+variable "argo_workflows_oauth_client_id" {
+  description = "Argo Workflows OAuth2 Client ID (argo-server UI SSO)"
+  type        = string
+  sensitive   = true
+}
+
+variable "argo_workflows_oauth_client_secret" {
+  description = "Argo Workflows OAuth2 Client Secret (argo-server UI SSO)"
+  type        = string
+  sensitive   = true
+}
+
 variable "nextcloud_oauth_client_id" {
   description = "Nextcloud OAuth2 Client ID"
   type        = string

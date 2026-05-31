@@ -138,6 +138,17 @@ resource "cloudflare_dns_record" "argocd" {
   comment = "Managed by Terraform - ArgoCD via k3s-services tunnel"
 }
 
+# Argo Workflows (server UI)
+resource "cloudflare_dns_record" "argo_workflows" {
+  zone_id = var.cloudflare_zone_id
+  name    = "argo-workflows.${local.base_domain}"
+  content = local.k3s_tunnel_endpoint
+  type    = "CNAME"
+  ttl     = 1
+  proxied = true
+  comment = "Managed by Terraform - Argo Workflows server UI via k3s-services tunnel"
+}
+
 # Google Calendar Bot
 resource "cloudflare_dns_record" "calendar_bot" {
   zone_id = var.cloudflare_zone_id
