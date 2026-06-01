@@ -72,6 +72,11 @@
         cores = 2
         max-jobs = 1
       '';
+      # actions/checkout@v4 など node20 を要求する JS action を node24 で動かす。
+      # nodeRuntimes から node20 を外しているため、これがないと runner が
+      # node20 バイナリを起動しようとして即死する。2026-06-16 に GitHub 側で
+      # default が node24 に切り替わったら不要になる。
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24 = "true";
     };
     serviceOverrides = {
       # メモリ (homeMachine 15.5 GB 中 4 GB を runner に割当)
