@@ -162,6 +162,9 @@
                 (import ./overlays/mlx-metal.nix)
                 # direnv の checkPhase が macos-latest CI で hang する問題を回避
                 (import ./overlays/direnv-darwin-skip-check.nix)
+                # claude-code を nixpkgs より新しい upstream フレーバーで提供
+                # (home/modules/development/ai-tools.nix の pkgs.claude-code 用)
+                claude-code.overlays.default
               ];
             }
           ];
@@ -177,6 +180,9 @@
                 (import ./overlays/mlx-metal.nix)
                 # direnv の checkPhase が macos-latest CI で hang する問題を回避
                 (import ./overlays/direnv-darwin-skip-check.nix)
+                # claude-code を nixpkgs より新しい upstream フレーバーで提供
+                # (home/modules/development/ai-tools.nix の pkgs.claude-code 用)
+                claude-code.overlays.default
               ];
             }
           ];

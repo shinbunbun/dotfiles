@@ -14,18 +14,14 @@
 */
 { pkgs, ... }:
 {
-  home.packages =
-    with pkgs;
-    [
-      mcp-grafana
-      github-mcp-server
-      uv
-      duckdb
-      nodejs_22
-    ]
-    ++ lib.optionals stdenv.isLinux [
-      claude-code
-    ];
+  home.packages = with pkgs; [
+    claude-code
+    mcp-grafana
+    github-mcp-server
+    uv
+    duckdb
+    nodejs_22
+  ];
 
   programs.zsh.initExtra = ''
     if command -v gh &>/dev/null; then
