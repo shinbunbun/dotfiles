@@ -110,8 +110,7 @@ in
       extraFlags = [ "--force-cleanup" ];
     };
     casks = [
-      "claude" # Claude AIアシスタント
-      "claude-code" # Claude Code CLIツール
+      "claude" # Claude AIアシスタント（Desktop GUI）。CLI は Nix の pkgs.claude-code 経由
       "google-chrome" # Webブラウザ
       "warp" # ターミナル
     ];

@@ -65,8 +65,7 @@ in
 
       # 生産性ツール
       "obsidian" # ナレッジマネジメント
-      "claude" # Claude AIアシスタント
-      "claude-code" # Claude Code CLIツール
+      "claude" # Claude AIアシスタント（Desktop GUI）。CLI は Nix の pkgs.claude-code 経由
       "warp" # ターミナル
 
       # クリエイティブツール
