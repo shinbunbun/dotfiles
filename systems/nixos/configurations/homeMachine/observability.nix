@@ -3,6 +3,7 @@
 
   このファイルは nixos-observability モジュールを使用した監視スタックの設定を定義します：
   - Node Exporter: システムメトリクス
+  - Process Exporter: プロセス別メトリクス (top 相当)
   - Fluent Bit: ログ収集 (k3s 上の Loki へ送信)
 
   Prometheus, Alertmanager, SNMP Exporter は k3s クラスタ (k8s-apps) の
@@ -38,13 +39,19 @@ in
       openFirewall = true;
     };
 
-    # Monitoring設定（Node Exporter のみ）
+    # Monitoring設定（Node Exporter + Process Exporter）
     monitoring = {
       enable = true;
 
       nodeExporter = {
         enable = true;
         port = cfg.monitoring.nodeExporter.port;
+      };
+
+      # Process Exporter: プロセス別 CPU/メモリ (top 相当)
+      processExporter = {
+        enable = true;
+        port = cfg.monitoring.processExporter.port;
       };
     };
   };

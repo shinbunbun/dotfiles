@@ -60,6 +60,7 @@ in
     inputs.sops-nix.nixosModules.sops
     inputs.vscode-server.nixosModules.default
     inputs.nixos-observability.nixosModules.fluentBit
+    inputs.nixos-observability.nixosModules.monitoring
   ];
 
   # システム設定
