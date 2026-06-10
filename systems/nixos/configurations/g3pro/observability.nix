@@ -3,6 +3,7 @@
 
   このファイルはg3proの監視設定を定義します：
   - Node Exporter: システムメトリクスの公開（homeMachineのPrometheusがスクレイプ）
+  - Process Exporter: プロセス別メトリクスの公開 (top 相当)
   - Fluent Bit: systemd-journalログを Loki / Vector (k3s) へ転送
 
   Fluent Bitは nixos-observability-config の generator を使用し、
@@ -49,6 +50,17 @@ in
       "--collector.filesystem.mount-points-exclude=^/(dev|proc|sys|run/user/.+)($|/)"
       "--collector.netdev.device-exclude=^(veth.*|br.*|docker.*|virbr.*|lo)$"
     ];
+  };
+
+  # Process Exporter（nixos-observability モジュール経由、プロセス別メトリクス / top 相当）
+  # node exporter は上で直書きしているため nodeExporter.enable = false で共存させる
+  services.observability.monitoring = {
+    enable = true;
+    nodeExporter.enable = false;
+    processExporter = {
+      enable = true;
+      port = cfg.monitoring.processExporter.port;
+    };
   };
 
   # Fluent Bit設定（nixos-observability モジュール経由）
