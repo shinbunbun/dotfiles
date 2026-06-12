@@ -15,7 +15,7 @@
   - nix develop
 */
 {
-  description = "nix-dotfiles-template";
+  description = "shinbunbun's personal NixOS/Darwin dotfiles";
 
   nixConfig = {
     extra-experimental-features = "nix-command flakes";
