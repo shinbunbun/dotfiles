@@ -117,21 +117,29 @@ jobs:
     needs: discover
     if: needs.discover.outputs.has-nixos == 'true'
     strategy:
+      # report-only スキャンなので 1 ターゲットの失敗で他ターゲットを cancel しない
+      fail-fast: false
       matrix: ${{ fromJSON(needs.discover.outputs.nixos-matrix) }}
     uses: shinbunbun/nix-ci-workflows/.github/workflows/scan-vulnerabilities.yaml@main
     with:
       runner: 'ubuntu-latest'
       target: ".#nixosConfigurations.${{ matrix.configuration }}.config.system.build.toplevel"
       whitelist: '.github/vulnxscan-whitelist.csv'
+      # unfree パッケージ (terraform 等) は公開キャッシュに無いため Attic から substitute する
+      use-attic: true
     secrets:
       # NVD API key を reusable に forward (identity 判定の NVD CPE 照会の rate-limit 緩和)。
       # reusable 側は required:false なので未設定でも動く。
       NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+      ATTIC_READ_TOKEN: ${{ secrets.ATTIC_READ_TOKEN }}
+      ATTIC_TOKEN: ${{ secrets.ATTIC_TOKEN }}
 
   scan-darwin:
     needs: discover
     if: needs.discover.outputs.has-darwin == 'true'
     strategy:
+      # report-only スキャンなので 1 ターゲットの失敗で他ターゲットを cancel しない
+      fail-fast: false
       matrix: ${{ fromJSON(needs.discover.outputs.darwin-matrix) }}
     uses: shinbunbun/nix-ci-workflows/.github/workflows/scan-vulnerabilities.yaml@main
     with:
@@ -140,10 +148,14 @@ jobs:
       vulnix-nocheck: true
       target: ".#darwinConfigurations.${{ matrix.configuration }}.config.system.build.toplevel"
       whitelist: '.github/vulnxscan-whitelist.csv'
+      # darwin 閉包は現状公開キャッシュで賄えているが、nixos と同条件に揃える
+      use-attic: true
     secrets:
       # NVD API key を reusable に forward (identity 判定の NVD CPE 照会の rate-limit 緩和)。
       # reusable 側は required:false なので未設定でも動く。
       NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+      ATTIC_READ_TOKEN: ${{ secrets.ATTIC_READ_TOKEN }}
+      ATTIC_TOKEN: ${{ secrets.ATTIC_TOKEN }}
 
   # [非 PR] 各ターゲットの NOTIFY (artifact) を集約し、集約 Issue を 1 本 upsert する。
   # PR コンテキストでは走らせない (PR の閉包で集約 Issue を先食い upsert しないため。代わりに delta-gate)。
