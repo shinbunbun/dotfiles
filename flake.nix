@@ -34,11 +34,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    devshell = {
-      url = "github:numtide/devshell";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     sops-nix = {
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -47,10 +42,6 @@
     vscode-server = {
       url = "github:nix-community/nixos-vscode-server";
       inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    flake-utils = {
-      url = "github:numtide/flake-utils";
     };
 
     # nixos-observability
@@ -91,10 +82,8 @@
       nixpkgs,
       nix-darwin,
       home-manager,
-      devshell,
       sops-nix,
       vscode-server,
-      flake-utils,
       nixos-observability,
       nixos-observability-config,
       deploy-rs,
@@ -226,8 +215,6 @@
         # Service modules
         services = {
           cockpit = ./systems/nixos/modules/services/cockpit.nix;
-          authentik = ./systems/nixos/modules/services/authentik.nix;
-          obsidian-livesync = ./systems/nixos/modules/services/obsidian-livesync.nix;
           unified-cloudflare-tunnel = ./systems/nixos/modules/services/unified-cloudflare-tunnel.nix;
           desktop-cloudflare-tunnel = ./systems/nixos/modules/services/desktop-cloudflare-tunnel.nix;
           attic = ./systems/nixos/modules/services/attic.nix;
