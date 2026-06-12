@@ -49,8 +49,9 @@ v: {
       ];
       clusterInit = v.assertBool "k3s.desktop.clusterInit" true;
       keepalivedPriority = v.assertPositiveInt "k3s.desktop.keepalivedPriority" 150;
+      # --node-ip は k3s.nix 消費側で networking.hosts.nixosDesktop.ip から導出する
+      # （IP の単一情報源化のため。infrastructure.nix では指定しない）
       extraFlags = [
-        "--node-ip=192.168.1.4"
         "--kubelet-arg=housekeeping-interval=30s"
       ];
       linstor = {
@@ -67,8 +68,9 @@ v: {
         "agent"
       ];
       keepalivedPriority = v.assertPositiveInt "k3s.homeMachine.keepalivedPriority" 100;
+      # --node-ip は k3s.nix 消費側で networking.hosts.nixos.ip から導出する
+      # （IP の単一情報源化のため。infrastructure.nix では指定しない）
       extraFlags = [
-        "--node-ip=192.168.1.3"
         "--kubelet-arg=housekeeping-interval=30s"
       ];
       linstor = {
@@ -85,8 +87,9 @@ v: {
         "agent"
       ];
       keepalivedPriority = v.assertPositiveInt "k3s.g3pro.keepalivedPriority" 50;
+      # --node-ip は k3s.nix 消費側で networking.hosts.g3pro.ip から導出する
+      # （IP の単一情報源化のため。infrastructure.nix では指定しない）
       extraFlags = [
-        "--node-ip=192.168.1.6"
         "--kubelet-arg=housekeeping-interval=30s"
       ];
       linstor = {
@@ -98,9 +101,13 @@ v: {
 
   nfs = {
     exportPath = v.assertPath "nfs.exportPath" "/export/k8s";
-    clients = [
-      { ip = v.assertIP "nfs.clients[0].ip" "192.168.1.3"; }
-      { ip = v.assertIP "nfs.clients[1].ip" "192.168.1.4"; }
+    # NFS クライアントの IP は networking.hosts を単一情報源とするため、ここでは
+    # ホストキーのみを列挙する。実際の IP は消費側 (nfs.nix) で
+    # networking.hosts.<key>.ip から解決する（section merge では cross-section
+    # 参照ができないため）。
+    clientHosts = [
+      "nixos" # homeMachine (192.168.1.3)
+      "nixosDesktop" # nixos-desktop (192.168.1.4)
     ];
     options = v.assertString "nfs.options" "rw,nohide,insecure,no_subtree_check,no_root_squash";
   };

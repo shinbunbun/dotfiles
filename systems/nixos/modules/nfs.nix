@@ -22,9 +22,11 @@ in
 {
   # NFS server configuration
   services.nfs.server.enable = true;
+  # クライアント IP は networking.hosts を単一情報源として解決する
+  # （cfg.nfs.clientHosts のホストキー → networking.hosts.<key>.ip）。
   services.nfs.server.exports = lib.concatMapStringsSep "\n" (
-    client: "${cfg.nfs.exportPath}  ${client.ip}(${cfg.nfs.options})"
-  ) cfg.nfs.clients;
+    host: "${cfg.nfs.exportPath}  ${cfg.networking.hosts.${host}.ip}(${cfg.nfs.options})"
+  ) cfg.nfs.clientHosts;
 
   # Open NFS port in firewall
   networking.firewall.allowedTCPPorts = [
