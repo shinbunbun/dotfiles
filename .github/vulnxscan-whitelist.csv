@@ -1,0 +1,2 @@
+vuln_id,comment,package
+^CVE-2021-4034$,"polkit PwnKit: closure は polkit-127 で PwnKit は 0.120.r2 で修正済み。version_local '1.pam' は polkit-1.pam (PAM 設定派生) の誤パース = 誤検知 (dotfiles-private#276 で実 closure 確認済)",polkit
