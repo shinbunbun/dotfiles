@@ -28,7 +28,7 @@ jobs:
     if: needs.discover-targets.outputs.has-nixos == 'true'
     strategy:
       matrix: ${{ fromJSON(needs.discover-targets.outputs.nixos-matrix) }}
-    uses: shinbunbun/nix-ci-workflows/.github/workflows/build-nix.yaml@main
+    uses: shinbunbun/nix-ci-workflows/.github/workflows/build-nix.yaml@test/setup-nix-attic-selfref
     with:
       runner: ubuntu-latest
       build-target: ".#nixosConfigurations.${{ matrix.configuration }}.config.system.build.toplevel"
@@ -49,7 +49,7 @@ jobs:
     if: needs.discover-targets.outputs.has-darwin == 'true'
     strategy:
       matrix: ${{ fromJSON(needs.discover-targets.outputs.darwin-matrix) }}
-    uses: shinbunbun/nix-ci-workflows/.github/workflows/build-nix.yaml@main
+    uses: shinbunbun/nix-ci-workflows/.github/workflows/build-nix.yaml@test/setup-nix-attic-selfref
     with:
       runner: macos-latest
       build-target: ".#darwinConfigurations.${{ matrix.configuration }}.config.system.build.toplevel"
@@ -67,7 +67,7 @@ jobs:
 
   build-devshell:
     needs: format-check
-    uses: shinbunbun/nix-ci-workflows/.github/workflows/build-nix.yaml@main
+    uses: shinbunbun/nix-ci-workflows/.github/workflows/build-nix.yaml@test/setup-nix-attic-selfref
     with:
       runner: ubuntu-latest
       build-target: ".#devShells.x86_64-linux.default"
