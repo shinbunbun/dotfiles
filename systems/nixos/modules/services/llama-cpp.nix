@@ -12,7 +12,7 @@
   設計方針:
   - shared/sections/services.nix の llamaCpp セクションをデフォルト値の供給源とする
   - ホストごとに modelPath を指定し enable する (nixos-desktop で Qwen3.6-35B-A3B 等)
-  - macmini の mlx-lm.server (port 8081) と並存することを前提にデフォルトポートは 8082
+  - デフォルトポートは 8082
 
   使用方法:
     services.llamaCpp = {

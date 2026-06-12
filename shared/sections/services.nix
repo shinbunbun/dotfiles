@@ -50,11 +50,6 @@ v: {
     baseUrl = v.assertString "authentik.baseUrl" "https://auth.shinbunbun.com";
   };
 
-  mlxLm = {
-    model = v.assertString "mlxLm.model" "mlx-community/Qwen3.5-4B-MLX-4bit";
-    port = v.assertPort "mlxLm.port" 8081;
-  };
-
   # llama.cpp ベースのローカル LLM 推論サーバ (services/llama-cpp.nix を参照)。
   # Qwen3.6-35B-A3B のような MoE モデルを CPU オフロード推論する想定で、
   # ホスト側 (dotfiles-private) で modelPath と enable を指定する。

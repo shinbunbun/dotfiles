@@ -144,11 +144,6 @@
             ./systems/darwin/configurations/macbook/default.nix
             {
               nixpkgs.overlays = [
-                # MLX Metal GPU有効化（PyPI wheelベース）
-                # mlx-lm は home/modules/development/llm-tools.nix で stdenv.isDarwin に
-                # ぶら下がっており macbook にも入るため、accelerate 等の依存テスト無効化を
-                # 含む overlay を macmini と同様に適用する必要がある。
-                (import ./overlays/mlx-metal.nix)
                 # direnv の checkPhase が macos-latest CI で hang する問題を回避
                 (import ./overlays/direnv-darwin-skip-check.nix)
                 # claude-code を nixpkgs より新しい upstream フレーバーで提供
@@ -165,8 +160,6 @@
             ./systems/darwin/configurations/macmini/default.nix
             {
               nixpkgs.overlays = [
-                # MLX Metal GPU有効化（PyPI wheelベース）
-                (import ./overlays/mlx-metal.nix)
                 # direnv の checkPhase が macos-latest CI で hang する問題を回避
                 (import ./overlays/direnv-darwin-skip-check.nix)
                 # claude-code を nixpkgs より新しい upstream フレーバーで提供
