@@ -8,6 +8,7 @@ v: {
   networking = {
     hosts = {
       nixos = {
+        ip = v.assertIP "networking.hosts.nixos.ip" "192.168.1.3";
         hostname = v.assertString "networking.hosts.nixos.hostname" "nixos";
         domain = v.assertString "networking.hosts.nixos.domain" "shinbunbun.com";
       };

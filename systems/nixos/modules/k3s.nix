@@ -70,6 +70,19 @@ let
 
   clusterCfg = cfg.k3s.cluster;
 
+  # このホストの IP（networking.hosts を単一情報源とする）。
+  # infrastructure.nix の extraFlags には --node-ip を持たせず、ここで
+  # networking.hosts.*.ip から導出して付与する（IP の二重定義解消）。
+  nodeIP =
+    if config.networking.hostName == cfg.networking.hosts.nixosDesktop.hostname then
+      cfg.networking.hosts.nixosDesktop.ip
+    else if config.networking.hostName == cfg.networking.hosts.nixos.hostname then
+      cfg.networking.hosts.nixos.ip
+    else if config.networking.hostName == cfg.networking.hosts.g3pro.hostname then
+      cfg.networking.hosts.g3pro.ip
+    else
+      throw "k3s.nix: networking.hosts に hostName '${config.networking.hostName}' の IP 定義がありません";
+
   # k3sフラグを結合（共通 + ノード固有 + HA固有）
   haFlags = [
     "--https-listen-port=${toString clusterCfg.apiBackendPort}"
@@ -82,8 +95,14 @@ let
     else
       [ "--server=https://${clusterCfg.vip}:${toString clusterCfg.apiPort}" ];
 
+  nodeIPFlags = [ "--node-ip=${nodeIP}" ];
+
   allExtraFlags =
-    cfg.k3s.commonExtraFlags ++ haFlags ++ serverAddrFlags ++ (k3sConfig.extraFlags or [ ]);
+    cfg.k3s.commonExtraFlags
+    ++ haFlags
+    ++ serverAddrFlags
+    ++ nodeIPFlags
+    ++ (k3sConfig.extraFlags or [ ]);
 
   # 監視用RBACマニフェスト
   monitoringRbacConfig = pkgs.writeText "monitoring-rbac.yaml" ''
@@ -175,24 +194,18 @@ let
         balance roundrobin
         default-server inter 3s fall 3 rise 2
         server nixos-desktop ${cfg.networking.hosts.nixosDesktop.ip}:${toString clusterCfg.apiBackendPort} check
-        server homemachine 192.168.1.3:${toString clusterCfg.apiBackendPort} check
+        server homemachine ${cfg.networking.hosts.nixos.ip}:${toString clusterCfg.apiBackendPort} check
         server g3pro ${cfg.networking.hosts.g3pro.ip}:${toString clusterCfg.apiBackendPort} check
   '';
 
   # keepalivedのユニキャストピア（自分以外のノード）
   allNodeIPs = [
     cfg.networking.hosts.nixosDesktop.ip
-    "192.168.1.3"
+    cfg.networking.hosts.nixos.ip
     cfg.networking.hosts.g3pro.ip
   ];
-  myIP =
-    if config.networking.hostName == cfg.networking.hosts.nixosDesktop.hostname then
-      cfg.networking.hosts.nixosDesktop.ip
-    else if config.networking.hostName == cfg.networking.hosts.nixos.hostname then
-      "192.168.1.3"
-    else
-      cfg.networking.hosts.g3pro.ip;
-  unicastPeers = builtins.filter (ip: ip != myIP) allNodeIPs;
+  # 自ノードの IP は nodeIP（--node-ip と同一の導出）を再利用する
+  unicastPeers = builtins.filter (ip: ip != nodeIP) allNodeIPs;
 
   # ネットワークインターフェース（ホストごとに異なる）
   keepalivedInterface =
