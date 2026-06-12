@@ -87,10 +87,6 @@ let
       port = config.attic.port;
     }
     {
-      name = "mlxLm";
-      port = config.mlxLm.port;
-    }
-    {
       name = "llamaCpp";
       port = config.llamaCpp.port;
     }
