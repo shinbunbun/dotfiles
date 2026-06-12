@@ -1,0 +1,35 @@
+name: Terraform CI
+
+on:
+  pull_request:
+    paths:
+      - 'terraform/**'
+      - '.github/workflows/terraform-ci.yaml'
+
+jobs:
+  terraform-check:
+    name: fmt-check + validate
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: terraform
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          # devshell の terraform と同じバージョンに固定 (浮動ピンだと CI と手元で挙動差が出うる)
+          terraform_version: "1.15.5"
+
+      - name: terraform fmt -check
+        run: terraform fmt -check -recursive
+
+      - name: terraform init -backend=false
+        run: terraform init -backend=false
+
+      - name: terraform validate
+        run: terraform validate
