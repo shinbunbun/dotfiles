@@ -2,7 +2,8 @@
   shinbunbun (Darwin/macOS) ユーザープロファイル
 
   macOSシステム用のhome-manager設定です。
-  開発ツール、シェルツール、GUI アプリケーションなどを含みます。
+  共通設定は ../common.nix で管理し、このファイルは
+  Darwin ユーザー固有の username/homeDirectory およびフォント設定を宣言します。
 */
 {
   inputs,
@@ -17,46 +18,18 @@ let
 in
 {
   imports = [
-    # 開発ツール
-    ../../modules/development/ai-tools.nix
-    ../../modules/development/cloud-tools.nix
-    ../../modules/development/development-tools.nix
-    ../../modules/development/editors.nix
-    # ローカル LLM (mlx-lm) は現在無効化中。再有効化する場合は以下のコメントを外す
-    # ../../modules/development/llm-tools.nix
-
-    # シェルツール
-    ../../modules/shell/shell-tools.nix
-    ../../modules/shell/version-control.nix
-    ../../modules/shell/tmux.nix
-
-    # セキュリティツール
-    ../../modules/security/security-tools.nix
+    ../common.nix
   ];
 
-  # 基本設定
+  # Darwinユーザー固有の設定
   home.username = lib.mkForce cfg.users.darwin.username;
   home.homeDirectory = lib.mkForce cfg.users.darwin.homeDirectory;
   home.stateVersion = lib.mkForce cfg.system.homeStateVersion;
-  xdg.enable = true;
 
-  # ユーザー固有のパッケージ
+  # macOS専用パッケージ
   home.packages = with pkgs; [
-    # システムツール
-    gh
-    llvm
-
-    # Nix開発ツール
-    nil
-    nixd
-    nixfmt
-
-    # macOS専用アプリケーション
     nerd-fonts.fira-code
   ];
-
-  # Home Managerの有効化
-  programs.home-manager.enable = true;
 
   # フォント設定
   fonts.fontconfig.enable = true;
