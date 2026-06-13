@@ -3,9 +3,158 @@
 
   このファイルは開発環境を定義します。
   必要なツールやスクリプトを提供します。
+
+  TF_VAR_* の環境変数は、変数名 → (sops ファイル, 抽出パス) の attrset
+  (tfVars) として一元定義し、Nix 側でループ展開して shellHook の
+  export 行を生成します。新規アプリの OAuth を追加する際は tfVars に
+  1 エントリ追記するだけで済みます。
 */
 { pkgs, inputs, ... }:
 
+let
+  inherit (pkgs) lib;
+
+  # sops ファイルのパス (TF_VAR とそれ以外の特殊変数で共有)
+  cloudflareFile = "secrets/cloudflare.yaml";
+  authentikFile = "secrets/authentik-terraform.yaml";
+  grafanaFile = "secrets/grafana.yaml";
+  oidcFile = "secrets/authentik-cloudflare-oidc.yaml";
+
+  # TF_VAR_<name> = { file = <sops ファイル>; extract = <sops --extract パス>; }
+  # ここに 1 エントリ追記すれば対応する export 行が自動生成される。
+  tfVars = {
+    # Cloudflare (secrets/cloudflare.yaml)
+    TF_VAR_cloudflare_zone_id = {
+      file = cloudflareFile;
+      extract = ''["cloudflare"]["zone-id"]'';
+    };
+    TF_VAR_cloudflare_account_id = {
+      file = cloudflareFile;
+      extract = ''["cloudflare"]["account-id"]'';
+    };
+    TF_VAR_home_tunnel_id = {
+      file = cloudflareFile;
+      extract = ''["cloudflare"]["tunnel-id"]'';
+    };
+    TF_VAR_desktop_tunnel_id = {
+      file = cloudflareFile;
+      extract = ''["cloudflare"]["desktop-tunnel-id"]'';
+    };
+    TF_VAR_k3s_tunnel_id = {
+      file = cloudflareFile;
+      extract = ''["cloudflare"]["k3s-tunnel-id"]'';
+    };
+    TF_VAR_identity_provider_id = {
+      file = cloudflareFile;
+      extract = ''["cloudflare"]["identity-provider-id"]'';
+    };
+
+    # Authentik / 各アプリ OAuth (secrets/authentik-terraform.yaml)
+    TF_VAR_authentik_api_token = {
+      file = authentikFile;
+      extract = ''["authentik"]["api-token"]'';
+    };
+    TF_VAR_couchdb_oauth_client_id = {
+      file = authentikFile;
+      extract = ''["couchdb"]["oauth_client_id"]'';
+    };
+    TF_VAR_couchdb_oauth_client_secret = {
+      file = authentikFile;
+      extract = ''["couchdb"]["oauth_client_secret"]'';
+    };
+    TF_VAR_argocd_oauth_client_id = {
+      file = authentikFile;
+      extract = ''["argocd"]["oidc_client_id"]'';
+    };
+    TF_VAR_argocd_oauth_client_secret = {
+      file = authentikFile;
+      extract = ''["argocd"]["oidc_client_secret"]'';
+    };
+    TF_VAR_argo_workflows_oauth_client_id = {
+      file = authentikFile;
+      extract = ''["argo_workflows"]["oauth_client_id"]'';
+    };
+    TF_VAR_argo_workflows_oauth_client_secret = {
+      file = authentikFile;
+      extract = ''["argo_workflows"]["oauth_client_secret"]'';
+    };
+    TF_VAR_nextcloud_oauth_client_id = {
+      file = authentikFile;
+      extract = ''["nextcloud"]["oauth_client_id"]'';
+    };
+    TF_VAR_nextcloud_oauth_client_secret = {
+      file = authentikFile;
+      extract = ''["nextcloud"]["oauth_client_secret"]'';
+    };
+    TF_VAR_immich_oauth_client_id = {
+      file = authentikFile;
+      extract = ''["immich"]["oauth_client_id"]'';
+    };
+    TF_VAR_immich_oauth_client_secret = {
+      file = authentikFile;
+      extract = ''["immich"]["oauth_client_secret"]'';
+    };
+    TF_VAR_scanopy_oauth_client_id = {
+      file = authentikFile;
+      extract = ''["scanopy"]["oauth_client_id"]'';
+    };
+    TF_VAR_scanopy_oauth_client_secret = {
+      file = authentikFile;
+      extract = ''["scanopy"]["oauth_client_secret"]'';
+    };
+    TF_VAR_librechat_oauth_client_id = {
+      file = authentikFile;
+      extract = ''["librechat"]["oauth_client_id"]'';
+    };
+    TF_VAR_librechat_oauth_client_secret = {
+      file = authentikFile;
+      extract = ''["librechat"]["oauth_client_secret"]'';
+    };
+
+    # Grafana OAuth (secrets/grafana.yaml)
+    TF_VAR_grafana_oauth_client_id = {
+      file = grafanaFile;
+      extract = ''["grafana"]["oauth_client_id"]'';
+    };
+    TF_VAR_grafana_oauth_client_secret = {
+      file = grafanaFile;
+      extract = ''["grafana"]["oauth_client_secret"]'';
+    };
+
+    # Cloudflare OIDC (secrets/authentik-cloudflare-oidc.yaml)
+    TF_VAR_cloudflare_oidc_client_id = {
+      file = oidcFile;
+      extract = ''["cloudflare"]["oidc_client_id"]'';
+    };
+    TF_VAR_cloudflare_oidc_client_secret = {
+      file = oidcFile;
+      extract = ''["cloudflare"]["oidc_client_secret"]'';
+    };
+  };
+
+  # tfVars から、必要な sops ファイルが存在するときのみ load_sops_var を
+  # 呼ぶ export 行を生成する。ファイル単位でグルーピングして
+  # 「ファイルが無い場合はスキップ」のガードを共有する。
+  filesUsed = lib.unique (lib.mapAttrsToList (_: v: v.file) tfVars);
+
+  genFileBlock =
+    file:
+    let
+      varsForFile = lib.filterAttrs (_: v: v.file == file) tfVars;
+      lines = lib.mapAttrsToList (
+        name: v: "load_sops_var ${name} ${lib.escapeShellArg file} ${lib.escapeShellArg v.extract}"
+      ) varsForFile;
+    in
+    ''
+      if [ -f ${lib.escapeShellArg file} ]; then
+      ${lib.concatStringsSep "\n" lines}
+      else
+        echo "⚠ Warning: ${file} not found (TF_VAR の一部が未設定です)" >&2
+      fi
+    '';
+
+  tfVarBlocks = lib.concatStringsSep "\n" (map genFileBlock filesUsed);
+in
 pkgs.mkShell {
   name = "nix-dotfiles-dev";
 
@@ -51,83 +200,46 @@ pkgs.mkShell {
     echo "SOPS tools available: age, sops, ssh-to-age"
     echo ""
 
-    # SOPSからCloudflare設定を環境変数に読み込む
-    if [ -f secrets/cloudflare.yaml ]; then
+    # SOPS から 1 変数を復号して export するヘルパー。
+    # 復号に失敗した場合は 2>/dev/null で握り潰さず、どの変数が
+    # 取得できなかったかを stderr に警告 1 行で出す (devShell 自体は止めない)。
+    load_sops_var() {
+      _name="$1"
+      _file="$2"
+      _extract="$3"
+      # stderr 捕捉先は mktemp で per-call に分離する。固定パス (/tmp/.sops_err)
+      # だと並列 devShell や sticky /tmp 上の他ユーザー所有ファイルと衝突しうる。
+      _err=$(mktemp)
+      _val=$(sops -d --extract "$_extract" "$_file" 2>"$_err") || {
+        echo "⚠ Warning: $_name を復号できませんでした ($_file $_extract)" >&2
+        sed 's/^/    sops: /' "$_err" >&2
+        rm -f "$_err"
+        return 0
+      }
+      rm -f "$_err"
+      export "$_name=$_val"
+    }
+
+    # Cloudflare API トークン / R2 アクセスキー (TF_VAR 以外の特殊変数)。
+    # CLOUDFLARE_API_TOKEN は cf-terraforming と TF_VAR の両方で使うため、
+    # sops 呼び出しを増やさないよう TF_VAR_cloudflare_api_token に再利用する。
+    if [ -f ${lib.escapeShellArg cloudflareFile} ]; then
       echo "Loading Cloudflare secrets from SOPS..."
-
-      # APIトークン (cf-terraforming用とTerraform用)
-      export CLOUDFLARE_API_TOKEN=$(sops -d --extract '["cloudflare"]["api-token"]' secrets/cloudflare.yaml 2>/dev/null)
+      load_sops_var CLOUDFLARE_API_TOKEN ${lib.escapeShellArg cloudflareFile} ${lib.escapeShellArg ''["cloudflare"]["api-token"]''}
       export TF_VAR_cloudflare_api_token="$CLOUDFLARE_API_TOKEN"
-
-      # R2アクセスキー
-      export AWS_ACCESS_KEY_ID=$(sops -d --extract '["cloudflare"]["r2-access-key-id"]' secrets/cloudflare.yaml 2>/dev/null)
-      export AWS_SECRET_ACCESS_KEY=$(sops -d --extract '["cloudflare"]["r2-secret-access-key"]' secrets/cloudflare.yaml 2>/dev/null)
-
-      # その他のTerraform変数
-      export TF_VAR_cloudflare_zone_id=$(sops -d --extract '["cloudflare"]["zone-id"]' secrets/cloudflare.yaml 2>/dev/null)
-      export TF_VAR_cloudflare_account_id=$(sops -d --extract '["cloudflare"]["account-id"]' secrets/cloudflare.yaml 2>/dev/null)
-      export TF_VAR_home_tunnel_id=$(sops -d --extract '["cloudflare"]["tunnel-id"]' secrets/cloudflare.yaml 2>/dev/null)
-      export TF_VAR_desktop_tunnel_id=$(sops -d --extract '["cloudflare"]["desktop-tunnel-id"]' secrets/cloudflare.yaml 2>/dev/null)
-      export TF_VAR_k3s_tunnel_id=$(sops -d --extract '["cloudflare"]["k3s-tunnel-id"]' secrets/cloudflare.yaml 2>/dev/null)
-      export TF_VAR_identity_provider_id=$(sops -d --extract '["cloudflare"]["identity-provider-id"]' secrets/cloudflare.yaml 2>/dev/null)
-
+      load_sops_var AWS_ACCESS_KEY_ID ${lib.escapeShellArg cloudflareFile} ${lib.escapeShellArg ''["cloudflare"]["r2-access-key-id"]''}
+      load_sops_var AWS_SECRET_ACCESS_KEY ${lib.escapeShellArg cloudflareFile} ${lib.escapeShellArg ''["cloudflare"]["r2-secret-access-key"]''}
       if [ -n "$CLOUDFLARE_API_TOKEN" ]; then
-        echo "✓ Cloudflare environment variables loaded from SOPS"
-      else
-        echo "⚠ Warning: Could not load Cloudflare secrets from SOPS"
-        echo "  Make sure you have the correct age key configured"
+        echo "✓ Cloudflare API token / R2 keys loaded from SOPS"
       fi
     else
-      echo "⚠ Warning: secrets/cloudflare.yaml not found"
+      echo "⚠ Warning: ${cloudflareFile} not found" >&2
     fi
+
+    # tfVars から自動生成した TF_VAR_* の export 行 (ファイル単位ガード付き)。
+    ${tfVarBlocks}
+
     echo ""
-
-    # SOPSからAuthentik設定を環境変数に読み込む
-    if [ -f secrets/authentik-terraform.yaml ]; then
-      export TF_VAR_authentik_api_token=$(sops -d --extract '["authentik"]["api-token"]' secrets/authentik-terraform.yaml 2>/dev/null)
-      [ -n "$TF_VAR_authentik_api_token" ] && echo "✓ Authentik API token loaded"
-    fi
-
-    # Grafana OAuth (secrets/grafana.yaml)
-    if [ -f secrets/grafana.yaml ]; then
-      export TF_VAR_grafana_oauth_client_id=$(sops -d --extract '["grafana"]["oauth_client_id"]' secrets/grafana.yaml 2>/dev/null)
-      export TF_VAR_grafana_oauth_client_secret=$(sops -d --extract '["grafana"]["oauth_client_secret"]' secrets/grafana.yaml 2>/dev/null)
-      [ -n "$TF_VAR_grafana_oauth_client_id" ] && echo "✓ Grafana OAuth secrets loaded"
-    fi
-
-    # Cloudflare OIDC (secrets/authentik-cloudflare-oidc.yaml)
-    if [ -f secrets/authentik-cloudflare-oidc.yaml ]; then
-      export TF_VAR_cloudflare_oidc_client_id=$(sops -d --extract '["cloudflare"]["oidc_client_id"]' secrets/authentik-cloudflare-oidc.yaml 2>/dev/null)
-      export TF_VAR_cloudflare_oidc_client_secret=$(sops -d --extract '["cloudflare"]["oidc_client_secret"]' secrets/authentik-cloudflare-oidc.yaml 2>/dev/null)
-      [ -n "$TF_VAR_cloudflare_oidc_client_id" ] && echo "✓ Cloudflare OIDC secrets loaded"
-    fi
-
-    # CouchDB OAuth (secrets/authentik-terraform.yaml)
-    if [ -f secrets/authentik-terraform.yaml ]; then
-      export TF_VAR_couchdb_oauth_client_id=$(sops -d --extract '["couchdb"]["oauth_client_id"]' secrets/authentik-terraform.yaml 2>/dev/null)
-      export TF_VAR_couchdb_oauth_client_secret=$(sops -d --extract '["couchdb"]["oauth_client_secret"]' secrets/authentik-terraform.yaml 2>/dev/null)
-      [ -n "$TF_VAR_couchdb_oauth_client_id" ] && echo "✓ CouchDB OAuth secrets loaded"
-      export TF_VAR_argocd_oauth_client_id=$(sops -d --extract '["argocd"]["oidc_client_id"]' secrets/authentik-terraform.yaml 2>/dev/null)
-      export TF_VAR_argocd_oauth_client_secret=$(sops -d --extract '["argocd"]["oidc_client_secret"]' secrets/authentik-terraform.yaml 2>/dev/null)
-      [ -n "$TF_VAR_argocd_oauth_client_id" ] && echo "✓ ArgoCD OAuth secrets loaded"
-      export TF_VAR_argo_workflows_oauth_client_id=$(sops -d --extract '["argo_workflows"]["oauth_client_id"]' secrets/authentik-terraform.yaml 2>/dev/null)
-      export TF_VAR_argo_workflows_oauth_client_secret=$(sops -d --extract '["argo_workflows"]["oauth_client_secret"]' secrets/authentik-terraform.yaml 2>/dev/null)
-      [ -n "$TF_VAR_argo_workflows_oauth_client_id" ] && echo "✓ Argo Workflows OAuth secrets loaded"
-      export TF_VAR_nextcloud_oauth_client_id=$(sops -d --extract '["nextcloud"]["oauth_client_id"]' secrets/authentik-terraform.yaml 2>/dev/null)
-      export TF_VAR_nextcloud_oauth_client_secret=$(sops -d --extract '["nextcloud"]["oauth_client_secret"]' secrets/authentik-terraform.yaml 2>/dev/null)
-      [ -n "$TF_VAR_nextcloud_oauth_client_id" ] && echo "✓ Nextcloud OAuth secrets loaded"
-      export TF_VAR_immich_oauth_client_id=$(sops -d --extract '["immich"]["oauth_client_id"]' secrets/authentik-terraform.yaml 2>/dev/null)
-      export TF_VAR_immich_oauth_client_secret=$(sops -d --extract '["immich"]["oauth_client_secret"]' secrets/authentik-terraform.yaml 2>/dev/null)
-      [ -n "$TF_VAR_immich_oauth_client_id" ] && echo "✓ Immich OAuth secrets loaded"
-      export TF_VAR_scanopy_oauth_client_id=$(sops -d --extract '["scanopy"]["oauth_client_id"]' secrets/authentik-terraform.yaml 2>/dev/null)
-      export TF_VAR_scanopy_oauth_client_secret=$(sops -d --extract '["scanopy"]["oauth_client_secret"]' secrets/authentik-terraform.yaml 2>/dev/null)
-      [ -n "$TF_VAR_scanopy_oauth_client_id" ] && echo "✓ Scanopy OAuth secrets loaded"
-      export TF_VAR_librechat_oauth_client_id=$(sops -d --extract '["librechat"]["oauth_client_id"]' secrets/authentik-terraform.yaml 2>/dev/null)
-      export TF_VAR_librechat_oauth_client_secret=$(sops -d --extract '["librechat"]["oauth_client_secret"]' secrets/authentik-terraform.yaml 2>/dev/null)
-      [ -n "$TF_VAR_librechat_oauth_client_id" ] && echo "✓ LibreChat OAuth secrets loaded"
-    fi
-    echo ""
-
     echo "Terraform commands (cd terraform/):"
     echo "  - terraform init"
     echo "  - terraform plan"
