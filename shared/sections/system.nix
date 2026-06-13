@@ -14,6 +14,10 @@ v: {
     nixosStateVersion = v.assertString "system.nixosStateVersion" "21.11";
     homeStateVersion = v.assertString "system.homeStateVersion" "24.11";
     timeZone = v.assertString "system.timeZone" "Asia/Tokyo";
+    # systemd-boot が ESP に保持する世代数の上限。
+    # ESP (vfat) は小容量 (g3pro は 486MB) で世代毎に kernel+initrd が ~70MB 積み上がるため、
+    # 無制限だと枯渇する。5 世代あればロールバックには十分。
+    bootConfigurationLimit = v.assertPositiveInt "system.bootConfigurationLimit" 5;
   };
 
   deploy = {
