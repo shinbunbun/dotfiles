@@ -48,6 +48,8 @@ in
   };
 
   boot.loader.systemd-boot.enable = true;
+  # ESP の世代蓄積による枯渇を防ぐため保持世代数を制限する（値は shared/config.nix）
+  boot.loader.systemd-boot.configurationLimit = configValues.system.bootConfigurationLimit;
   boot.loader.efi.canTouchEfiVariables = true;
 
   time.timeZone = configValues.system.timeZone;
