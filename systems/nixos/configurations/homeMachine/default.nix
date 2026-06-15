@@ -32,6 +32,9 @@ in
 
     # 基本モジュール
     ../../modules/base.nix
+    # nix-ld: uvx 由来の standalone Python (mcp-server-motherduck = DuckDB ネイティブ
+    # 拡張) が libstdc++.so.6 を解決できるようにする
+    ../../modules/nix-ld.nix
     ../../modules/optimise.nix
     ../../modules/networking.nix
     ../../modules/security.nix

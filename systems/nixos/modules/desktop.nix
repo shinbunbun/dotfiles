@@ -18,6 +18,9 @@
   ...
 }:
 {
+  # nix-ld（動的リンカー）は共有モジュールで enable + libraries を設定
+  imports = [ ./nix-ld.nix ];
+
   # X Window System設定
   services.xserver = {
     enable = true;
@@ -49,9 +52,6 @@
 
   # Docker仮想化
   virtualisation.docker.enable = true;
-
-  # nix-ld（動的リンカー設定）
-  programs.nix-ld.enable = true;
 
   # Avahiサービス（mDNS）
   services.avahi = {
