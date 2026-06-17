@@ -165,6 +165,11 @@ jobs:
   diff-gate-nixos:
     needs: discover
     if: github.event_name == 'pull_request' && needs.discover.outputs.has-nixos == 'true'
+    # reusable diff-gate.yaml が base closure-paths を gh run download するため actions:read が要る。
+    # 呼び出し job 側で宣言しないと caller top-level (contents:read) を超過し startup_failure になる。
+    permissions:
+      contents: read
+      actions: read
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.discover.outputs.nixos-matrix) }}
@@ -180,6 +185,9 @@ jobs:
   diff-gate-darwin:
     needs: discover
     if: github.event_name == 'pull_request' && needs.discover.outputs.has-darwin == 'true'
+    permissions:
+      contents: read
+      actions: read
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.discover.outputs.darwin-matrix) }}
