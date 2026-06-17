@@ -192,9 +192,11 @@ jobs:
           nix run nixpkgs#python3 -- \
             .nix-ci-workflows/ci/scripts/vulnxscan_aggregate.py signals
 
-  # [PR のみ・required status check] delta スキャン (#284)。この run の head signals を main 最新スキャンの
-  # baseline signals と diff し、PR が新規流入/解消した CVE を PR コメントに upsert する。
-  # 新規流入 (introduced) があれば --gate で exit 1 → check fail → auto-merge をブロック。
+  # [PR のみ・required status check] diff-gate (#347)。closure の差分 store path (= この PR が
+  # 足したパス) だけを vulnix -R で再スキャンし、新規流入 CVE を PR コメントに upsert する。
+  # 脆弱性データは head 側 vulnix の 1 スキャンからのみ読むため、旧 delta-gate のような
+  # baseline 時刻ずれ/DB ドリフト/NVD 404 起因の誤検出 (glibc 等) は構造的に発生しない。
+  # job 名は required status check 名を保つため delta-gate のまま。
   # 閉包関連変更が無い PR では即 pass する (required check として必ず「報告」されるよう always 実行)。
   delta-gate:
     needs: [changes, scan-nixos, scan-darwin]
@@ -207,7 +209,7 @@ jobs:
     steps:
       - name: Pass when no closure change
         if: needs.changes.result == 'success' && needs.changes.outputs.relevant == 'false'
-        run: echo "::notice::flake.lock/*.nix 変更なし → 脆弱性流入なし、delta-gate pass"
+        run: echo "::notice::flake.lock/*.nix 変更なし → 脆弱性流入なし、diff-gate pass"
       - name: Fail closed when change-detection is indeterminate
         # changes ジョブが infra 失敗等で判定 (true/false) を出せなかった場合、
         # fail-open (脆弱性をすり抜け auto-merge) を避けるため fail-closed で block する
@@ -224,56 +226,63 @@ jobs:
           repository: shinbunbun/nix-ci-workflows
           ref: main
           path: .nix-ci-workflows
-      - name: Install Nix with flakes enabled
+      - name: Setup Nix + Attic (Δ パス realise 用)
         if: needs.changes.outputs.relevant == 'true'
-        uses: cachix/install-nix-action@v31
+        uses: shinbunbun/nix-ci-workflows/.github/actions/setup-nix-attic@main
         with:
-          extra_nix_config: |
-            experimental-features = nix-command flakes
-            access-tokens = github.com=${{ github.token }}
-      - name: Download head NOTIFY reports (this run)
+          install-nix: 'true'
+          # Δ (= PR が足した store path) を vulnix が読めるよう Attic/公開キャッシュから substitute する。
+          # darwin Δ は linux 上ではビルド不可だが、darwin scan が Attic に push 済みなので substitute は可能。
+          use-attic: 'true'
+          attic-read-token: ${{ secrets.ATTIC_READ_TOKEN }}
+          attic-token: ${{ secrets.ATTIC_TOKEN }}
+          extra-nix-config: 'access-tokens = github.com=${{ github.token }}'
+      - name: Download head closure paths (this run)
         if: needs.changes.outputs.relevant == 'true'
         uses: actions/download-artifact@v8
         with:
-          pattern: vulnxscan-signal-*
-          path: head-signals
-      - name: Download baseline NOTIFY reports (main 最新スキャン)
+          pattern: vulnxscan-paths-*
+          path: head-paths
+      - name: Download baseline closure paths (main 最新スキャン)
         if: needs.changes.outputs.relevant == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
-          mkdir -p baseline-signals
-          # main の成功 run の artifact を baseline に使う (案B)。最新 run が「成功扱いだが scan が
-          # skip され artifact 空」「実行中で未 upload」のことがある (例: 過去の restructure バグ)。
-          # そのまま空 baseline だと delta が fail-open するので、新しい順に試し
-          # notify.json が実在する最初の run を採用する (最大 10 件)。
+          mkdir -p base-paths
+          # main の成功 run の closure paths を baseline に使う。閉包のパス集合は「決定的な事実」
+          # なので脆弱性データのように時刻で揺れない (artifact 失効時は baseline 不在で graceful)。
           RIDS=$(gh run list \
             --workflow "Scan Vulnerabilities" --branch main --status success \
             --limit 10 --json databaseId --jq '.[].databaseId' 2>/dev/null || true)
           PICKED=""
           for RID in $RIDS; do
-            rm -rf baseline-signals && mkdir -p baseline-signals
+            rm -rf base-paths && mkdir -p base-paths
             if gh run download "$RID" \
-                 --pattern 'vulnxscan-signal-*' --dir baseline-signals 2>/dev/null \
-               && find baseline-signals -name notify.json | grep -q .; then
+                 --pattern 'vulnxscan-paths-*' --dir base-paths 2>/dev/null \
+               && find base-paths -name closure-paths.txt | grep -q .; then
               PICKED="$RID"
               echo "baseline = main run $RID"
               break
             fi
           done
           if [ -z "$PICKED" ]; then
-            rm -rf baseline-signals && mkdir -p baseline-signals
-            echo "::warning::artifact 付きの main 成功 run が見つかりません (delta は baseline 不在として継続)"
+            rm -rf base-paths && mkdir -p base-paths
+            echo "::warning::artifact 付きの main 成功 run が見つかりません (baseline 不在として継続)"
           fi
-      - name: Compute delta, comment & gate
+      - name: Compute diff, comment & gate
         if: needs.changes.outputs.relevant == 'true'
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          # --gate: introduced > 0 なら exit 1 で本 job を fail させ auto-merge をブロックする。
-          nix run nixpkgs#python3 -- \
-            .nix-ci-workflows/ci/scripts/vulnxscan_delta.py \
-            head-signals baseline-signals "${{ github.event.pull_request.number }}" --gate
+          # closure の差分 store path (= この PR が足したパス) だけを vulnix -R で再スキャンし、
+          # introduced を PR コメントに upsert する。脆弱性データは head 側 vulnix の 1 スキャンからのみ
+          # 読むため、baseline の時刻ずれ/DB ドリフト/404 起因の誤検出は構造的に発生しない (#347)。
+          # vulnix を PATH に供給 (Δ は _default_runner が nix-store --realise してから vulnix -R)。
+          # darwin の Δ も Attic/公開キャッシュから substitute して linux 上で vulnix に渡せる (実証済み)。
+          # --gate: introduced > 0 / scan 未完走 なら exit 1 で fail → required check fail → auto-merge ブロック。
+          nix shell nixpkgs#vulnix -c python3 \
+            .nix-ci-workflows/ci/scripts/vulnxscan_diff_gate.py \
+            head-paths base-paths "${{ github.event.pull_request.number }}" --gate
