@@ -93,10 +93,20 @@ jobs:
               \"content\": \"✅ ビルド完了\\n\\n**デプロイ承認待ち**\\nhttps://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\\n\\nデプロイを開始するには、上記リンクから \`Deploy to NixOS\` ジョブを承認してください。\"
             }"
 
+  # k3s は nixos-desktop / homeMachine / g3pro の 3 ノード embedded-etcd HA 構成。
+  # etcd クォーラム = 3 中 2 のため、homeMachine と g3pro が同時に k3s を restart すると
+  # （nixos-desktop の 1 台だけ残り）クォーラムを喪失する。これを防ぐため:
+  #   - deploy-g3pro を deploy-nixos の後段に直列化（needs に deploy-nixos を追加）
+  #   - 両ノードに wait-k3s-healthy: true を付与し、次ノードへ進む前に etcd 復帰を確認
+  #   - concurrency group で push 連打によるラン跨ぎの同時 deploy も直列化
+  # （shinbunbun/dotfiles#570）
   deploy-nixos:
     name: Deploy to NixOS
     needs: [build-nixos, notify-build-complete]
     if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/fix/deploy') && github.event_name == 'push' && !inputs.skip_deploy
+    concurrency:
+      group: k3s-etcd-deploy
+      cancel-in-progress: false
     uses: shinbunbun/nix-ci-workflows/.github/workflows/deploy-nix.yaml@main
     with:
       environment: production
@@ -104,6 +114,7 @@ jobs:
       ssh-hostname: homemachine
       ssh-host: "192.168.1.3"
       needs-sops: true
+      wait-k3s-healthy: true
     secrets:
       AUTHENTIK_CLIENT_ID: ${{ secrets.AUTHENTIK_CLIENT_ID }}
       ATTIC_TOKEN: ${{ secrets.ATTIC_TOKEN }}
@@ -134,10 +145,15 @@ jobs:
       DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
       SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
 
+  # deploy-nixos(homeMachine) の完了（etcd 復帰確認込み）を待ってから deploy する。
+  # これにより同時に 2 つの etcd メンバーが restart することを防ぐ（#570）。
   deploy-g3pro:
     name: Deploy to g3pro
-    needs: [build-nixos, notify-build-complete]
+    needs: [build-nixos, notify-build-complete, deploy-nixos]
     if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/fix/deploy') && github.event_name == 'push' && !inputs.skip_deploy
+    concurrency:
+      group: k3s-etcd-deploy
+      cancel-in-progress: false
     uses: shinbunbun/nix-ci-workflows/.github/workflows/deploy-nix.yaml@main
     with:
       environment: production
@@ -145,6 +161,7 @@ jobs:
       ssh-hostname: g3pro
       ssh-host: "192.168.1.6"
       needs-sops: true
+      wait-k3s-healthy: true
     secrets:
       AUTHENTIK_CLIENT_ID: ${{ secrets.AUTHENTIK_CLIENT_ID }}
       ATTIC_TOKEN: ${{ secrets.ATTIC_TOKEN }}
