@@ -12,3 +12,4 @@ vuln_id,comment,package
 ^CVE-2026-42010$,"誤検知。GnuTLS RSA-PSK の NUL バイト認証バイパスは upstream 3.8.13 で修正 (NEWS 記載)。NVD CPE が境界欠落のワイルドカードのため auto-clear されないが、導入版は修正版そのものの 3.8.13 (#751)",gnutls
 ^CVE-2026-33845$,"誤検知。NVD CPE は versionEndExcluding=3.8.13 で導入版 3.8.13 は境界上=範囲外 (3.8.13 が本 DTLS OOB read の修正リリース)。3.8.13 未満へ regress した場合は再評価が必要 (#751)",gnutls
 ^CVE-2026-8376$,"誤検知 (アーキ限定)。NVD description と oss-security advisory は本 heap overflow を 32-bit ビルド限定と明記 (mincount*l の SSize_t オーバーフローが 32-bit でのみ発生)。本フリートは x86_64/aarch64 の 64-bit のみのため悪用前提が成立せず非該当。版範囲 (<=5.43.10) には入るため 32-bit ターゲット追加時は再評価が必要 (#751)",perl
+^CVE-2023-51767$,"リスク受容。NVD disputed + OpenSSH upstream が攻撃モデルを却下 (Rowhammer/DRAM ビット反転による認証バイパスはハードウェア欠陥で OpenSSH 責務外との立場)。悪用にはローカル同居 + Rowhammer 可能 HW という非現実的前提が必要で実効リスク極小。upstream 修正予定なし=恒久的に残るためリスク受容。CPE 上限なしで全 openssh 版に付与され続ける点に注意 (#751)",openssh
