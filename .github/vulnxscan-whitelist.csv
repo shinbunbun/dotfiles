@@ -1,2 +1,14 @@
 vuln_id,comment,package
 ^CVE-2021-4034$,"polkit PwnKit: closure は polkit-127 で PwnKit は 0.120.r2 で修正済み。version_local '1.pam' は polkit-1.pam (PAM 設定派生) の誤パース = 誤検知 (dotfiles-private#276 で実 closure 確認済)",polkit
+^CVE-2025-59777$,"誤検知。GNU libmicrohttpd <=1.0.2 の NULL ポインタ参照 DoS だが、脆弱コードは HAVE_EXPERIMENTAL (--enable-experimental, 既定無効) 有効時のみコンパイルされる。nixpkgs の generic.nix は configureFlags を渡さず experimental 無効ビルドのため脆弱コードを含まない。Debian security-tracker も unimportant に降格 (#751)",libmicrohttpd
+^CVE-2025-62689$,"誤検知。CVE-2025-59777 と同根で、HAVE_EXPERIMENTAL 有効時のみコンパイルされる experimental コードの脆弱性。nixpkgs ビルドは experimental 無効のため非該当。Debian security-tracker も unimportant (Vulnerable code only compiled when HAVE_EXPERIMENTAL flag is set) (#751)",libmicrohttpd
+^CVE-2010-4226$,"誤検知。NVD 記載の build は openSUSE Build Service (OBS) の build/obs-build ツールを指し GNU cpio 本体ではない。Debian tracker も NOT-FOR-US (OpenSuSE build services)。GNU cpio CPE はバージョン無制約ワイルドカードによる過大マッチ (#751)",cpio
+^CVE-2008-3844$,"誤検知。2008 年に Red Hat の鍵で署名された改ざん済み OpenSSH RPM (RHEL4/5) の配布インシデントで、OpenSSH ソース自体の脆弱性ではない。CPE は RHEL 限定。nixpkgs ビルドの openssh 10.3p1 は無関係 (#751)",openssh
+^CVE-2007-2768$,"誤検知。OPIE (One-Time Passwords) を PAM に使う構成限定のアカウント列挙。NVD はバージョン範囲を持たず全 openssh に付与され続ける stale finding。nixpkgs openssh は OPIE 非リンク、本リポジトリも鍵認証のみのため非該当 (#751)",openssh
+^CVE-2021-26720$,"誤検知。脆弱コードは Debian パッケージの maintainer script avahi-daemon-check-dns.sh (/etc/network/if-up.d 経由 root 実行) の symlink 攻撃で upstream avahi ではない。NVD/Debian とも Debian packaging 限定と明記。NixOS は当該スクリプトも if-up.d も持たないため非該当 (#751)",avahi
+^CVE-2024-21485$,"誤検知。NVD の dash は Plotly Dash (Python Web フレームワーク, affected <2.15.0) の HTML href XSS。本パッケージは Debian Almquist shell (POSIX /bin/sh) 0.5.13.3 で vendor/product/版体系すべて別物の名前衝突 (#751)",dash
+^CVE-2022-26691$,"誤検知。NVD openprinting:cups は versionEndExcluding=2.4.2 (2.4.2 で修正)。導入版 2.4.19 は明確に範囲外。別 CPE の apple:cups (499.x) は macOS フォークで別物 (#751)",cups
+^CVE-2023-4039$,"誤検知。NVD disputed タグ (GCC は脆弱性ではなく hardening の限界と主張)。AArch64 の -fstack-protector 限定 (CPE target_hardware=arm64) で x86_64 ターゲットには非該当。導入版 gcc 15.2.0 は 2023-09-12 修正より後で版範囲外 (#751)",gcc
+^CVE-2026-42010$,"誤検知。GnuTLS RSA-PSK の NUL バイト認証バイパスは upstream 3.8.13 で修正 (NEWS 記載)。NVD CPE が境界欠落のワイルドカードのため auto-clear されないが、導入版は修正版そのものの 3.8.13 (#751)",gnutls
+^CVE-2026-33845$,"誤検知。NVD CPE は versionEndExcluding=3.8.13 で導入版 3.8.13 は境界上=範囲外 (3.8.13 が本 DTLS OOB read の修正リリース)。3.8.13 未満へ regress した場合は再評価が必要 (#751)",gnutls
+^CVE-2026-8376$,"誤検知 (アーキ限定)。NVD description と oss-security advisory は本 heap overflow を 32-bit ビルド限定と明記 (mincount*l の SSize_t オーバーフローが 32-bit でのみ発生)。本フリートは x86_64/aarch64 の 64-bit のみのため悪用前提が成立せず非該当。版範囲 (<=5.43.10) には入るため 32-bit ターゲット追加時は再評価が必要 (#751)",perl
