@@ -295,6 +295,46 @@ resource "cloudflare_zero_trust_access_application" "terrakube_dex" {
   }]
 }
 
+# Terrakube VCS webhook - 認証バイパス
+# GitHub が push イベントを POST /webhook/v2/{id} に配送する。GitHub は CF Access
+# の OIDC を通れないため bypass 必須。Terrakube 側が webhook secret の HMAC を
+# 検証するので公開しても安全。path 指定で UI app より優先。
+resource "cloudflare_zero_trust_access_application" "terrakube_webhook" {
+  account_id                = var.cloudflare_account_id
+  name                      = "Terrakube Webhook"
+  domain                    = "${local.home_services.terrakube}/webhook"
+  type                      = "self_hosted"
+  session_duration          = "24h"
+  auto_redirect_to_identity = false
+  enable_binding_cookie     = false
+  options_preflight_bypass  = false
+
+  policies = [{
+    id         = cloudflare_zero_trust_access_policy.webhook_bypass.id
+    precedence = 1
+  }]
+}
+
+# Terrakube VCS callback - 認証バイパス
+# VCS 接続 (GitHub App) の OAuth callback GET /callback/v1/vcs/{id}。GitHub からの
+# redirect で SameSite/Cookie 事故を避けるため bypass。OAuth code は単回・App
+# 紐付きで安全。path 指定で UI app より優先。
+resource "cloudflare_zero_trust_access_application" "terrakube_callback" {
+  account_id                = var.cloudflare_account_id
+  name                      = "Terrakube Callback"
+  domain                    = "${local.home_services.terrakube}/callback"
+  type                      = "self_hosted"
+  session_duration          = "24h"
+  auto_redirect_to_identity = false
+  enable_binding_cookie     = false
+  options_preflight_bypass  = false
+
+  policies = [{
+    id         = cloudflare_zero_trust_access_policy.webhook_bypass.id
+    precedence = 1
+  }]
+}
+
 
 # ========================================
 # CloudFlare Zero Trust Access Policies
