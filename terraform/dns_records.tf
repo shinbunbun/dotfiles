@@ -192,3 +192,25 @@ resource "cloudflare_dns_record" "mixi2_bot" {
   proxied = true
   comment = "Managed by Terraform - mixi2 Bot via k3s-services tunnel"
 }
+
+# Terrakube (UI + Dex on /dex path) — dotfiles-private#327
+resource "cloudflare_dns_record" "terrakube" {
+  zone_id = var.cloudflare_zone_id
+  name    = "terrakube.${local.base_domain}"
+  content = local.k3s_tunnel_endpoint
+  type    = "CNAME"
+  ttl     = 1
+  proxied = true
+  comment = "Managed by Terraform - Terrakube UI/Dex via k3s-services tunnel"
+}
+
+# Terrakube API
+resource "cloudflare_dns_record" "terrakube_api" {
+  zone_id = var.cloudflare_zone_id
+  name    = "terrakube-api.${local.base_domain}"
+  content = local.k3s_tunnel_endpoint
+  type    = "CNAME"
+  ttl     = 1
+  proxied = true
+  comment = "Managed by Terraform - Terrakube API via k3s-services tunnel"
+}
