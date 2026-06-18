@@ -21,6 +21,7 @@ locals {
     hubble    = "hubble.${local.base_domain}"
     scanopy   = "scanopy.${local.base_domain}"
     openwebui = "chat.${local.base_domain}"
+    terrakube = "terrakube.${local.base_domain}"
   }
 
   # desktop-services (nixos-desktop) のドメイン

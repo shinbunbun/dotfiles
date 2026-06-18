@@ -192,3 +192,15 @@ resource "cloudflare_dns_record" "mixi2_bot" {
   proxied = true
   comment = "Managed by Terraform - mixi2 Bot via k3s-services tunnel"
 }
+
+# Terrakube (UI + API + Dex を単一ホストで。/api と /dex はパスルーティング) — dotfiles-private#327
+# API への terraform CLI アクセスは LAN VIP (192.168.128.25) 経由で tunnel を使わない。
+resource "cloudflare_dns_record" "terrakube" {
+  zone_id = var.cloudflare_zone_id
+  name    = "terrakube.${local.base_domain}"
+  content = local.k3s_tunnel_endpoint
+  type    = "CNAME"
+  ttl     = 1
+  proxied = true
+  comment = "Managed by Terraform - Terrakube UI/API/Dex via k3s-services tunnel"
+}

@@ -82,3 +82,12 @@ resource "authentik_application" "librechat" {
   meta_launch_url    = "https://chat.shinbunbun.com"
   policy_engine_mode = "any"
 }
+
+# Terrakube (dotfiles-private#327)
+resource "authentik_application" "terrakube" {
+  name               = "Terrakube"
+  slug               = "terrakube"
+  protocol_provider  = authentik_provider_oauth2.terrakube.id
+  meta_launch_url    = "https://terrakube.shinbunbun.com"
+  policy_engine_mode = "any"
+}

@@ -173,3 +173,15 @@ variable "librechat_oauth_client_secret" {
   type        = string
   sensitive   = true
 }
+
+variable "terrakube_oauth_client_id" {
+  description = "Terrakube (Dex) OAuth2 Client ID"
+  type        = string
+  sensitive   = true
+}
+
+variable "terrakube_oauth_client_secret" {
+  description = "Terrakube (Dex) OAuth2 Client Secret"
+  type        = string
+  sensitive   = true
+}
