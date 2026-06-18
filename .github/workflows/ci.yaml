@@ -90,7 +90,7 @@ jobs:
           curl -X POST "${{ secrets.DISCORD_WEBHOOK_URL }}" \
             -H "Content-Type: application/json" \
             -d "{
-              \"content\": \"✅ ビルド完了\\n\\n**デプロイ承認待ち**\\nhttps://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\\n\\nデプロイを開始するには、上記リンクから \`Deploy to NixOS\` ジョブを承認してください。\"
+              \"content\": \"✅ ビルド完了\\n\\n**自動デプロイを開始します**\\nhttps://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\\n\\n各ターゲットのデプロイ結果は個別に通知されます。\"
             }"
 
   # k3s は nixos-desktop / homeMachine / g3pro の 3 ノード embedded-etcd HA 構成。
