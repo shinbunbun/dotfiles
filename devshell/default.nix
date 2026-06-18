@@ -110,6 +110,14 @@ let
       file = authentikFile;
       extract = ''["librechat"]["oauth_client_secret"]'';
     };
+    TF_VAR_terrakube_oauth_client_id = {
+      file = authentikFile;
+      extract = ''["terrakube"]["oidc_client_id"]'';
+    };
+    TF_VAR_terrakube_oauth_client_secret = {
+      file = authentikFile;
+      extract = ''["terrakube"]["oidc_client_secret"]'';
+    };
 
     # Grafana OAuth (secrets/grafana.yaml)
     TF_VAR_grafana_oauth_client_id = {

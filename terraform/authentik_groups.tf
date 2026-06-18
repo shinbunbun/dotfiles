@@ -45,3 +45,11 @@ resource "authentik_group" "immich_admins" {
   is_superuser = false
   users        = [data.authentik_user.shinbunbun.id]
 }
+
+# Terrakube 管理者 (chart の security.adminGroup = "Terrakube Admins" と一致。
+# Dex 経由で groups claim に乗り、Terrakube が admin 判定に使う)
+resource "authentik_group" "terrakube_admins" {
+  name         = "Terrakube Admins"
+  is_superuser = false
+  users        = [data.authentik_user.shinbunbun.id]
+}

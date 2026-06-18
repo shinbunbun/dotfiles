@@ -255,6 +255,46 @@ resource "cloudflare_zero_trust_access_application" "calendar_bot_webhook" {
   }]
 }
 
+# Terrakube UI/API - 認証必須 (dotfiles-private#327)
+# 単一ホスト terrakube.shinbunbun.com の / (UI) と /api (ブラウザ SPA→API) を
+# Authentik groups で保護。/dex は下の bypass app (より具体的な path) が優先する。
+resource "cloudflare_zero_trust_access_application" "terrakube" {
+  account_id                = var.cloudflare_account_id
+  name                      = "Terrakube"
+  domain                    = local.home_services.terrakube
+  type                      = "self_hosted"
+  session_duration          = "24h"
+  auto_redirect_to_identity = true
+  allowed_idps              = [var.identity_provider_id]
+  enable_binding_cookie     = false
+  options_preflight_bypass  = false
+
+  policies = [{
+    id         = cloudflare_zero_trust_access_policy.oidc_groups_allow.id
+    precedence = 1
+  }]
+}
+
+# Terrakube Dex - 認証バイパス
+# Terrakube api がトークン検証で Dex の JWKS を …/dex/keys から取得する
+# (サーバ間=Cookie 無し) ため、/dex を CF Access で塞ぐとログインが壊れる。
+# Dex 自体は OIDC provider なので公開前提で許容。path 指定で UI app より優先。
+resource "cloudflare_zero_trust_access_application" "terrakube_dex" {
+  account_id                = var.cloudflare_account_id
+  name                      = "Terrakube Dex"
+  domain                    = "${local.home_services.terrakube}/dex"
+  type                      = "self_hosted"
+  session_duration          = "24h"
+  auto_redirect_to_identity = false
+  enable_binding_cookie     = false
+  options_preflight_bypass  = false
+
+  policies = [{
+    id         = cloudflare_zero_trust_access_policy.webhook_bypass.id
+    precedence = 1
+  }]
+}
+
 
 # ========================================
 # CloudFlare Zero Trust Access Policies
