@@ -167,9 +167,11 @@ jobs:
     if: github.event_name == 'pull_request' && needs.discover.outputs.has-nixos == 'true'
     # reusable diff-gate.yaml が base closure-paths を gh run download するため actions:read が要る。
     # 呼び出し job 側で宣言しないと caller top-level (contents:read) を超過し startup_failure になる。
+    # id-token:write は WireGuard action (peer-issuer の OIDC 認証) 用。
     permissions:
       contents: read
       actions: read
+      id-token: write
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.discover.outputs.nixos-matrix) }}
@@ -178,9 +180,16 @@ jobs:
       runner: 'ubuntu-latest'
       target: ".#nixosConfigurations.${{ matrix.configuration }}.config.system.build.toplevel"
       use-attic: true
+      # GitHub-hosted runner を WireGuard(peer-issuer) で LAN に入れ、公開せず LAN VIP の
+      # NVD ミラーを使う (vulnix の NVD 直取得 timeout 由来 fail-closed 偽ブロックを回避)。
+      # ci.yaml の build ジョブと同じ WireGuard パターン。
+      needs-wireguard: true
+      wireguard-allowed-ips: '192.168.128.26/32'
+      nvd-mirror: 'http://192.168.128.26/'
     secrets:
       ATTIC_READ_TOKEN: ${{ secrets.ATTIC_READ_TOKEN }}
       ATTIC_TOKEN: ${{ secrets.ATTIC_TOKEN }}
+      AUTHENTIK_CLIENT_ID: ${{ secrets.AUTHENTIK_CLIENT_ID }}
 
   diff-gate-darwin:
     needs: discover
