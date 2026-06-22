@@ -194,9 +194,12 @@ jobs:
   diff-gate-darwin:
     needs: discover
     if: github.event_name == 'pull_request' && needs.discover.outputs.has-darwin == 'true'
+    # diff-gate-nixos と同様: actions:read は base closure-paths の gh run download 用、
+    # id-token:write は WireGuard action (peer-issuer の OIDC 認証) 用。
     permissions:
       contents: read
       actions: read
+      id-token: write
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.discover.outputs.darwin-matrix) }}
@@ -206,9 +209,16 @@ jobs:
       vulnix-nocheck: true
       target: ".#darwinConfigurations.${{ matrix.configuration }}.config.system.build.toplevel"
       use-attic: true
+      # macos-latest も GitHub-hosted で LAN VIP に直接到達できないため、nixos 側と同じく
+      # WireGuard(peer-issuer) で LAN に入り NVD ミラーを使う。WireGuard action は macOS を
+      # サポート済み (setup.sh が brew install wireguard-tools + wg-quick up で分岐)。
+      needs-wireguard: true
+      wireguard-allowed-ips: '192.168.128.26/32'
+      nvd-mirror: 'http://192.168.128.26/'
     secrets:
       ATTIC_READ_TOKEN: ${{ secrets.ATTIC_READ_TOKEN }}
       ATTIC_TOKEN: ${{ secrets.ATTIC_TOKEN }}
+      AUTHENTIK_CLIENT_ID: ${{ secrets.AUTHENTIK_CLIENT_ID }}
 
   # [非 PR] 各ターゲットの NOTIFY (artifact) を集約し、集約 Issue を 1 本 upsert する。
   # PR コンテキストでは走らせない (PR の閉包で集約 Issue を先食い upsert しないため。代わりに delta-gate)。
