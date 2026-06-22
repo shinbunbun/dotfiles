@@ -240,6 +240,8 @@ jobs:
       - name: Aggregate & upsert issue
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          # full scan の run 間差分 (新規流入/解消 CVE) を Discord 通知する (未設定ならスキップ)。
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
           set -euo pipefail
           nix run nixpkgs#python3 -- \
