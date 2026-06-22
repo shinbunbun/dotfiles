@@ -176,6 +176,9 @@ jobs:
     uses: shinbunbun/nix-ci-workflows/.github/workflows/diff-gate.yaml@main
     with:
       runner: 'ubuntu-latest'
+      # GitHub-hosted runner は LAN VIP に到達できないため、tunnel 経由で公開した NVD ミラーを指す。
+      # vulnix の NVD 直取得タイムアウト由来の fail-closed 偽ブロックを回避する。
+      nvd-mirror: 'https://nvd-mirror.shinbunbun.com/'
       target: ".#nixosConfigurations.${{ matrix.configuration }}.config.system.build.toplevel"
       use-attic: true
     secrets:
@@ -195,6 +198,8 @@ jobs:
     with:
       runner: 'macos-latest'
       vulnix-nocheck: true
+      # nixos と同じ公開ミラー (GitHub-hosted runner からは tunnel 経由で到達)。
+      nvd-mirror: 'https://nvd-mirror.shinbunbun.com/'
       target: ".#darwinConfigurations.${{ matrix.configuration }}.config.system.build.toplevel"
       use-attic: true
     secrets:
