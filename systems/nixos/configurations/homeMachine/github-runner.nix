@@ -9,8 +9,15 @@
   - dotfiles-private の deploy 対象は nixos-desktop のみで、homeMachine は対象外
   - dotfiles (本リポジトリ) の homeMachine deploy は ubuntu-latest + WireGuard 経由で
     実行されるため、自己破壊経路は存在しない
-  - ラベルは旧 runner と同一 (`nixos`, `x86_64-linux`) のため workflow 側変更は不要
   - Attic キャッシュ (192.168.1.3:8080) は同一ホスト上にあり、ビルドキャッシュは局所的
+
+  ラベル設計 (#769):
+    この runner は deploy 専用 ("deploy" ラベル付き)。dotfiles-private の deploy job
+    (deploy.yaml) だけが "deploy" ラベルを要求し、deploy 対象 (nixos-desktop) 以外の
+    ホスト = homeMachine でのみ実行されることを保証する (#639 自己破壊回避)。deploy 以外の
+    CI job は "build-only" ラベルで nixos-desktop の build runner プール
+    (dotfiles-private github-runner-ci.nix) に流れ、homeMachine には来ない。
+    base ラベル (nixos / x86_64-linux) は据え置き、追加で deploy を付与する。
 
   リソース分離方針 (homeMachine: 4 cores / 15.5 GB RAM、Grafana 実測ベース):
     homeMachine は k3s control plane / Attic / CNPG / observability などの
@@ -46,9 +53,12 @@
     url = "https://github.com/shinbunbun/dotfiles-private";
     tokenFile = config.sops.secrets."dotfiles_private_runner_token".path;
     name = "homemachine";
+    # deploy 専用ラベル (#769)。deploy.yaml の deploy job だけがこの runner に流れ、
+    # build-only ジョブ (nixos-desktop プール) はここに来ない。
     extraLabels = [
       "nixos"
       "x86_64-linux"
+      "deploy"
     ];
     replace = true;
     ephemeral = true;
