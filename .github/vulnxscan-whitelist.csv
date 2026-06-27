@@ -16,3 +16,17 @@ vuln_id,comment,package
 ^CVE-2022-42010$,"誤検知。dbus message パーサの脆弱性だが closure の dbus は 1.16.2 (修正版 1.15.2 以降)。版据え置きのまま依存更新の rebuild で content-addressed store path のみ差分に出た既知の rebuild FP (dotfiles-private#356 と同一)",dbus
 ^CVE-2022-42011$,"誤検知。dbus 1.16.2 は修正済み (1.15.2 以降) で対象外。rebuild による content-addressed store path 差分の誤検知 (dotfiles-private#356 と同一)",dbus
 ^CVE-2022-42012$,"誤検知。dbus 1.16.2 は修正済み (1.15.2 以降) で対象外。rebuild による content-addressed store path 差分の誤検知 (dotfiles-private#356 と同一)",dbus
+^CVE-2021-21684$,"CVE-2021-21684 は Jenkins Git Plugin (cpe:2.3:a:jenkins:git ≤4.8.2) の stored XSS であり git SCM 本体(導入物 git-scm 2.54.0)とは別製品の CPE 衝突、フリートに Jenkins も存在しないため誤検知 (dotfiles #793)",git
+^CVE-2021-36230$,"CVE-2021-36230 は HashiCorp Terraform Enterprise プラットフォーム(v202106-1 系・fixed v202107-1)の API 認可不備で、nixpkgs が提供するオープンソース Terraform CLI バイナリ(別製品・別バージョン体系)には該当しない CPE 衝突の誤検知 (dotfiles #793)",terraform
+^CVE-2021-4048$,"lapack の version ""3"" は liblapack.so.3 の soname を表す nixpkgs ラッパ版であり netlib リリース番号ではなく、実体の provider(openblas ≥0.3.18 / lapack-reference 3.12.x)は CVE-2021-4048 修正版(LAPACK 3.10.1 / OpenBLAS 0.3.18)以降のため誤検知 (dotfiles #793)",lapack
+^CVE-2022-30947$,"CVE-2022-30947 は Jenkins Git Plugin (cpe:jenkins:git) の脆弱性で、導入物の git-scm バージョン管理ツールとは別製品の CPE 衝突による誤検知 (dotfiles #793)",git
+^CVE-2022-36882$,"CVE-2022-36882 は Jenkins Git Plugin(CPE jenkins:git)の CSRF であり nixpkgs の git VCS とは別製品の CPE 衝突による誤検知 (dotfiles #793)",git
+^CVE-2022-36883$,"CVE-2022-36883 は Jenkins Git Plugin (cpe vendor=jenkins/product=git) の脆弱性で、導入物の分散バージョン管理ツール git 2.54.0 とは別製品の CPE 衝突による誤検知 (dotfiles #793)",git
+^CVE-2022-36884$,"CVE-2022-36884 は Jenkins Git Plugin (cpe:2.3:a:jenkins:git) の webhook 認証欠落であり、導入物の git SCM v2.54.0 とは別製品の CPE 衝突による誤検知 (dotfiles #793)",git
+^CVE-2022-38663$,"CVE-2022-38663 は Jenkins Git Plugin(cpe jenkins:git、Git Plugin 4.11.5 で修正)のビルドログ資格情報マスク欠陥であり、nixpkgs の Git SCM(git-scm)とは別製品の CPE 衝突による誤検知(dotfiles #793)",git
+^CVE-2023-6992$,"CVE-2023-6992 は Cloudflare 版 zlib フォーク(CPE cloudflare:zlib、deflate.c のメモリ破壊)の脆弱性で、導入物は madler/zlib upstream 1.3.2 という別製品のため CPE 衝突による誤検知 (dotfiles #793)",zlib
+^CVE-2024-9410$,"CVE-2024-9410 は Ada Support のクラウド SaaS「Ada.cx Sentry」の SSRF(cpe:ada:ada.cx_sentry, 2024-10-01 サーバ側修正済)で、導入物の ada-url C++ URL パーサライブラリとは vendor/product が異なる CPE 衝突のため誤検知 (dotfiles #793)",ada
+^CVE-2025-69650$,"CVE-2025-69650はreadelfのdouble-free DoS（コード実行なし）でNVD/SUSEともdisputed（pre-releaseコード限定で正式タグ版2.46に影響なし）、binutilsは信頼できない入力を受けない開発者ツールのためリスク受容 (dotfiles #793)",binutils
+^CVE-2026-27820$,"CVE-2026-27820 は Ruby の zlib gem(Zlib::GzipReader#ungetc、影響版3.x/修正3.2.3)の脆弱性で、導入物は madler/zlib の C 圧縮ライブラリ 1.3.2 という別製品のため NVD CPE 衝突による誤検知 (dotfiles #793)",zlib
+^CVE-2026-6846$,"CVE-2026-6846 は binutils ld の XCOFF バックエンド(bfd/xcofflink.c の xcoff_link_add_symbols)のヒープオーバーフローだが、nixpkgs 既定 binutils は withAllTargets=false で x86_64-linux ネイティブターゲットのみをビルドし XCOFF バックエンドを含まず(--enable-targets=all 非付与)、XCOFF は AIX/PowerPC 専用フォーマットで本フリート非該当ゆえ当該コードパスは非到達のため誤検知 (dotfiles #793)",binutils
+^CVE-2025-69651$,"CVE-2025-69651 は readelf process_got_section_contents() の invalid free による SIGABRT(DoS のみ・コード実行なし)で NVD disputed(observed behavior occurred only in pre-release code and did not affect any tagged version)。導入版 2.46 は tagged release で非該当、binutils は信頼できない入力を受けない開発者ツールのためリスク受容。CVE-2025-69650 と同系列 (dotfiles #793)",binutils
