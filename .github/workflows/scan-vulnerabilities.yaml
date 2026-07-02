@@ -2,28 +2,32 @@ name: Scan Vulnerabilities
 
 # Nix サプライチェーン脆弱性スキャン (公開 dotfiles 版)。
 # nix-ci-workflows の reusable workflow を discover-targets で fan-out して呼ぶ。
-# 検証/設計: dotfiles-private Issue #276 / delta スキャン #284
+# 検証/設計: dotfiles-private Issue #276 / diff-gate #347
 #
 # 注: dotfiles-private は self-hosted runner (skip-nix-install) 前提だが、公開 dotfiles の
 # 既存 ci.yaml は GitHub-hosted runner (ubuntu-latest / macos-latest + cachix install-nix-action)
 # を使う。本ワークフローも同じ runner 構成に合わせ、skip-nix-install は付けない
-# (nix を都度インストールする)。aggregate/delta-gate は inline で nix run を使うため
+# (nix を都度インストールする)。aggregate は reusable (vulnxscan-aggregate.yaml) 側で
+# setup-nix-attic により nix を導入する。delta-gate job は inline で nix run を使うため
 # cachix/install-nix-action で nix を導入する。
 #
 # トリガー方針 (auto-update-flake.lock 前提):
-#   - push:main[flake.lock/*.nix] = 確定スキャン。main にマージされた閉包を scan → 集約 Issue を upsert。
-#   - pull_request (paths フィルタ無し) = delta スキャン (#284)。PR の閉包を main 最新スキャンと diff し、
-#                              「この PR が新規流入/解消した CVE」を PR コメントに upsert。
-#                              新規流入があれば delta-gate を fail させ auto-merge をブロックする (#284 blocking)。
+#   - push:main[flake.lock/*.nix] = 確定スキャン。main にマージされた閉包を full scan → 集約 Issue を upsert。
+#   - pull_request (paths フィルタ無し) = diff-gate (#347)。PR が閉包に足した差分 store path
+#                              だけを (build/eval 済みコンテキストで) vulnix -R 検査し、「この PR が
+#                              新規流入させた CVE」を PR コメントに upsert する。新規流入があれば
+#                              delta-gate job を fail させ auto-merge をブロックする (blocking)。
 #   - schedule (weekly)      = 安全網。auto-update が stuck して closure が動かない時の periodic scan。
 #   - workflow_dispatch      = 手動。
 #
 # context 分岐:
-#   pull_request 時          → changes で閉包関連ファイル変更を検出 → 関連時のみ scan + delta-gate。
-#                              delta-gate は PR で必ず実行 (required status check 化のため)。
-#   push:main/schedule/dispatch → changes は relevant=true を出力して scan → aggregate (upsert)。delta-gate はスキップ。
+#   pull_request 時          → changes で閉包関連ファイル変更を検出 → 関連時のみ diff-gate-* scan + gate。
+#                              delta-gate job は PR で必ず実行 (required status check 化のため)。
+#   push:main/schedule/dispatch → changes は relevant=true を出力して full scan → aggregate (upsert)。
+#                              diff-gate-* / delta-gate はスキップ。
 #
-# delta-gate を ruleset の required status check に登録することで auto-merge をブロックする。
+# delta-gate job を ruleset の required status check に登録することで auto-merge をブロックする
+# (job 名は required check 名の安定のため diff-gate 移行後も delta-gate のまま)。
 # pull_request の paths フィルタを外しているのは、関連変更の無い PR でも delta-gate が必ず
 # 「報告」され、required check 未報告で PR が永久 block される落とし穴を避けるため
 # (関連変更が無ければ delta-gate は即 pass)。
@@ -222,40 +226,21 @@ jobs:
 
   # [非 PR] 各ターゲットの NOTIFY (artifact) を集約し、集約 Issue を 1 本 upsert する。
   # PR コンテキストでは走らせない (PR の閉包で集約 Issue を先食い upsert しないため。代わりに delta-gate)。
+  # fan-in aggregate は reusable 化済み (T81)。旧 inline ステップ (download-artifact →
+  # vulnxscan_aggregate.py signals → Discord 通知) と挙動は同一。
+  # NOTE: マージ前に nci の ref を @main へ flip すること (検証中は feature branch を指す)。
   aggregate:
     needs: [scan-nixos, scan-darwin]
     if: always() && github.event_name != 'pull_request' && (needs.scan-nixos.result == 'success' || needs.scan-darwin.result == 'success')
-    runs-on: ubuntu-latest
     permissions:
       contents: read
       issues: write
-    steps:
-      - name: Checkout nix-ci-workflows helpers
-        uses: actions/checkout@v6
-        with:
-          repository: shinbunbun/nix-ci-workflows
-          ref: main
-          path: .nix-ci-workflows
-      - name: Install Nix with flakes enabled
-        uses: cachix/install-nix-action@v31
-        with:
-          extra_nix_config: |
-            experimental-features = nix-command flakes
-            access-tokens = github.com=${{ github.token }}
-      - name: Download NOTIFY reports
-        uses: actions/download-artifact@v8
-        with:
-          pattern: vulnxscan-signal-*
-          path: signals
-      - name: Aggregate & upsert issue
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-          # full scan の run 間差分 (新規流入/解消 CVE) を Discord 通知する (未設定ならスキップ)。
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-        run: |
-          set -euo pipefail
-          nix run nixpkgs#python3 -- \
-            .nix-ci-workflows/ci/scripts/vulnxscan_aggregate.py signals
+    uses: shinbunbun/nix-ci-workflows/.github/workflows/vulnxscan-aggregate.yaml@feature/vulnxscan-aggregate-reusable
+    with:
+      runner: 'ubuntu-latest'
+    secrets:
+      # full scan の run 間差分 (新規流入/解消 CVE) を Discord 通知する (未設定ならスキップ)。
+      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
 
   # [PR のみ・required status check] diff-gate aggregator (#347)。diff-gate-* producer が出した
   # introduced-*.json を集約し、新規流入 CVE を PR コメントに upsert する。脆弱性データは
