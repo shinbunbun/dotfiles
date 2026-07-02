@@ -228,14 +228,13 @@ jobs:
   # PR コンテキストでは走らせない (PR の閉包で集約 Issue を先食い upsert しないため。代わりに delta-gate)。
   # fan-in aggregate は reusable 化済み (T81)。旧 inline ステップ (download-artifact →
   # vulnxscan_aggregate.py signals → Discord 通知) と挙動は同一。
-  # NOTE: マージ前に nci の ref を @main へ flip すること (検証中は feature branch を指す)。
   aggregate:
     needs: [scan-nixos, scan-darwin]
     if: always() && github.event_name != 'pull_request' && (needs.scan-nixos.result == 'success' || needs.scan-darwin.result == 'success')
     permissions:
       contents: read
       issues: write
-    uses: shinbunbun/nix-ci-workflows/.github/workflows/vulnxscan-aggregate.yaml@feature/vulnxscan-aggregate-reusable
+    uses: shinbunbun/nix-ci-workflows/.github/workflows/vulnxscan-aggregate.yaml@main
     with:
       runner: 'ubuntu-latest'
     secrets:
