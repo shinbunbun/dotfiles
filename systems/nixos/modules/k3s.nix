@@ -97,11 +97,21 @@ let
 
   nodeIPFlags = [ "--node-ip=${nodeIP}" ];
 
+  # etcd メトリクスを :2381 平文HTTP（認証なし）で公開する。vmagent（k3s Pod、Pod
+  # ネットワークから各ノード IP:2381 へアクセス）が etcd_disk_wal_fsync_duration_seconds
+  # 等をスクレイプできるようにする。dotfiles-private#398 で etcd fsync 停滞が k3s 全断の
+  # 根因だったにもかかわらず etcd メトリクスが公開されておらず診断できなかったギャップへの
+  # 対応（unified-dotfiles#34）。embedded etcd member である server role のときのみ意味を
+  # 持つため role == "server" でのみ付与する（3ノードとも現状 server だが将来 agent が
+  # 増えても安全なようにガードする）。
+  etcdMetricsFlags = lib.optionals (role == "server") [ "--etcd-expose-metrics" ];
+
   allExtraFlags =
     cfg.k3s.commonExtraFlags
     ++ haFlags
     ++ serverAddrFlags
     ++ nodeIPFlags
+    ++ etcdMetricsFlags
     ++ (k3sConfig.extraFlags or [ ]);
 
   # 監視用RBACマニフェスト
@@ -369,6 +379,7 @@ in
         clusterCfg.apiPort # HAProxy フロントエンド
         clusterCfg.apiBackendPort # k3s API Server バックエンド
         10250 # Kubelet metrics
+        2381 # etcd メトリクス（平文HTTP・認証なし、--etcd-expose-metrics）。vmagent がスクレイプ。LAN 内限定
         4240 # Cilium health check
         4244 # Hubble
         179 # BGP (Cilium ↔ RouterOS)
@@ -380,7 +391,7 @@ in
         {
           from = 2379;
           to = 2380;
-        } # etcd
+        } # etcd (peer/client)
         {
           from = 7000;
           to = 8000;
