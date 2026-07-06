@@ -277,11 +277,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1783338534,
-        "narHash": "sha256-j6/+zDtcerQCCk5l7KqbmkbBp8c+DQvXDgbNNJLBfz0=",
+        "lastModified": 1783379179,
+        "narHash": "sha256-JJwNjq9Fzc6fQg8v424kMio1+VZh+WLAIqBlVQRqyXw=",
         "owner": "shinbunbun",
         "repo": "nixos-observability-config",
-        "rev": "be4bff67cb7f1434f92a4283d7007111884577bc",
+        "rev": "21268c0252e74191a13e252aa246cfbc84317252",
         "type": "github"
       },
       "original": {
