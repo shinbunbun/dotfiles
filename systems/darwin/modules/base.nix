@@ -55,4 +55,11 @@ in
 
   # Homebrewのパスを環境変数に追加
   environment.systemPath = [ "/opt/homebrew/bin" ];
+
+  # HTML マニュアル(darwin-manual-html)のビルドを暫定的に無効化する。
+  # nixpkgs の nixos-render-docs が --toc-depth を廃止(--sidebar-depth へ)した一方、
+  # nix-darwin が未追随のため darwin-manual-html のビルドが失敗する。
+  # 上流修正 (LnL7/nix-darwin#1817 / PR #1818 / #1819) がマージされ次第、この設定を撤去すること。
+  # man ページ(documentation.man)は影響を受けないため据え置く。
+  documentation.doc.enable = false;
 }
