@@ -58,7 +58,8 @@ in
     # 外部モジュール
     inputs.home-manager.nixosModules.home-manager
     inputs.sops-nix.nixosModules.sops
-    inputs.vscode-server.nixosModules.default
+    # vscode-server は flake=false で取り込み、モジュールを直接 import する（flake.nix 参照）
+    (import "${inputs.vscode-server}/modules/vscode-server")
     inputs.nixos-observability.nixosModules.fluentBit
     inputs.nixos-observability.nixosModules.monitoring
   ];

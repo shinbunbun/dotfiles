@@ -39,9 +39,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # nixos-vscode-server の flake outputs は flake-utils の eachDefaultSystem で
+    # x86_64-darwin を eager 評価するため、nixpkgs 26.11 (x86_64-darwin サポート廃止)
+    # 配下で throw する。flake = false でソースとして取り込み、モジュールを直接 import する。
     vscode-server = {
       url = "github:nix-community/nixos-vscode-server";
-      inputs.nixpkgs.follows = "nixpkgs";
+      flake = false;
     };
 
     # nixos-observability
@@ -96,7 +99,6 @@
       systems = [
         "x86_64-linux"
         "aarch64-linux"
-        "x86_64-darwin"
         "aarch64-darwin"
       ];
 
