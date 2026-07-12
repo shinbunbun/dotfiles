@@ -60,7 +60,8 @@ in
     inputs.attic.nixosModules.atticd
     inputs.home-manager.nixosModules.home-manager
     inputs.sops-nix.nixosModules.sops
-    inputs.vscode-server.nixosModules.default
+    # vscode-server は flake=false で取り込み、モジュールを直接 import する（flake.nix 参照）
+    (import "${inputs.vscode-server}/modules/vscode-server")
     inputs.nixos-observability.nixosModules.monitoring
     # nixos-observability.nixosModules.loki は k3s に移行したため削除
     inputs.nixos-observability.nixosModules.fluentBit
