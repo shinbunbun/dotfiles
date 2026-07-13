@@ -281,10 +281,19 @@ in
       "L+ /var/lib/rancher/k3s/server/manifests/monitoring-rbac.yaml - - - - ${monitoringRbacConfig}"
     ];
 
-    # ghcr.io認証用のregistries.yamlを動的生成するsystemdサービス
-    # argocd/ghcr_pat シークレットは dotfiles-private の argocd.nix で定義されるため、
-    # 初期化ノード（nixos-desktop）でのみ有効
-    systemd.services.k3s-registries = lib.mkIf clusterInit {
+    # ghcr.io 認証用の registries.yaml を動的生成する systemd サービス。
+    # 全 k3s ノードで有効化し、private な ghcr イメージをどのノードに載っても pull
+    # できるようにする。ノード限定認証（旧: clusterInit のみ）だと、未認証ノードへ
+    # スケジュールされた Pod が匿名 pull にフォールバックして 401 ImagePullBackOff で
+    # 失敗する（2026-07-13 g3pro での CronJob 全滅の根因）。
+    # PAT の供給元はノード種別で異なる（どちらも同一の read-only pull PAT）:
+    #   - clusterInit ノード（nixos-desktop）: dotfiles-private の argocd/ghcr_pat
+    #   - join ノード（g3pro/homemachine, dotfiles）: dotfiles/secrets/ghcr.yaml の ghcr/pull_pat
+    sops.secrets."ghcr/pull_pat" = lib.mkIf (!clusterInit) {
+      sopsFile = "${inputs.self}/secrets/ghcr.yaml";
+    };
+
+    systemd.services.k3s-registries = lib.mkIf enable {
       description = "k3s Container Registry Authentication Setup";
       before = [ "k3s.service" ];
       after = [ "sops-nix.service" ];
@@ -302,7 +311,11 @@ in
 
       script =
         let
-          ghcrPatPath = config.sops.secrets."argocd/ghcr_pat".path;
+          ghcrPatPath =
+            if clusterInit then
+              config.sops.secrets."argocd/ghcr_pat".path
+            else
+              config.sops.secrets."ghcr/pull_pat".path;
           registry = cfg.ghcr.registry;
           username = cfg.ghcr.username;
         in
