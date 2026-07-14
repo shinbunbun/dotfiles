@@ -103,8 +103,12 @@
       ];
 
       # nixpkgsの共通設定
+      # allowUnfree = true（全 unfree 許可）ではなく allowUnfreePredicate で
+      # claude-code（Anthropic 独自ライセンス = unfree）のみを明示的に許可する。
+      # これにより将来 unfree パッケージが意図せず closure に混入した場合は
+      # eval が拒否して検知できる（vulnxscan の CPE 衝突 FP 増加も抑制）。
       nixpkgsConfig = {
-        allowUnfree = true;
+        allowUnfreePredicate = pkg: builtins.elem (nixpkgs.lib.getName pkg) [ "claude-code" ];
       };
 
       # システムごとの関数を作成
