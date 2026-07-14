@@ -27,36 +27,38 @@ let
   };
 in
 {
-  # Node Exporter（NixOS組み込み）
-  # k3s クラスタの vmagent がこのエンドポイントをスクレイプする
-  services.prometheus.exporters.node = {
-    enable = true;
-    port = cfg.monitoring.nodeExporter.port;
-    openFirewall = true;
-    enabledCollectors = [
-      "cpu"
-      "diskstats"
-      "filesystem"
-      "loadavg"
-      "meminfo"
-      "netdev"
-      "stat"
-      "time"
-      "vmstat"
-      "systemd"
-      "processes"
-    ];
-    extraFlags = [
-      "--collector.filesystem.mount-points-exclude=^/(dev|proc|sys|run/user/.+)($|/)"
-      "--collector.netdev.device-exclude=^(veth.*|br.*|docker.*|virbr.*|lo)$"
-    ];
-  };
-
-  # Process Exporter（nixos-observability モジュール経由、プロセス別メトリクス / top 相当）
-  # node exporter は上で直書きしているため nodeExporter.enable = false で共存させる
+  # Node Exporter + Process Exporter（nixos-observability モジュール経由）
+  # k3s クラスタの vmagent がこのエンドポイントをスクレイプする。
+  # 現行値固定: 直書き時の collector リスト・extraFlags・port を
+  # そのままモジュールの option に移し替え、挙動を変えない
+  # （モジュール default の collector には寄せない）。
   services.observability.monitoring = {
     enable = true;
-    nodeExporter.enable = false;
+    openFirewall = true;
+
+    nodeExporter = {
+      enable = true;
+      port = cfg.monitoring.nodeExporter.port;
+      enabledCollectors = [
+        "cpu"
+        "diskstats"
+        "filesystem"
+        "loadavg"
+        "meminfo"
+        "netdev"
+        "stat"
+        "time"
+        "vmstat"
+        "systemd"
+        "processes"
+      ];
+      extraFlags = [
+        "--collector.filesystem.mount-points-exclude=^/(dev|proc|sys|run/user/.+)($|/)"
+        "--collector.netdev.device-exclude=^(veth.*|br.*|docker.*|virbr.*|lo)$"
+      ];
+    };
+
+    # Process Exporter（プロセス別メトリクス / top 相当）
     processExporter = {
       enable = true;
       port = cfg.monitoring.processExporter.port;
