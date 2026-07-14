@@ -70,12 +70,11 @@ in
   system.stateVersion = "25.11";
 
   # ネットワーク設定（g3pro固有）
-  # グローバルDHCPを無効化し、物理インター��ェースのみDHCPを有効化
+  # グローバルDHCPを無効化し、物理インターフェースのみDHCPを有効化
   # （Cilium仮想インターフェースへのDHCPパケット送信を防止）
   networking.useDHCP = false;
   networking.interfaces.${cfg.networking.interfaces.g3pro.primary}.useDHCP = true;
   networking.extraHosts = ''
-    ${cfg.networking.hosts.nixos.hostname}.${cfg.networking.hosts.nixos.domain} ${cfg.networking.hosts.nixos.hostname}
     ${cfg.networking.hosts.nixosDesktop.ip} ${cfg.networking.hosts.nixosDesktop.hostname}
     ${cfg.networking.hosts.macmini.ip} ${cfg.networking.hosts.macmini.hostname}
   '';

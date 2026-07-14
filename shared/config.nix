@@ -39,10 +39,6 @@ let
       port = config.networking.firewall.generalPort;
     }
     {
-      name = "networking.firewall.nfs";
-      port = config.networking.firewall.nfsPort;
-    }
-    {
       name = "monitoring.nodeExporter";
       port = config.monitoring.nodeExporter.port;
     }
@@ -85,10 +81,6 @@ let
     {
       name = "llamaCpp";
       port = config.llamaCpp.port;
-    }
-    {
-      name = "jellyfin";
-      port = config.jellyfin.port;
     }
     {
       name = "nextcloud";

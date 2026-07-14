@@ -3,7 +3,7 @@
 
   このモジュールはk3sクラスタ上にArgoCDをデプロイします：
   - k3s HelmChart CRDを使用したArgoCD Helm chartの自動デプロイ
-  - Traefik IngressRouteによるHTTPルーティング
+  - 外部公開は Cloudflare Tunnel 経由（TLS 終端は Cloudflare 側、ArgoCD 自体は insecure モード）
   - SOPS統合によるOIDCクレデンシャルの安全な管理
   - GitHub Deploy Keyの自動投入（k8s-appsリポジトリアクセス用）
   - KSOPS（Kustomize + SOPS）によるGitリポジトリ内暗号化Secret管理
@@ -51,7 +51,7 @@ let
 
     # ArgoCD Server 設定
     server = {
-      extraArgs = [ "--insecure" ]; # Traefik が TLS 終端するため
+      extraArgs = [ "--insecure" ]; # TLS は Cloudflare Tunnel 側で終端するため
       # Prometheus メトリクス Service (argocd-server-metrics :8083) を有効化
       # VictoriaMetrics VMAgent が VMServiceScrape 経由で収集する
       metrics.enabled = true;
@@ -146,7 +146,7 @@ let
 
       # パラメータ設定
       params = {
-        # Traefik が TLS 終端するため insecure モード
+        # TLS は Cloudflare Tunnel 側で終端するため insecure モード
         "server.insecure" = true;
       };
     };

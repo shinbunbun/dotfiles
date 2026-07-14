@@ -11,16 +11,6 @@ v: {
       port = v.assertPort "management.cockpit.port" 9091;
       domain = v.assertString "management.cockpit.domain" "cockpit.shinbunbun.com";
     };
-
-    # アクセス制限設定
-    access = {
-      allowedNetworks = v.assertListOf "management.access.allowedNetworks" [
-        "192.168.1.0/24"
-        "192.168.11.0/24"
-        "10.100.0.0/24" # WireGuard
-      ] v.assertCIDR;
-      wireguardInterface = v.assertString "management.access.wireguardInterface" "wg0";
-    };
   };
 
   cloudflare = {

@@ -1,7 +1,7 @@
 /*
   インフラストラクチャ設定セクション
 
-  k3s、NFS、Atticバイナリキャッシュ、Fluent Bitの設定を定義します。
+  k3s、Samba、Atticバイナリキャッシュ、Fluent Bitの設定を定義します。
 */
 v: {
   k3s = {
@@ -12,7 +12,6 @@ v: {
       apiBackendPort = v.assertPort "k3s.cluster.apiBackendPort" 6444;
       serviceCIDR = v.assertCIDR "k3s.cluster.serviceCIDR" "192.168.128.0/24";
       servicePool = v.assertString "k3s.cluster.servicePool" "192.168.128.100-192.168.128.200";
-      traefikVIP = v.assertIP "k3s.cluster.traefikVIP" "192.168.128.10";
       podCIDR = v.assertCIDR "k3s.cluster.podCIDR" "10.42.0.0/16";
       coredns = {
         replicas = v.assertPositiveInt "k3s.cluster.coredns.replicas" 2;
@@ -99,21 +98,7 @@ v: {
     };
   };
 
-  nfs = {
-    exportPath = v.assertPath "nfs.exportPath" "/export/k8s";
-    # NFS クライアントの IP は networking.hosts を単一情報源とするため、ここでは
-    # ホストキーのみを列挙する。実際の IP は消費側 (nfs.nix) で
-    # networking.hosts.<key>.ip から解決する（section merge では cross-section
-    # 参照ができないため）。
-    clientHosts = [
-      "nixos" # homeMachine (192.168.1.3)
-      "nixosDesktop" # nixos-desktop (192.168.1.4)
-    ];
-    options = v.assertString "nfs.options" "rw,nohide,insecure,no_subtree_check,no_root_squash";
-  };
-
   samba = {
-    enable = v.assertBool "samba.enable" false;
     workgroup = v.assertString "samba.workgroup" "WORKGROUP";
     serverString = v.assertString "samba.serverString" "NixOS NAS";
     keepalive = v.assertNonNegativeInt "samba.keepalive" 60;

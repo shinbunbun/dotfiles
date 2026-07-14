@@ -65,20 +65,12 @@ v: {
     host = v.assertString "llamaCpp.host" "0.0.0.0";
   };
 
-  jellyfin = {
-    enable = v.assertBool "jellyfin.enable" false;
-    port = v.assertPort "jellyfin.port" 8096;
-  };
-
   nextcloud = {
-    enable = v.assertBool "nextcloud.enable" false;
     port = v.assertPort "nextcloud.port" 8443;
     domain = v.assertString "nextcloud.domain" "nextcloud.shinbunbun.com";
   };
 
   immich = {
-    enable = v.assertBool "immich.enable" false;
     port = v.assertPort "immich.port" 2283;
-    domain = v.assertString "immich.domain" "immich.shinbunbun.com";
   };
 }

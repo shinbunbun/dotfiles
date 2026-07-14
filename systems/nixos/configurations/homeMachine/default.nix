@@ -15,12 +15,11 @@
 let
   cfg = import ../../../../shared/config.nix;
   homeMachineUsername = cfg.users.nixos.username;
-  isVM = builtins.getEnv "NIXOS_BUILD_VM" == "1";
 in
 {
   imports = [
     # ハードウェア設定
-    (if isVM then ../../modules/vm.nix else ./hardware.nix)
+    ./hardware.nix
 
     # ホスト固有の設定
     ./observability.nix

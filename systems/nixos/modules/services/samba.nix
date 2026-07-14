@@ -26,62 +26,56 @@ let
   hostsAllow = lib.concatStringsSep " " allowedNetworks;
 in
 {
-  config = lib.mkMerge [
-    # shared/config.nix で samba.enable = true の場合、サービス自体を有効化
-    (lib.mkIf cfg.samba.enable {
-      services.samba.enable = true;
-    })
+  # Sambaが有効な場合（ホスト側で services.samba.enable を設定）、
+  # グローバル設定（macOS互換、hosts allow 等）を適用
+  config = lib.mkIf config.services.samba.enable {
+    services.samba = {
+      openFirewall = true;
 
-    # Sambaが有効な場合（どこで有効化されたかに関わらず）、グローバル設定を適用
-    (lib.mkIf config.services.samba.enable {
-      services.samba = {
-        openFirewall = true;
+      settings = {
+        global = {
+          workgroup = workgroup;
+          "server string" = serverString;
 
-        settings = {
-          global = {
-            workgroup = workgroup;
-            "server string" = serverString;
+          # セキュリティ設定
+          "server min protocol" = "SMB3_00";
+          "map to guest" = "never";
 
-            # セキュリティ設定
-            "server min protocol" = "SMB3_00";
-            "map to guest" = "never";
+          # macOS互換性
+          "vfs objects" = "fruit streams_xattr";
+          "fruit:metadata" = "stream";
+          "fruit:model" = "MacSamba";
+          "fruit:posix_rename" = "yes";
+          "fruit:veto_appledouble" = "no";
+          "fruit:nfs_aces" = "no";
+          "fruit:wipe_intentionally_left_blank_rfork" = "yes";
+          "fruit:delete_empty_adfiles" = "yes";
 
-            # macOS互換性
-            "vfs objects" = "fruit streams_xattr";
-            "fruit:metadata" = "stream";
-            "fruit:model" = "MacSamba";
-            "fruit:posix_rename" = "yes";
-            "fruit:veto_appledouble" = "no";
-            "fruit:nfs_aces" = "no";
-            "fruit:wipe_intentionally_left_blank_rfork" = "yes";
-            "fruit:delete_empty_adfiles" = "yes";
+          # Time Machine無効化（TM非対応の共有でカーネルエラーを防止）
+          "fruit:time machine" = "no";
 
-            # Time Machine無効化（TM非対応の共有でカーネルエラーを防止）
-            "fruit:time machine" = "no";
+          # ログ設定
+          logging = "systemd";
 
-            # ログ設定
-            logging = "systemd";
+          # アクセス制御
+          "hosts allow" = hostsAllow;
+          "hosts deny" = "0.0.0.0/0";
 
-            # アクセス制御
-            "hosts allow" = hostsAllow;
-            "hosts deny" = "0.0.0.0/0";
+          # macOS接続安定性
+          "keepalive" = keepalive;
+          "dead time" = deadTime;
+          "server multi channel support" = if serverMultiChannelSupport then "yes" else "no";
 
-            # macOS接続安定性
-            "keepalive" = keepalive;
-            "dead time" = deadTime;
-            "server multi channel support" = if serverMultiChannelSupport then "yes" else "no";
-
-            # パフォーマンス
-            "use sendfile" = "yes";
-          };
+          # パフォーマンス
+          "use sendfile" = "yes";
         };
       };
+    };
 
-      # WS-Discovery（macOS/Windowsからの自動検出）
-      services.samba-wsdd = {
-        enable = true;
-        openFirewall = true; # discovery用ポートはLAN内で開放
-      };
-    })
-  ];
+    # WS-Discovery（macOS/Windowsからの自動検出）
+    services.samba-wsdd = {
+      enable = true;
+      openFirewall = true; # discovery用ポートはLAN内で開放
+    };
+  };
 }
