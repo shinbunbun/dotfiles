@@ -55,10 +55,6 @@ let
       port = config.monitoring.smartctlExporter.port;
     }
     {
-      name = "monitoring.alertmanager";
-      port = config.monitoring.alertmanager.port;
-    }
-    {
       name = "k3s.cluster.apiPort";
       port = config.k3s.cluster.apiPort;
     }
@@ -89,14 +85,6 @@ let
     {
       name = "llamaCpp";
       port = config.llamaCpp.port;
-    }
-    {
-      name = "peerIssuer";
-      port = config.peerIssuer.listenPort;
-    }
-    {
-      name = "peerIssuer.router";
-      port = config.peerIssuer.routerPort;
     }
     {
       name = "jellyfin";

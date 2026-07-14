@@ -1,7 +1,7 @@
 /*
   インフラストラクチャ設定セクション
 
-  k3s、NFS、Atticバイナリキャッシュ、peer-issuer、Fluent Bitの設定を定義します。
+  k3s、NFS、Atticバイナリキャッシュ、Fluent Bitの設定を定義します。
 */
 v: {
   k3s = {
@@ -155,22 +155,6 @@ v: {
         n: builtins.isInt n && n >= 1 && n <= 22
       ) "Must be an integer between 1 and 22";
     };
-  };
-
-  peerIssuer = {
-    domain = v.assertString "peerIssuer.domain" "wg-lease.shinbunbun.com";
-    listenAddr = v.assertString "peerIssuer.listenAddr" "0.0.0.0:8088";
-    listenPort = v.assertPort "peerIssuer.listenPort" 8088;
-    dbPath = v.assertPath "peerIssuer.dbPath" "/var/lib/peer-issuer/leases.db";
-    poolCIDR = v.assertCIDR "peerIssuer.poolCIDR" "10.66.66.64/26";
-    routerHost = v.assertIP "peerIssuer.routerHost" "192.168.1.1";
-    routerPort = v.assertPort "peerIssuer.routerPort" 22;
-    routerUser = v.assertString "peerIssuer.routerUser" "wgissuer";
-    routerWgInterface = v.assertString "peerIssuer.routerWgInterface" "wg-home";
-    wgMTU = v.assertPositiveInt "peerIssuer.wgMTU" 1392;
-    wgKeepalive = v.assertPositiveInt "peerIssuer.wgKeepalive" 25;
-    defaultTTL = v.assertPositiveInt "peerIssuer.defaultTTL" 86400;
-    stateDirectory = v.assertPath "peerIssuer.stateDirectory" "/var/lib/peer-issuer";
   };
 
   fluentBit = {

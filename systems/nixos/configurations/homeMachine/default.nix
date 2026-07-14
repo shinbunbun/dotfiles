@@ -44,10 +44,6 @@ in
     # サービスモジュール
     ../../modules/services/mosh.nix
     ../../modules/services/services.nix
-    # ../../modules/services/monitoring.nix          # nixos-observability に移行
-    # ../../modules/services/alertmanager.nix        # nixos-observability に移行
-    # ../../modules/services/loki.nix                # nixos-observability に移行
-    # ../../modules/services/fluent-bit.nix          # nixos-observability に移行
     ../../modules/services/cockpit.nix
     ../../modules/services/attic.nix
     ../../modules/services/deploy-user.nix

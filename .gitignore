@@ -5,10 +5,6 @@
 result
 key.txt
 *_unencrypted
-hive
-std
-tui
-std-action
 sops-nix
 .envrc
 *.swp
