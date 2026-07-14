@@ -28,7 +28,7 @@ in
   ];
 
   # Nixpkgs設定
-  nixpkgs.config.allowUnfree = true;
+  nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [ "claude-code" ];
 
   # Touch IDを使用したsudo認証
   security.pam.services.sudo_local.touchIdAuth = true;

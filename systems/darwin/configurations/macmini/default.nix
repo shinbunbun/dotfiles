@@ -97,7 +97,7 @@ in
   };
 
   # Nixpkgs設定
-  nixpkgs.config.allowUnfree = true;
+  nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [ "claude-code" ];
 
   # Homebrew設定（最小限）
   homebrew = {
