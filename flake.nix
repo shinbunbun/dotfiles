@@ -203,8 +203,9 @@
         system-tools = ./systems/nixos/modules/system-tools.nix;
         networking = ./systems/nixos/modules/networking.nix;
         wireguard = ./systems/nixos/modules/wireguard.nix;
-        nfs = ./systems/nixos/modules/nfs.nix;
         k3s = ./systems/nixos/modules/k3s.nix;
+        # vm.nix は NIXOS_BUILD_VM impure 経由の --impure VM ビルド検証専用
+        # （通常の nixosConfigurations からは未参照）。
         vm = ./systems/nixos/modules/vm.nix;
 
         # Service modules

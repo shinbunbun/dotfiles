@@ -5,7 +5,6 @@
   - Node Exporter: 各ホストのシステムメトリクス公開
   - Process Exporter: 各ホストのプロセス別メトリクス公開 (top 相当)
   - Loki: Fluent Bit クライアントの送信先 (本体は k3s クラスタ)
-  - Grafana: 外部 URL のみ保持（本体は k3s クラスタ）
 
   Prometheus / Alertmanager / SNMP Exporter / k3sメトリクス設定は
   k3s クラスタの VictoriaMetrics スタック (k8s-apps) に移管済み。
@@ -26,11 +25,6 @@ v: {
     # smartctl Exporter 設定 (ディスク SMART メトリクス公開)
     smartctlExporter = {
       port = v.assertPort "monitoring.smartctlExporter.port" 9633;
-    };
-
-    # Grafana設定 (k3s 上の外部 URL のみ保持、本体は k3s クラスタでホスト)
-    grafana = {
-      domain = v.assertString "monitoring.grafana.domain" "grafana.shinbunbun.com";
     };
 
     # Loki設定 (Fluent Bit クライアント参照用のみ、本体は k3s クラスタ)

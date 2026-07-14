@@ -51,7 +51,6 @@ v: {
 
     firewall = {
       generalPort = v.assertPort "networking.firewall.generalPort" 8888;
-      nfsPort = v.assertPort "networking.firewall.nfsPort" 2049;
     };
   };
 
