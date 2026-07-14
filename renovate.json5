@@ -7,7 +7,7 @@
     ":timezone(Asia/Tokyo)",
     ":dependencyDashboard",
     // 横断共有プリセット: GitHub Actions を commit SHA に pin + digest automerge
-    "github>shinbunbun/nix-ci-workflows//renovate-presets/actions-pin",
+    "github>shinbunbun/nix-ci-workflows//renovate-presets/actions-pin.json5",
   ],
 
   // Renovate は GitHub Actions の SHA pin 用途に限定する (T128)。
