@@ -1,0 +1,22 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+
+  extends: [
+    "config:recommended",
+    ":semanticCommits",
+    ":timezone(Asia/Tokyo)",
+    ":dependencyDashboard",
+    // 横断共有プリセット: GitHub Actions を commit SHA に pin + digest automerge
+    "github>shinbunbun/nix-ci-workflows//renovate-presets/actions-pin",
+  ],
+
+  // Renovate は GitHub Actions の SHA pin 用途に限定する (T128)。
+  // flake.lock / Cargo / Go / Terraform 等の依存更新は本スコープ外のため無効化。
+  enabledManagers: ["github-actions"],
+
+  timezone: "Asia/Tokyo",
+
+  commitMessageTopic: "{{depName}}",
+  commitMessageAction: "更新",
+  labels: ["dependencies", "renovate"],
+}
