@@ -280,21 +280,21 @@ jobs:
           exit 1
       - name: Checkout nix-ci-workflows helpers
         if: needs.changes.outputs.relevant == 'true'
-        uses: actions/checkout@v7
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
         with:
           repository: shinbunbun/nix-ci-workflows
           ref: main
           path: .nix-ci-workflows
       - name: Install Nix with flakes enabled
         if: needs.changes.outputs.relevant == 'true'
-        uses: cachix/install-nix-action@v31
+        uses: cachix/install-nix-action@a49548c11d9846ad46ecc0115273879b045f001c # v31
         with:
           extra_nix_config: |
             experimental-features = nix-command flakes
             access-tokens = github.com=${{ github.token }}
       - name: Download introduced findings (diff-gate producers)
         if: needs.changes.outputs.relevant == 'true'
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           pattern: vulnxscan-introduced-*
           path: introduced
