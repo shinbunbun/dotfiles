@@ -207,6 +207,7 @@
 
         # Service modules
         services = {
+          sshd-baseline = ./systems/nixos/modules/services/sshd-baseline.nix;
           cockpit = ./systems/nixos/modules/services/cockpit.nix;
           unified-cloudflare-tunnel = ./systems/nixos/modules/services/unified-cloudflare-tunnel.nix;
           desktop-cloudflare-tunnel = ./systems/nixos/modules/services/desktop-cloudflare-tunnel.nix;
