@@ -21,7 +21,6 @@ in
     # 基本モジュール
     ../../modules/base.nix
     ../../modules/optimise.nix
-    ../../modules/wireguard.nix
 
     # 外部モジュール
     inputs.home-manager.darwinModules.home-manager
