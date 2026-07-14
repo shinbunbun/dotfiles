@@ -2,7 +2,7 @@
   オブザーバビリティ設定 - g3pro
 
   このファイルはg3proの監視設定を定義します：
-  - Node Exporter: システムメトリクスの公開（homeMachineのPrometheusがスクレイプ）
+  - Node Exporter: システムメトリクスの公開（k3s の vmagent がスクレイプ）
   - Process Exporter: プロセス別メトリクスの公開 (top 相当)
   - Fluent Bit: systemd-journalログを Loki / Vector (k3s) へ転送
 
@@ -28,7 +28,7 @@ let
 in
 {
   # Node Exporter（NixOS組み込み）
-  # homeMachineのPrometheusがこのエンドポイントをスクレイプする
+  # k3s クラスタの vmagent がこのエンドポイントをスクレイプする
   services.prometheus.exporters.node = {
     enable = true;
     port = cfg.monitoring.nodeExporter.port;
