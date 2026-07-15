@@ -254,58 +254,16 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-      - name: Pass when no closure change
-        if: needs.changes.result == 'success' && needs.changes.outputs.relevant == 'false'
-        run: echo "::notice::flake.lock/*.nix 変更なし → 脆弱性流入なし、diff-gate pass"
-      - name: Fail closed when change-detection is indeterminate
-        # changes ジョブが infra 失敗等で判定 (true/false) を出せなかった場合、fail-open を避けて block。
-        if: needs.changes.result != 'success' || (needs.changes.outputs.relevant != 'true' && needs.changes.outputs.relevant != 'false')
-        run: |
-          echo "::error::changes ジョブが閉包変更の判定を出せませんでした (infra 失敗等)。"
-          echo "::error::fail-closed で gate を block します。ジョブを re-run してください。"
-          exit 1
-      - name: Fail closed when discover or a diff-gate producer failed
-        # producer (diff-gate-*) が introduced.json 書込前にクラッシュ/discover が失敗すると、
-        # その target が集約から不可視になり fail-open する。success/skipped 以外 (failure・cancelled)
-        # を捕まえて block する (skipped = 対象 target 無しは正常なので block しない)。
-        if: >-
-          needs.changes.outputs.relevant == 'true' && (
-            (needs.discover.result != 'success' && needs.discover.result != 'skipped') ||
-            (needs.diff-gate-nixos.result != 'success' && needs.diff-gate-nixos.result != 'skipped') ||
-            (needs.diff-gate-darwin.result != 'success' && needs.diff-gate-darwin.result != 'skipped')
-          )
-        run: |
-          echo "::error::diff-gate producer/discover が失敗しました (discover=${{ needs.discover.result }} / nixos=${{ needs.diff-gate-nixos.result }} / darwin=${{ needs.diff-gate-darwin.result }})。"
-          echo "::error::集約から漏れる target が新規流入をすり抜けるのを避けるため fail-closed で block します。re-run してください。"
-          exit 1
-      - name: Checkout nix-ci-workflows helpers
-        if: needs.changes.outputs.relevant == 'true'
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      # fail-closed 3 段 + download-artifact + aggregate は共有 composite に集約 (T100)。
+      # job 名 (= required status check 名) を delta-gate に保つため reusable workflow ではなく
+      # composite action を使う。needs 結果は composite が参照できないため inputs で渡す。
+      - name: Aggregate diff-gate producers & gate
+        uses: shinbunbun/nix-ci-workflows/.github/actions/diff-gate-aggregate@main
         with:
-          repository: shinbunbun/nix-ci-workflows
-          ref: main
-          path: .nix-ci-workflows
-      - name: Install Nix with flakes enabled
-        if: needs.changes.outputs.relevant == 'true'
-        uses: cachix/install-nix-action@a49548c11d9846ad46ecc0115273879b045f001c # v31
-        with:
-          extra_nix_config: |
-            experimental-features = nix-command flakes
-            access-tokens = github.com=${{ github.token }}
-      - name: Download introduced findings (diff-gate producers)
-        if: needs.changes.outputs.relevant == 'true'
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
-        with:
-          pattern: vulnxscan-introduced-*
-          path: introduced
-      - name: Aggregate, comment & gate
-        if: needs.changes.outputs.relevant == 'true'
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          # introduced-*.json を集約して PR コメント upsert。
-          # --gate: 新規流入 > 0 / producer の scan 未完走 なら exit 1 → required check fail → block。
-          nix run nixpkgs#python3 -- \
-            .nix-ci-workflows/ci/scripts/vulnxscan_diff_gate.py gate \
-            introduced "${{ github.event.pull_request.number }}" --gate
+          changes-result: ${{ needs.changes.result }}
+          changes-relevant: ${{ needs.changes.outputs.relevant }}
+          discover-result: ${{ needs.discover.result }}
+          diff-gate-nixos-result: ${{ needs.diff-gate-nixos.result }}
+          diff-gate-darwin-result: ${{ needs.diff-gate-darwin.result }}
+          pr-number: ${{ github.event.pull_request.number }}
+          github-token: ${{ github.token }}
