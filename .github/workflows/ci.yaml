@@ -83,7 +83,7 @@ jobs:
     name: Notify build completion
     needs: [build-nixos, build-darwin]
     runs-on: ubuntu-latest
-    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/fix/deploy') && github.event_name == 'push' && !inputs.skip_deploy
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && !inputs.skip_deploy
     steps:
       - name: Send Discord notification
         run: |
@@ -103,7 +103,7 @@ jobs:
   deploy-nixos:
     name: Deploy to NixOS
     needs: [build-nixos, notify-build-complete]
-    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/fix/deploy') && github.event_name == 'push' && !inputs.skip_deploy
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && !inputs.skip_deploy
     concurrency:
       group: k3s-etcd-deploy
       cancel-in-progress: false
@@ -126,7 +126,7 @@ jobs:
   deploy-macmini:
     name: Deploy to macmini
     needs: [build-darwin, notify-build-complete]
-    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/fix/deploy') && github.event_name == 'push' && !inputs.skip_deploy
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && !inputs.skip_deploy
     uses: shinbunbun/nix-ci-workflows/.github/workflows/deploy-nix.yaml@main
     with:
       environment: production
@@ -150,7 +150,7 @@ jobs:
   deploy-g3pro:
     name: Deploy to g3pro
     needs: [build-nixos, notify-build-complete, deploy-nixos]
-    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/fix/deploy') && github.event_name == 'push' && !inputs.skip_deploy
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && !inputs.skip_deploy
     concurrency:
       group: k3s-etcd-deploy
       cancel-in-progress: false
