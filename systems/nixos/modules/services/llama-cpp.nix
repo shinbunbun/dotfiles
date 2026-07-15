@@ -200,8 +200,17 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    # DynamicUser=true + StateDirectory="llama-cpp" の組み合わせでは、systemd が実体を
+    # root 専用の /var/lib/private/llama-cpp に置き、/var/lib/llama-cpp -> private/llama-cpp
+    # のシンボリックリンクを張る (初回起動時に既存の実ディレクトリはそこへ移送される)。
+    # このため親を "d /var/lib/llama-cpp" と宣言すると、移送後は systemd-tmpfiles-resetup の
+    # たびに `"/var/lib/llama-cpp" already exists and is not a directory.` を吐き続ける。
+    #
+    # models 側の 1 行だけで両方の状態が成立するため親の宣言は置かない:
+    #   - 移送後 : シンボリックリンクを辿って models に当たり無言で成功する
+    #   - 新規機 : d ルールが親を自動生成するので /var/lib/llama-cpp ごと実体が出来て
+    #             ブートストラップが成立し、初回起動時に systemd が private/ へ移送する
     systemd.tmpfiles.rules = [
-      "d /var/lib/llama-cpp 0755 root root -"
       "d /var/lib/llama-cpp/models 0755 root root -"
     ];
 
