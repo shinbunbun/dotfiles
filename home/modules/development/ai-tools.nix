@@ -28,12 +28,13 @@
       export GITHUB_PERSONAL_ACCESS_TOKEN="$(gh auth token 2>/dev/null)"
     fi
     # DuckDB MCP (mcp-server-motherduck) が Garage S3 に read-only でアクセス
-    # するための credentials。k8s 上の grafana-duckdb-credentials Secret
-    # (GarageKey "grafana-duckdb" の secretTemplate 出力、logs-archive バケット
-    # read のみ) をそのまま再利用する。kubectl 不在 / 権限なしの環境では何もしない。
-    if command -v kubectl &>/dev/null && kubectl auth can-i get secret/grafana-duckdb-credentials -n grafana &>/dev/null; then
-      export GARAGE_DUCKDB_KEY_ID="$(kubectl get secret grafana-duckdb-credentials -n grafana -o jsonpath='{.data.AWS_ACCESS_KEY_ID}' 2>/dev/null | base64 -d 2>/dev/null)"
-      export GARAGE_DUCKDB_SECRET="$(kubectl get secret grafana-duckdb-credentials -n grafana -o jsonpath='{.data.AWS_SECRET_ACCESS_KEY}' 2>/dev/null | base64 -d 2>/dev/null)"
+    # するための credentials。k8s 上の grafana-duckdb-archive-credentials Secret
+    # (GarageKey "grafana-duckdb-archive" の secretTemplate 出力、garage-archive
+    # クラスタの logs-archive バケット read のみ) をそのまま再利用する。unified の
+    # .envrc と同一ロジック。kubectl 不在 / 権限なしの環境では何もしない。
+    if command -v kubectl &>/dev/null && kubectl auth can-i get secret/grafana-duckdb-archive-credentials -n grafana &>/dev/null; then
+      export GARAGE_DUCKDB_KEY_ID="$(kubectl get secret grafana-duckdb-archive-credentials -n grafana -o jsonpath='{.data.AWS_ACCESS_KEY_ID}' 2>/dev/null | base64 -d 2>/dev/null)"
+      export GARAGE_DUCKDB_SECRET="$(kubectl get secret grafana-duckdb-archive-credentials -n grafana -o jsonpath='{.data.AWS_SECRET_ACCESS_KEY}' 2>/dev/null | base64 -d 2>/dev/null)"
     fi
   '';
 
