@@ -277,7 +277,16 @@ in
     # k3sマニフェストディレクトリに設定ファイルを自動配置
     # Cilium は ArgoCD で管理するため、ここでは配置しない
     # （新規クラスタ初期化時のみ手動で helm install が必要。モジュール冒頭コメント参照）
+    #
+    # `r` で traefik-config.yaml を削除しているのは、Traefik 撤廃時に `L+` ルールを
+    # 消しても symlink 実体が /var/lib に残り、nix GC でリンク先が消えて dangling 化
+    # したため（systemd-tmpfiles は symlink の作成・更新しかせず、ルール消滅による
+    # 削除はしない）。k3s の deploy watcher はこのディレクトリを走査する際に symlink を
+    # os.Stat するため、dangling が 1 本あるだけで走査全体が中断し、auto-deploy が
+    # 丸ごと停止する（15 秒ごとに "Failed to process config: stat ..." を出し続ける）。
+    # `r` は対象が存在しなければ no-op なので、新規ノードでも安全。
     systemd.tmpfiles.rules = [
+      "r /var/lib/rancher/k3s/server/manifests/traefik-config.yaml"
       "L+ /var/lib/rancher/k3s/server/manifests/monitoring-rbac.yaml - - - - ${monitoringRbacConfig}"
     ];
 
