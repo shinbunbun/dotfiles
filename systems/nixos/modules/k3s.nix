@@ -281,8 +281,8 @@ in
     # `r` で traefik-config.yaml を削除しているのは、Traefik 撤廃時に `L+` ルールを
     # 消しても symlink 実体が /var/lib に残り、nix GC でリンク先が消えて dangling 化
     # したため（systemd-tmpfiles は symlink の作成・更新しかせず、ルール消滅による
-    # 削除はしない）。k3s の deploy watcher は walkFiles で symlink を os.Stat するので
-    # dangling 1 本で filepath.Walk 全体が中断し、manifests ディレクトリの auto-deploy が
+    # 削除はしない）。k3s の deploy watcher はこのディレクトリを走査する際に symlink を
+    # os.Stat するため、dangling が 1 本あるだけで走査全体が中断し、auto-deploy が
     # 丸ごと停止する（15 秒ごとに "Failed to process config: stat ..." を出し続ける）。
     # `r` は対象が存在しなければ no-op なので、新規ノードでも安全。
     systemd.tmpfiles.rules = [
