@@ -7,6 +7,10 @@
   - システムクリップボード連携（tmux-yank）
   - 基本設定の改善（tmux-sensible）
   - 拡張キー対応（Shift+Enter等の修飾キー付きシーケンスをアプリケーションに転送）
+  - セッションの永続化（tmux-resurrect + tmux-continuum）
+    - マシン再起動をまたいでセッション（ペイン構成・作業ディレクトリ・実行プロセス）を復元
+    - continuumが5分ごとに自動保存し、tmux起動時に自動復元する
+    - 保存データは ~/.local/share/tmux/resurrect/ に保持される
 
   使い方:
     tmux           - 新しいセッションを開始
@@ -14,6 +18,8 @@
     prefix + |     - 縦分割
     prefix + -     - 横分割
     prefix + r     - 設定リロード
+    prefix + Ctrl-s - セッションを手動保存（resurrect）
+    prefix + Ctrl-r - セッションを手動復元（resurrect）
 */
 { pkgs, ... }:
 {
@@ -45,6 +51,27 @@
     plugins = with pkgs.tmuxPlugins; [
       sensible # 基本的なデフォルト設定の改善
       yank # システムクリップボードへのコピー対応
+
+      # セッション永続化: 手動保存/復元（prefix + Ctrl-s / prefix + Ctrl-r）
+      {
+        plugin = resurrect;
+        extraConfig = ''
+          # ペインの表示内容も保存/復元する
+          set -g @resurrect-capture-pane-contents 'on'
+          # vim/nvimはセッションファイル併用で開いていたバッファも復元
+          set -g @resurrect-strategy-vim 'session'
+          set -g @resurrect-strategy-nvim 'session'
+        '';
+      }
+
+      # 自動保存 + tmux起動時の自動復元（resurrectの後に読み込むこと）
+      {
+        plugin = continuum;
+        extraConfig = ''
+          set -g @continuum-restore 'on' # tmux起動時に前回のセッションを自動復元
+          set -g @continuum-save-interval '5' # 5分ごとに自動保存
+        '';
+      }
     ];
 
     # 追加キーバインド
