@@ -51,5 +51,21 @@
     extraEnvironment = {
       NIX_CONFIG = "experimental-features = nix-command flakes";
     };
+    # launchd の再起動ポリシーを上書きし、runner を自己復旧可能にする。
+    #
+    # モジュール既定では ephemeral runner の KeepAlive が
+    # `{ SuccessfulExit = true; }`（正常終了時のみ再起動）となるため、
+    # 一時的なエラー（boot 時の sops secret race、GitHub broker への SSL 失敗等）で
+    # 非0終了すると launchd が再起動せず、runner が offline のまま固定される。
+    #
+    # `KeepAlive = true`（終了コードに関わらず常に再起動、ThrottleInterval=30 で
+    # 最短30秒間隔）にすることで、
+    #   - ジョブ完了(exit 0) → 再起動して再登録（ephemeral 本来の挙動）
+    #   - 一時エラー(exit≠0) → 30秒後に再起動して自己復旧
+    # の両方を満たす。恒久エラー（token 失効等）の場合は30秒毎にリトライし続け、
+    # ログと GitHub 上の offline 表示で問題が露出する（silent failure を防ぐ）。
+    serviceOverrides = {
+      KeepAlive = lib.mkForce true;
+    };
   };
 }
