@@ -49,20 +49,31 @@ let
   # ポートに実行時展開するプレースホルダ (Nix ではリテラル ${PORT} として埋め込む)。cmd は
   # 空白区切り単一行だが llama-swap がシェル的にトークン化する。JSON 等クォートが必要な引数は
   # ホスト側が args 要素として単一引用符付きで渡すこと (例: "'{\"enable_thinking\":false}'")。
+  #
+  # m.port を設定した場合は ''${PORT} の自動割当ではなく固定ポートで llama-server を起動し、
+  # llama-swap の proxy をそのポートへ向ける。llama-swap の /metrics は host/GPU 統計のみで
+  # 推論 tps (llamacpp:*) を出さないため、llama-server の /metrics を外部 Prometheus から
+  # 直接 scrape したいときに使う (別途 args に "--host" "0.0.0.0" と openFirewall が必要)。
   modelToConfig =
     _name: m:
+    let
+      portArg = if m.port != null then toString m.port else "\${PORT}";
+    in
     {
       cmd = lib.concatStringsSep " " (
         [ serverBin ]
         ++ m.args
         ++ [
           "--port"
-          "\${PORT}"
+          portArg
         ]
       );
       ttl = m.ttl;
     }
-    // lib.optionalAttrs (m.aliases != [ ]) { inherit (m) aliases; };
+    // lib.optionalAttrs (m.aliases != [ ]) { inherit (m) aliases; }
+    // lib.optionalAttrs (m.port != null) {
+      proxy = "http://127.0.0.1:${toString m.port}";
+    };
 
   swapConfig = yamlFormat.generate "llama-swap.yaml" {
     inherit (cfg) healthCheckTimeout logLevel;
@@ -181,6 +192,19 @@ in
               default = 1800;
               description = "idle unload までの秒数。";
             };
+            port = lib.mkOption {
+              type = lib.types.nullOr lib.types.port;
+              default = null;
+              description = ''
+                固定 upstream ポート。設定すると llama-server を --port <port> で起動し、
+                llama-swap は proxy: http://127.0.0.1:<port> でこのモデルへ接続する。
+                llama-server の /metrics を外部 Prometheus から直接 scrape する用途
+                (llama-swap 自身の /metrics は host/GPU 統計のみで推論 tps を出さないため)。
+                null なら llama-swap が startPort から自動割当する (''${PORT})。
+                外部 scrape するにはモデルの args に "--host" "0.0.0.0" を含め、
+                openFirewall でこのポートも開放すること (openFirewall=true なら自動で開く)。
+              '';
+            };
           };
         }
       );
@@ -265,6 +289,10 @@ in
       };
     };
 
-    networking.firewall.allowedTCPPorts = lib.optional cfg.openFirewall cfg.port;
+    # openFirewall では llama-swap の proxy port に加え、固定 upstream port
+    # (models.<name>.port) も開放する (llama-server /metrics を外部 scrape するため)。
+    networking.firewall.allowedTCPPorts = lib.optionals cfg.openFirewall (
+      [ cfg.port ] ++ lib.filter (p: p != null) (lib.mapAttrsToList (_: m: m.port) cfg.models)
+    );
   };
 }
