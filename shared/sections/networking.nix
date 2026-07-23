@@ -36,7 +36,9 @@ v: {
         wireless = v.assertString "networking.interfaces.homeMachine.wireless" "wlp1s0";
       };
       nixosDesktop = {
-        primary = v.assertString "networking.interfaces.nixosDesktop.primary" "enp6s0f0";
+        # GPU 増設で PCIe バス番号がずれ、enp6s0f0 から改称された (2026-07-20)。
+        # 名前は PCI 列挙順に依存するため、拡張カードの抜き差しで再び変わりうる。
+        primary = v.assertString "networking.interfaces.nixosDesktop.primary" "enp7s0f0";
       };
       g3pro = {
         primary = v.assertString "networking.interfaces.g3pro.primary" "enp1s0";
